@@ -1,11 +1,5 @@
 // require('ts-node/register');
 require("../app/config-env");
-const logInsertOnly = (query: string) => {
-
-  if (query.trim().startsWith('Executing (default): INSERT')) {
-    console.log(`[Sequelize Log] ${query}`);
-  }
-};
 module.exports = {
   define: {
     charset: "utf8mb4",
