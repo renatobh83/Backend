@@ -11,6 +11,7 @@ import AppError from "../errors/AppError";
 
 interface Session extends Client {
   id: number;
+  requestPairingCode(phoneNumber: string): Promise<string>
 }
 
 const sessions: Session[] = [];
@@ -89,12 +90,6 @@ export const initWbot = async (whatsapp: Whatsapp): Promise<Session> => {
       const io = getIO();
       const sessionName = whatsapp.name;
       const { tenantId } = whatsapp;
-      // let sessionCfg;
-      // if (whatsapp?.session) {
-
-      //   //sessionCfg = JSON.parse(whatsapp.session);
-      // }
-      // console.log(whatsapp)
       const wbot = new Client({
         authStrategy: new LocalAuth({ clientId: `wbot-${whatsapp.id}` }),
         takeoverOnConflict: true,
@@ -109,7 +104,7 @@ export const initWbot = async (whatsapp: Whatsapp): Promise<Session> => {
           remotePath:
             "https://raw.githubusercontent.com/wppconnect-team/wa-version/main/html/{version}.html"
         },
-        qrMaxRetries: 5
+        qrMaxRetries: 2
       }) as Session;
 
       wbot.id = whatsapp.id;
@@ -118,10 +113,8 @@ export const initWbot = async (whatsapp: Whatsapp): Promise<Session> => {
       let pairingCodeRequested = false;
 
       wbot.on("qr", async qr => {
-        console.log('qr',whatsapp)
         if (whatsapp.pairingCodeEnabled && !pairingCodeRequested) {
           const pairingCode = await wbot.requestPairingCode(whatsapp.wppUser); // enter the target phone number
-
           await whatsapp.update({ pairingCode: pairingCode, status: "qrcode", retries: 0 });
           pairingCodeRequested = true;
       }
