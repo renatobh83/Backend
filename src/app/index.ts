@@ -28,6 +28,7 @@ export default async function application() {
         initIO(app.server);
 
         // needs to start after socket is available
+
         await StartAllWhatsAppsSessions();
         GracefulShutdown(app.server);
       }

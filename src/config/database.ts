@@ -7,10 +7,14 @@ module.exports = {
     // freezeTableName: true
   },
   pool: {
-    max: process.env.POSTGRES_POOL_MAX || 100,
-    min: process.env.POSTGRES_POOL_MIN || 10,
-    acquire: process.env.POSTGRES_POOL_ACQUIRE || 30000,
-    idle: process.env.POSTGRES_POOL_IDLE || 10000
+    max: 5,
+    min: 0,
+    acquire: 30000,
+    idle: 10000,
+  },
+  // Opções de retry para tentativas de reconexão
+  retry: {
+    max: 3, // número máximo de tentativas
   },
   dialect: process.env.DB_DIALECT || "postgres",
   timezone: "UTC",

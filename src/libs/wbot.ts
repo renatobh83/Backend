@@ -85,6 +85,7 @@ const args: string[] = process.env.CHROME_ARGS
 args.unshift(`--user-agent=${DefaultOptions.userAgent}`);
 
 export const initWbot = async (whatsapp: Whatsapp): Promise<Session> => {
+
   return new Promise((resolve, reject) => {
     try {
       const io = getIO();

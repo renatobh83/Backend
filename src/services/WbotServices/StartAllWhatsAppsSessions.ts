@@ -47,7 +47,6 @@ export const StartAllWhatsAppsSessions = async (): Promise<void> => {
   if (whatsappSessions.length > 0) {
     // biome-ignore lint/complexity/noForEach: <explanation>
     whatsappSessions.forEach(whatsapp => {
-
       StartWhatsAppSession(whatsapp);
     });
   }
