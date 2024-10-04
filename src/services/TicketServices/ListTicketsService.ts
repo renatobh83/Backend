@@ -55,7 +55,6 @@ const ListTicketsService = async ({
   const isQueuesIds = queuesIds ? "S" : "N";
 
   const isSearchParam = searchParam ? "S" : "N";
-
   // // tratar as configurações do sistema
   // const settings = await ListSettingsService(tenantId);
   // const isNotViewAssignedTickets =
@@ -239,7 +238,6 @@ const ListTicketsService = async ({
     type: QueryTypes.SELECT,
     nest: true
   });
-
   let count = 0;
   let ticketsLength = 0;
   if (tickets?.length) {

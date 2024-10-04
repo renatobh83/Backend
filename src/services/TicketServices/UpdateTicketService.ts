@@ -73,6 +73,7 @@ const UpdateTicketService = async ({
   // Variavel para notificar usuário de novo contato como pendente
   const toPending =
     ticket.status !== "pending" && ticketData.status === "pending";
+
   const oldStatus = ticket.status;
   const oldUserId = ticket.user?.id;
 

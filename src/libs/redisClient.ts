@@ -1,13 +1,40 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import Redis from "ioredis";
-
+import { logger } from "../utils/logger"; // Supondo que você tenha um logger
 const redisClient = new Redis({
   port: Number(process.env.IO_REDIS_PORT), // Redis port
   host: process.env.IO_REDIS_SERVER,
   db: Number(process.env.IO_REDIS_DB_SESSION) || 9,
-  password: process.env.IO_REDIS_PASSWORD || undefined
+  password: process.env.IO_REDIS_PASSWORD || undefined,
+  retryStrategy: (times) => {
+    const delay = Math.min(times * 1000, 30000); // Aumentar o intervalo de reconexão até 30 segundos
+    logger.warn(`Retrying Redis connection in ${delay / 1000} seconds...`);
+    return delay;
+  }
 });
 
+// Evento para capturar erros de conexão
+redisClient.on("error", (error) => {
+  if (error.code === "ECONNRESET") {
+    logger.error("Redis connection was reset:", error);
+  } else {
+    logger.error("Redis encountered an error:", error);
+  }
+});
+// Evento para reconexão bem-sucedida
+redisClient.on("connect", () => {
+  logger.info("Connected to Redis successfully.");
+});
+
+// Evento para quando a conexão com o Redis é fechada
+redisClient.on("close", () => {
+  logger.warn("Redis connection closed.");
+});
+
+// Evento para quando o Redis estiver pronto para uso
+redisClient.on("ready", () => {
+  logger.info("Redis is ready for commands.");
+});
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 export const getValue = (key: string) => {
   return new Promise((resolve, reject) => {
