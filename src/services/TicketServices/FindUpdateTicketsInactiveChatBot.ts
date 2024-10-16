@@ -22,7 +22,7 @@ const FindUpdateTicketsInactiveChatBot = async (): Promise<void> => {
     where t."chatFlowId"::text = s.value
     and t.status = 'pending'
     and config->>'type' = 'configurations'
-    and t."lastInteractionBot" < CURRENT_TIMESTAMP - concat(config->'configurations'->'notResponseMessage'->'time', ' MINUTES')::interval
+    and t."lastInteractionBot" < CURRENT_TIMESTAMP - (config->'configurations'->'notResponseMessage'->>'time')::int * interval '1 minute'
     and (t."queueId" is null and t."userId" is null)
   `;
 

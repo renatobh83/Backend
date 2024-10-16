@@ -43,13 +43,17 @@ const CheckChatBotFlowWelcome = async (instance: Ticket): Promise<void> => {
   if (await IsContactTest(celularContato, celularTeste, instance.channel))
     return;
 
+  // alteracao do conteudo da line de from para source
   const lineFlow = chatFlow.flow.lineList.find(
-    (line: any) => line.from === "start"
+    (line: any) => line.source === "start"
   );
+
+
 
   await instance.update({
     chatFlowId: chatFlow.id,
-    stepChatFlow: lineFlow.to,
+    // alteracao do conteudo da line de to para target
+    stepChatFlow: lineFlow.target,
     lastInteractionBot: new Date()
   });
 

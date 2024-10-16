@@ -15,7 +15,7 @@ const redisClient = new Redis({
 
 // Evento para capturar erros de conexão
 redisClient.on("error", (error) => {
-  if (error.code === "ECONNRESET") {
+  if ((error as any).code === "ECONNRESET") {
     logger.error("Redis connection was reset:", error);
   } else {
     logger.error("Redis encountered an error:", error);

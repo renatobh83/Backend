@@ -87,7 +87,6 @@ const CreateForwardMessageService = async ({
       }
     ]
   });
-
   if (!messageCreated) {
     // throw new AppError("ERR_CREATING_MESSAGE", 501);
     throw new Error("ERR_CREATING_MESSAGE_SYSTEM");

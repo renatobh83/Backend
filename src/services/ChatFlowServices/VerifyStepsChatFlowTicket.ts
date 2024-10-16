@@ -119,9 +119,9 @@ const sendWelcomeMessage = async (
   ticket: Ticket,
   flowConfig: any
 ): Promise<void> => {
-  if (flowConfig?.configurations?.welcomeMessage?.message) {
+  if (flowConfig?.data?.welcomeMessage?.message) {
     const messageData = {
-      body: flowConfig.configurations?.welcomeMessage.message,
+      body: flowConfig.data?.welcomeMessage.message,
       fromMe: true,
       read: true,
       sendType: "bot"
@@ -142,14 +142,14 @@ const isRetriesLimit = async (
   flowConfig: any
 ): Promise<boolean> => {
   // verificar o limite de retentativas e realizar ação
-  const maxRetryNumber = flowConfig?.configurations?.maxRetryBotMessage?.number;
+  const maxRetryNumber = flowConfig?.data?.maxRetryBotMessage?.number;
   if (
-    flowConfig?.configurations?.maxRetryBotMessage &&
+    flowConfig?.data?.maxRetryBotMessage &&
     maxRetryNumber &&
     ticket.botRetries >= maxRetryNumber - 1
   ) {
-    const destinyType = flowConfig.configurations.maxRetryBotMessage.type;
-    const { destiny } = flowConfig.configurations.maxRetryBotMessage;
+    const destinyType = flowConfig.data.maxRetryBotMessage.type;
+    const { destiny } = flowConfig.data.maxRetryBotMessage;
     const updatedValues: any = {
       chatFlowId: null,
       stepChatFlow: null,
@@ -193,14 +193,14 @@ const isAnswerCloseTicket = async (
   message: string
 ): Promise<boolean> => {
   if (
-    !flowConfig?.configurations?.answerCloseTicket ||
-    flowConfig?.configurations?.answerCloseTicket?.length < 1
+    !flowConfig?.data?.answerCloseTicket ||
+    flowConfig?.data?.answerCloseTicket?.length < 1
   ) {
     return false;
   }
 
   // verificar condição com a ação
-  const params = flowConfig.configurations.answerCloseTicket.find(
+  const params = flowConfig.data.answerCloseTicket.find(
     (condition: any) => {
       return (
         String(condition).toLowerCase().trim() ===
@@ -264,7 +264,7 @@ const VerifyStepsChatFlowTicket = async (
       );
 
       // verificar condição com a ação do step
-      const stepCondition = step.conditions.find((conditions: any) => {
+      const stepCondition = step.data.conditions.find((conditions: any) => {
         if (conditions.type === "US") return true;
         const newConditions = conditions.condition.map((c: any) =>
           String(c).toLowerCase().trim()
@@ -272,7 +272,7 @@ const VerifyStepsChatFlowTicket = async (
         const message = String(msg.body).toLowerCase().trim();
         return newConditions.includes(message);
       });
-
+      console.log(step, stepCondition, flowConfig)
       if (
         !ticket.isCreated &&
         (await isAnswerCloseTicket(flowConfig, ticket, msg.body))
@@ -326,7 +326,7 @@ const VerifyStepsChatFlowTicket = async (
 
           const messageData = {
             body:
-              flowConfig.configurations.notOptionsSelectMessage.message ||
+              flowConfig.data.notOptionsSelectMessage.message ||
               "Desculpe! Não entendi sua resposta. Vamos tentar novamente! Escolha uma opção válida.",
             fromMe: true,
             read: true,
@@ -346,7 +346,7 @@ const VerifyStepsChatFlowTicket = async (
             lastInteractionBot: new Date()
           });
         }
-        for (const interaction of step.interactions) {
+        for (const interaction of step.data.interactions) {
           await BuildSendMessageService({
             msg: interaction,
             tenantId: ticket.tenantId,

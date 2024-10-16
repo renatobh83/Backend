@@ -24,9 +24,12 @@ const CreateChatFlowService = async ({
   name,
   isActive
 }: Request): Promise<ChatFlow> => {
+
   for await (const node of flow.nodeList) {
     if (node.type === "node") {
-      for await (const item of node.interactions) {
+
+      // biome-ignore lint/correctness/noUnsafeOptionalChaining: <explanation>
+      for await (const item of node.data?.interactions) {
         if (item.type === "MediaField" && item.data.media) {
           const newName = `${new Date().getTime()}-${item.data.name}`;
           await writeFileAsync(

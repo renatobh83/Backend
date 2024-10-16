@@ -16,7 +16,7 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
       email,
       password
     });
-
+    console.log(user)
     SendRefreshToken(res, refreshToken);
 
     const params = {

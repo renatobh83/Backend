@@ -12,6 +12,7 @@
     "test": "NODE_ENV=test jest",
     "posttest": "NODE_ENV=test sequelize db:migrate:undo:all",
     "db:migrate": "rm -Rf dist && npm run build && npx sequelize db:migrate",
+    "db:migrate1": "npx sequelize db:migrate",
     "db:seed": "npx sequelize db:seed:all"
   },
   "dependencies": {
@@ -59,6 +60,7 @@
     "@types/qrcode-terminal": "^0.12.2",
     "@types/uuid": "^10.0.0",
     "nodemon": "^3.1.4",
+    "sequelize-cli": "^6.6.2",
     "ts-node-dev": "^2.0.0",
     "typescript": "^5.5.4"
   }
