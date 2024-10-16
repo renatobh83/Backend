@@ -1,10 +1,11 @@
 import { Client,  Message as WbotMessage } from "whatsapp-web.js";
 import VerifyContact from "./helpers/VerifyContact";
-import CreateTemplateMessageService from "../MessageServices/CreateTemplateMessageService";
+
 import Confirmacao from "../../models/Confirmacao";
 import { logger } from "../../utils/logger";
 import FindorCreateConfirmacaoTicket from "../ConfirmacaoServices/FindorCreateConfirmacaoTicket";
 import ProcessBodyData from "../../helpers/ProcessBodyData";
+import CreateTemplateMessageService from "../MessageServices/CreateTemplateMessageService";
 
 interface Session extends Client {
     id: number;

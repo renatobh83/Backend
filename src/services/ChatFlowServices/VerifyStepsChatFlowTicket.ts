@@ -31,7 +31,7 @@ const isNextSteps = async (
 
     if (!nextStep) return;
 
-    for (const interaction of nextStep.interactions) {
+    for (const interaction of nextStep.data.interactions) {
       await BuildSendMessageService({
         msg: interaction,
         tenantId: ticket.tenantId,
@@ -64,12 +64,12 @@ const isQueueDefine = async (
       queueId: stepCondition.queueId
     });
 
-    if (flowConfig?.configurations?.autoDistributeTickets) {
+    if (flowConfig?.data?.autoDistributeTickets) {
       await DefinedUserBotService(
         ticket,
         stepCondition.queueId,
         ticket.tenantId,
-        flowConfig?.configurations?.autoDistributeTickets
+        flowConfig?.data?.autoDistributeTickets
       );
       ticket.reload();
     }
@@ -272,8 +272,7 @@ const VerifyStepsChatFlowTicket = async (
         const message = String(msg.body).toLowerCase().trim();
         return newConditions.includes(message);
       });
-      console.log(step, stepCondition, flowConfig)
-      if (
+       if (
         !ticket.isCreated &&
         (await isAnswerCloseTicket(flowConfig, ticket, msg.body))
       )
@@ -347,6 +346,7 @@ const VerifyStepsChatFlowTicket = async (
           });
         }
         for (const interaction of step.data.interactions) {
+
           await BuildSendMessageService({
             msg: interaction,
             tenantId: ticket.tenantId,

@@ -4,7 +4,7 @@ interface Request {
   msg: Contato;
   hora: string
 }
-const CreateTemplateMessageService = ({ msg, hora }: Request): { body: string } => {
+export default function CreateTemplateMessageService  ({ msg, hora }: Request): { body: string }  {
 
   const nome = msg.paciente_nome;
   const atendimentoData = msg.atendimento_data;
@@ -32,5 +32,33 @@ Podemos confirmar sua presença?
 
   return template;
 };
+export  function CreateTemplateMessageConsulta ({ msg }: any): { body: string } {
 
-export default CreateTemplateMessageService;
+  const nome = msg.ds_paciente;
+  const atendimentoData = msg.dt_data;
+  const horaAgendamento  = msg.dt_hora
+  const chegada = msg.dt_hora_chegada
+
+
+  const template = {
+    body: `
+Olá ${nome}. 😊,
+O seu proximo agendamento conosco esta marcado para o dia ${atendimentoData} às ${horaAgendamento}.
+
+⏰ Gentileza comparecer com ${chegada} de antecendia para efetuar o processo de atendimento na Recepção
+
+⚠ Importante:
+    - Paciente deverá apresentar pedido médico, carteira do convênio e documento de identificação com foto.
+    - Trazer todos os exames anteriores realizados da área a ser examinada.
+
+Podemos confirmar sua presença?
+
+✅ Para confirmar, digite 1.
+🚫 Para cancelar, 2.
+🔁 Se quiser reagendar, digite 3
+`,
+  };
+
+  return template;
+};
+
