@@ -1,4 +1,5 @@
-import ApiConfirma from "../services/ApiConfirmacaoServices/ApiConfirma";
+import ApiGenesis from "../services/ApiConfirmacaoServices/ApiGenesis";
 
-export const API = new ApiConfirma('root','1','https://otrsweb.zapto.org/testeportal/cgi-bin/dwserver.cgi/se1')
+
+export const API = new ApiGenesis('root','1','https://otrsweb.zapto.org/testeportal/cgi-bin/dwserver.cgi/se1')
 

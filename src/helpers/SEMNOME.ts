@@ -1,4 +1,4 @@
-import ApiConfirma from "../services/ApiConfirmacaoServices/ApiConfirma";
+import type ApiConfirma from "../services/ApiConfirmacaoServices/ApiGenesis";
 
 export async function confirmarAtendimentos(atendimentos, instanceApi: ApiConfirma) {
 

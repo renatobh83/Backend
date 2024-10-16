@@ -1,7 +1,7 @@
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { logger } from "../utils/logger";
-import ApiConfirma from "../services/ApiConfirmacaoServices/ApiConfirma";
+import ApiConfirma from "../services/ApiConfirmacaoServices/ApiGenesis";
 import GetApiConfirmacaoService from "../services/ApiConfirmacaoServices/GetApiConfirmacaoService";
 
 

@@ -7,7 +7,7 @@ import Queue from "../libs/Queue";
 import ShowWhatsAppService from "../services/WhatsappService/ShowWhatsAppService";
 import { StartWhatsAppSession } from "../services/WbotServices/StartWhatsAppSession";
 import { getWbot } from "../libs/wbot";
-import ApiConfirma from "../services/ApiConfirmacaoServices/ApiConfirma";
+
 import { API } from "../app/webhookApi";
 
 export default interface Notificacao {

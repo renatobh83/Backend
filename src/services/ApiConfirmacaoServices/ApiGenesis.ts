@@ -3,7 +3,7 @@ const fs = require('fs');
 const path = require('path');
 const axios = require("axios");
 
-class ApiConfirma {
+class ApiGenesis {
   id: string;
   initialized: any;
   pw: string;
@@ -228,23 +228,22 @@ class ApiConfirma {
       throw error;
     }
   }
-  async doListaConfirmacao(dataPost){
-    const url = `${this.linkApi}/doListaConfirmacao`;
-    try {
-      const response = await axios.post(url, { dt_de: '2024/10/16', dt_ate: '2024/10/16' }, {
-        headers: {
-          Authorization: `Bearer ${this.token}`,
-             'Content-Type': 'multipart/form-data'
-        },
-      });
+  // async doListaConfirmacao(dataPost){
+  //   const url = `${this.linkApi}/doListaConfirmacao`;
+  //   try {
+  //     const response = await axios.post(url, { dt_de: '2024/10/16', dt_ate: '2024/10/16' }, {
+  //       headers: {
+  //         Authorization: `Bearer ${this.token}`,
+  //            'Content-Type': 'multipart/form-data'
+  //       },
+  //     });
 
-
-         return response.data
-    } catch (error) {
-      console.error("Error :", error);
-      throw error;
-    }
-  }
+  //     return response.data
+  //   } catch (error) {
+  //     console.error("Error :", error);
+  //     throw error;
+  //   }
+  // }
 }
 
-export default ApiConfirma;
+export default ApiGenesis;
