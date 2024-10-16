@@ -7,6 +7,8 @@ import Queue from "../libs/Queue";
 import ShowWhatsAppService from "../services/WhatsappService/ShowWhatsAppService";
 import { StartWhatsAppSession } from "../services/WbotServices/StartWhatsAppSession";
 import { getWbot } from "../libs/wbot";
+import ApiConfirma from "../services/ApiConfirmacaoServices/ApiConfirma";
+import { API } from "../app/webhookApi";
 
 export default interface Notificacao {
   paciente_nome: string;
@@ -60,8 +62,6 @@ export const sendMessageConfirmacao = async (
           authToken
         }
       });
-
-
 
   if (APIConfig === null) {
     throw new AppError("ERR_SESSION_NOT_AUTH_TOKEN", 403);
@@ -185,3 +185,39 @@ export const startSession = async (
 
   return res.status(200).json(whatsapp);
 };
+
+
+export const TESTEAPIWEBHOOKS = async (
+  req: Request,
+  res: Response
+): Promise<Response> =>
+  {
+
+
+    const dataRequest =  {
+      js_paciente: btoa(JSON.stringify(req.body)),
+
+    }
+    // const agendamento = await API.doGetAgendamentos(73493)
+    // const da = await API.confirmaExame( 228399)
+    // const pr = await API.doGetPreparo(104)
+    // const login= await API.doPacienteLogin('suporte2@exp.net.br','1')
+    try {
+
+      // const newPaciente = await API.doCadatrarPaciente(btoa(JSON.stringify(req.body)))
+      // const planos = await API.doListaPlano()
+      // const atendimento = await API.doListaAtendimentos(72382)
+      // const medicos = await API.doListaMedicos()
+      // const laudo = await API.doGetLaudo(162824,72382, 1, false)
+      const data = {
+        dt_de : '20241016',
+        dt_ate :'20241016'
+      }
+      console.log(data)
+      const confirmacaolista = await API.doListaConfirmacao(data)
+      return res.status(200).send(confirmacaolista)
+    } catch (error) {
+
+      return res.status(500).send(error.response)
+    }
+}

@@ -36,4 +36,6 @@ apiExternalRoute.post(
 
 apiExternalRoute.post("/v1/api/external/:apiId/:idWbot/:authToken", APIExternalController.sendMessageConfirmacao)
 
+
+apiExternalRoute.get('/teste', APIExternalController.TESTEAPIWEBHOOKS)
 export default apiExternalRoute;

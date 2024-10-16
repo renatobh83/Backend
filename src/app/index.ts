@@ -31,8 +31,8 @@ export default async function application() {
 
         // needs to start after socket is available
 
-        await StartAllWhatsAppsSessions();
-        GracefulShutdown(app.server);
+        // await StartAllWhatsAppsSessions();
+        // GracefulShutdown(app.server);
       }
       async function close() {
         return new Promise<void>((resolve, reject) => {

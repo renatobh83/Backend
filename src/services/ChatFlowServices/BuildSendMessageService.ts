@@ -144,46 +144,48 @@ const BuildSendMessageService = async ({
       });
 
     }  else if (msg.type === "WebhookField") {
-      const token = "aa5234f21048750108464e50cf9ddf5ab86972861a6d62c7d540525e989c097d"
-      const urlTeste = "http://otrsweb.zapto.org/clinuxintegra/consultapacientes"
 
-      const nome = ticket.contact.name
+      // Choice Webhoook
+    //   const token = "aa5234f21048750108464e50cf9ddf5ab86972861a6d62c7d540525e989c097d"
+    //   const urlTeste = "http://otrsweb.zapto.org/clinuxintegra/consultapacientes"
 
-      const {data } = await axios.post(urlTeste, {
-        NomePaciente: nome
-      }, {
-        headers: {
-          'Authorization': token,
-          'Content-Type': 'application/json'
-        }
-      })
+    //   const nome = ticket.contact.name
 
-    const codigoPaciente = data[0].CodigoPaciente
+    //   const {data } = await axios.post(urlTeste, {
+    //     NomePaciente: nome
+    //   }, {
+    //     headers: {
+    //       'Authorization': token,
+    //       'Content-Type': 'application/json'
+    //     }
+    //   })
 
-      const token2 = 'eyJhbGciOiAiSFMyNTYiLCAidHlwIjogIkpXVCJ9.eyAiZXhwIiA6IDE3MjkwOTQ1NjIsICJucl92ZXJzYW8iIDogMzA3ODQsICJjZF9ncnVwbyIgOiAxLCAiY2RfbWF0cml6IiA6IDEsICJucl9lbXByZXNhIiA6IDEsICJucl9mdW5jaW9uYXJpbyIgOiAwLCAiY2RfZW1wcmVzYSIgOiAxLCAiY2RfdXN1YXJpbyIgOiAxLCAiZHNfdXN1YXJpbyIgOiAiUk9PVCIsICJjZF9mdW5jaW9uYXJpbyIgOiAxLCAiY2RfbWVkaWNvIiA6IDAsICJjZF9zZXNzYW8iIDogMCwgImNkX2F0ZW5kaW1lbnRvIiA6IDAsICJjZF9leGFtZSIgOiAwIH0.-PtWxWRHSrFqCfS7pgY01Bs5RYCDjktlfFwdGGbDtdw'
-      const agenda = `https://otrsweb.zapto.org/testeportal/cgi-bin/dwserver.cgi/se1/doListaAgendamento?cd_paciente=${codigoPaciente}`
-     const agendamento  = await axios.post(agenda,{}, {
-       headers: {
-         'Authorization': `Bearer ${token2}`
-       }
-     })
-     const messageSend = agendamento.data[0]
+    // const codigoPaciente = data[0].CodigoPaciente
 
-     const template = CreateTemplateMessageConsulta({
-      msg: messageSend,
-    });
+    //   const token2 = 'eyJhbGciOiAiSFMyNTYiLCAidHlwIjogIkpXVCJ9.eyAiZXhwIiA6IDE3MjkwOTQ1NjIsICJucl92ZXJzYW8iIDogMzA3ODQsICJjZF9ncnVwbyIgOiAxLCAiY2RfbWF0cml6IiA6IDEsICJucl9lbXByZXNhIiA6IDEsICJucl9mdW5jaW9uYXJpbyIgOiAwLCAiY2RfZW1wcmVzYSIgOiAxLCAiY2RfdXN1YXJpbyIgOiAxLCAiZHNfdXN1YXJpbyIgOiAiUk9PVCIsICJjZF9mdW5jaW9uYXJpbyIgOiAxLCAiY2RfbWVkaWNvIiA6IDAsICJjZF9zZXNzYW8iIDogMCwgImNkX2F0ZW5kaW1lbnRvIiA6IDAsICJjZF9leGFtZSIgOiAwIH0.-PtWxWRHSrFqCfS7pgY01Bs5RYCDjktlfFwdGGbDtdw'
+    //   const agenda = `https://otrsweb.zapto.org/testeportal/cgi-bin/dwserver.cgi/se1/doListaAgendamento?cd_paciente=${codigoPaciente}`
+    //  const agendamento  = await axios.post(agenda,{}, {
+    //    headers: {
+    //      'Authorization': `Bearer ${token2}`
+    //    }
+    //  })
+    //  const messageSend = agendamento.data[0]
 
-     const messageSent = await SendMessageSystemProxy({
-      ticket,
-      messageData: {
-        ...messageData,
-        body: template.body
-      },
-      media: null,
-      userId: null
-    });
+    //  const template = CreateTemplateMessageConsulta({
+    //   msg: messageSend,
+    // });
 
-      console.log(messageSent)
+    //  const messageSent = await SendMessageSystemProxy({
+    //   ticket,
+    //   messageData: {
+    //     ...messageData,
+    //     body: template.body
+    //   },
+    //   media: null,
+    //   userId: null
+    // });
+
+    //   console.log(messageSent)
 
 
     } else {

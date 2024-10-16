@@ -19,7 +19,6 @@ interface Request {
   }: Request): Promise<void> => {
 
     const apiData = {
-
         link: urlService,
         usuario: usuarioApi,
         senha: senhaApi,
