@@ -10,10 +10,10 @@ export async function confirmarAtendimentos(atendimentos, instanceApi: ApiConfir
         });
 
         // Aguarda todas as promessas serem resolvidas
-        const responses = await Promise.all(promessas);
+        const responses = await Promise.allSettled(promessas);
 
         // Verifica se todos os status são 200
-        const todosSucesso = responses.every(response => response.status === 200);
+        const todosSucesso = responses.every(response => response.status === 'fulfilled');
 
         if (todosSucesso) {
             // A FAZER
@@ -21,6 +21,7 @@ export async function confirmarAtendimentos(atendimentos, instanceApi: ApiConfir
             console.log("Todos os atendimentos foram confirmados com sucesso.");
             //await getPreparos(data.procedimentos)
             return true
+        // biome-ignore lint/style/noUselessElse: <explanation>
         } else {
             console.log("Nem todos os atendimentos foram confirmados com sucesso.");
             return false
