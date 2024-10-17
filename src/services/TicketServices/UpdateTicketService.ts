@@ -10,7 +10,7 @@ import CreateLogTicketService from "./CreateLogTicketService";
 interface TicketData {
   status?: string;
   userId?: number;
-  tenantId: number ;
+  tenantId: number;
   queueId?: number | null;
   autoReplyId?: number | string | null;
   stepAutoReplyId?: number | string | null;
@@ -18,9 +18,9 @@ interface TicketData {
 
 interface Request {
   ticketData: TicketData;
-  ticketId:  number;
+  ticketId: number;
   isTransference?: string | boolean | null;
-  userIdRequest: number ;
+  userIdRequest: number;
 }
 
 interface Response {
@@ -33,7 +33,7 @@ const UpdateTicketService = async ({
   ticketData,
   ticketId,
   isTransference,
-  userIdRequest
+  userIdRequest,
 }: Request): Promise<Response> => {
   const { status, userId, tenantId, queueId } = ticketData;
 
@@ -48,20 +48,20 @@ const UpdateTicketService = async ({
           "tags",
           {
             association: "wallets",
-            attributes: ["id", "name"]
-          }
-        ]
+            attributes: ["id", "name"],
+          },
+        ],
       },
       {
         model: User,
         as: "user",
-        attributes: ["id", "name"]
+        attributes: ["id", "name"],
       },
       {
         association: "whatsapp",
-        attributes: ["id", "name"]
-      }
-    ]
+        attributes: ["id", "name"],
+      },
+    ],
   });
 
   if (!ticket) {
@@ -69,7 +69,7 @@ const UpdateTicketService = async ({
   }
 
   await SetTicketMessagesAsRead(ticket);
-
+  console.log(ticket, ticketData);
   // Variavel para notificar usuário de novo contato como pendente
   const toPending =
     ticket.status !== "pending" && ticketData.status === "pending";
@@ -87,7 +87,7 @@ const UpdateTicketService = async ({
   const data: any = {
     status: statusData,
     queueId,
-    userId
+    userId,
   };
 
   // se atendimento for encerrado, informar data da finalização
@@ -109,7 +109,7 @@ const UpdateTicketService = async ({
     await CreateLogTicketService({
       userId: userIdRequest,
       ticketId,
-      type: "open"
+      type: "open",
     });
   }
 
@@ -118,7 +118,7 @@ const UpdateTicketService = async ({
     await CreateLogTicketService({
       userId: userIdRequest,
       ticketId,
-      type: "closed"
+      type: "closed",
     });
   }
 
@@ -127,7 +127,7 @@ const UpdateTicketService = async ({
     await CreateLogTicketService({
       userId: userIdRequest,
       ticketId,
-      type: "pending"
+      type: "pending",
     });
   }
 
@@ -136,14 +136,14 @@ const UpdateTicketService = async ({
     await CreateLogTicketService({
       userId: userIdRequest,
       ticketId,
-      type: "transfered"
+      type: "transfered",
     });
     // recebeu o atendimento tansferido
     if (userId) {
       await CreateLogTicketService({
         userId,
         ticketId,
-        type: "receivedTransfer"
+        type: "receivedTransfer",
       });
     }
   }
@@ -158,14 +158,14 @@ const UpdateTicketService = async ({
     socketEmit({
       tenantId,
       type: "notification:new",
-      payload: ticket
+      payload: ticket,
     });
   }
 
   socketEmit({
     tenantId,
     type: "ticket:update",
-    payload: ticket
+    payload: ticket,
   });
 
   return { ticket, oldStatus, oldUserId };
