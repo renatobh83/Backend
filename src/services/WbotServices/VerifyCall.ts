@@ -13,7 +13,7 @@ interface Session extends Client {
 }
 
 const VerifyCall = async (call: Call, wbot: Session): Promise<void> => {
-  console.log('VerifyCall sem funcao')
+  console.log("VerifyCall sem funcao");
   // return new Promise<void>((resolve, reject) => {
   //   (async () => {
   //     const messageDefault =

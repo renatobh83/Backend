@@ -11,7 +11,7 @@ import {
   BelongsTo,
   ForeignKey,
   AutoIncrement,
-  AllowNull
+  AllowNull,
 } from "sequelize-typescript";
 import User from "./User";
 import Tenant from "./Tenant";
@@ -34,7 +34,7 @@ class ChatFlow extends Model<ChatFlow> {
     if (flow) {
       for (const node of flow.nodeList) {
         if (node.type === "node") {
-          for (const item of node.interactions) {
+          for (const item of node.data.interactions) {
             if (item.type === "MediaField" && item.data.mediaUrl) {
               const { BACKEND_URL, PROXY_PORT } = process.env;
               const file = item.data.mediaUrl;

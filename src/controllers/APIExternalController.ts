@@ -19,7 +19,7 @@ export default interface Notificacao {
   atendimento_medico: string;
   atendimento_endereco: string;
   idexterno: string;
-  dados_agendamentos: string
+  dados_agendamentos: string;
   bot: string;
 }
 
@@ -36,37 +36,34 @@ interface Configuracao {
   contatos: Contato[];
 }
 
-
 interface MessageDataRequest {
   apiId: string;
   sessionId: number;
   media?: Express.Multer.File | string;
   externalKey: string;
   tenantId: number;
-  apiConfig: ApiConfig,
-  body: Contato
-  idWbot: string
+  apiConfig: ApiConfig;
+  body: Contato;
+  idWbot: string;
 }
 
 export const sendMessageConfirmacao = async (
   req: Request,
   res: Response
 ): Promise<Response> => {
-  const { contatos } : Configuracao = req.body
-  const { apiId, authToken , idWbot } = req.params;
-
+  const { contatos }: Configuracao = req.body;
+  const { apiId, authToken, idWbot } = req.params;
 
   const APIConfig = await ApiConfig.findOne({
-      where: {
-          id: apiId,
-          authToken
-        }
-      });
+    where: {
+      id: apiId,
+      authToken,
+    },
+  });
 
   if (APIConfig === null) {
     throw new AppError("ERR_SESSION_NOT_AUTH_TOKEN", 403);
   }
-
 
   const newMessage: MessageDataRequest = {
     externalKey: authToken,
@@ -75,15 +72,13 @@ export const sendMessageConfirmacao = async (
     sessionId: APIConfig.sessionId,
     tenantId: APIConfig.tenantId,
     apiConfig: APIConfig,
-    idWbot
+    idWbot,
   };
 
-
-   Queue.add("SendMessageConfirmar", newMessage);
+  Queue.add("SendMessageConfirmar", newMessage);
 
   return res.status(200).json({ message: "Message add queue" });
-}
-
+};
 
 export const sendMessageAPI = async (
   req: Request,
@@ -101,8 +96,8 @@ export const sendMessageAPI = async (
   const APIConfig = await ApiConfig.findOne({
     where: {
       id: apiId,
-      tenantId
-    }
+      tenantId,
+    },
   });
 
   if (APIConfig?.sessionId !== Number(sessionId)) {
@@ -115,7 +110,7 @@ export const sendMessageAPI = async (
     sessionId,
     tenantId,
     apiConfig: APIConfig,
-    media
+    media,
   };
 
   const schema = Yup.object().shape({
@@ -133,10 +128,10 @@ export const sendMessageAPI = async (
         mimetype: Yup.string().required(),
         originalname: Yup.string().required(),
         path: Yup.string().required(),
-        size: Yup.number().required()
+        size: Yup.number().required(),
       }),
     externalKey: Yup.string().required(),
-    tenantId: Yup.number().required()
+    tenantId: Yup.number().required(),
   });
 
   try {
@@ -160,8 +155,8 @@ export const startSession = async (
   const APIConfig = await ApiConfig.findOne({
     where: {
       id: apiId,
-      tenantId
-    }
+      tenantId,
+    },
   });
 
   if (APIConfig?.sessionId !== Number(sessionId)) {
@@ -171,7 +166,7 @@ export const startSession = async (
   const whatsapp = await ShowWhatsAppService({
     id: APIConfig.sessionId,
     tenantId: APIConfig.tenantId,
-    isInternal: true
+    isInternal: true,
   });
   try {
     const wbot = getWbot(APIConfig.sessionId);
@@ -186,38 +181,31 @@ export const startSession = async (
   return res.status(200).json(whatsapp);
 };
 
-
 export const TESTEAPIWEBHOOKS = async (
   req: Request,
   res: Response
-): Promise<Response> =>
-  {
+): Promise<Response> => {
+  const dataRequest = {
+    js_paciente: btoa(JSON.stringify(req.body)),
+  };
+  // const agendamento = await API.doGetAgendamentos(73493)
+  // const da = await API.confirmaExame( 228399)
+  // const pr = await API.doGetPreparo(104)
+  // const login= await API.doPacienteLogin('suporte2@exp.net.br','1')
+  try {
+    // const newPaciente = await API.doCadatrarPaciente(btoa(JSON.stringify(req.body)))
+    // const planos = await API.doListaPlano()
+    // const atendimento = await API.doListaAtendimentos(72382)
+    // const medicos = await API.doListaMedicos()
+    // const laudo = await API.doGetLaudo(162824,72382, 1, false)
+    const data = {
+      dt_de: "20241016",
+      dt_ate: "20241016",
+    };
 
-
-    const dataRequest =  {
-      js_paciente: btoa(JSON.stringify(req.body)),
-
-    }
-    // const agendamento = await API.doGetAgendamentos(73493)
-    // const da = await API.confirmaExame( 228399)
-    // const pr = await API.doGetPreparo(104)
-    // const login= await API.doPacienteLogin('suporte2@exp.net.br','1')
-    try {
-
-      // const newPaciente = await API.doCadatrarPaciente(btoa(JSON.stringify(req.body)))
-      // const planos = await API.doListaPlano()
-      // const atendimento = await API.doListaAtendimentos(72382)
-      // const medicos = await API.doListaMedicos()
-      // const laudo = await API.doGetLaudo(162824,72382, 1, false)
-      const data = {
-        dt_de : '20241016',
-        dt_ate :'20241016'
-      }
-      console.log(data)
-      const confirmacaolista = await API.doListaConfirmacao(data)
-      return res.status(200).send(confirmacaolista)
-    } catch (error) {
-
-      return res.status(500).send(error.response)
-    }
-}
+    const confirmacaolista = await API.doListaConfirmacao(data);
+    return res.status(200).send(confirmacaolista);
+  } catch (error) {
+    return res.status(500).send(error.response);
+  }
+};

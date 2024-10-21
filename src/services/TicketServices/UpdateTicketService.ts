@@ -69,7 +69,7 @@ const UpdateTicketService = async ({
   }
 
   await SetTicketMessagesAsRead(ticket);
-  console.log(ticket, ticketData);
+
   // Variavel para notificar usuário de novo contato como pendente
   const toPending =
     ticket.status !== "pending" && ticketData.status === "pending";
