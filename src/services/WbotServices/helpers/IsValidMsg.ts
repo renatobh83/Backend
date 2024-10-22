@@ -10,7 +10,8 @@ const isValidMsg = (msg: WbotMessage): boolean => {
     msg.type === "image" ||
     msg.type === "document" ||
     msg.type === "vcard" ||
-    msg.type === "sticker"
+    msg.type === "sticker" ||
+    msg.react
   )
     return true;
   return false;

@@ -9,7 +9,7 @@ import {
   Default,
   BelongsTo,
   ForeignKey,
-  AllowNull
+  AllowNull,
 } from "sequelize-typescript";
 import { v4 as uuidV4 } from "uuid";
 import Contact from "./Contact";
@@ -124,6 +124,14 @@ class Message extends Model<Message> {
   @AllowNull
   @Column(DataType.DATE)
   scheduleDate: Date;
+
+  @Default(null)
+  @AllowNull
+  reaction: string;
+
+  @Default(null)
+  @AllowNull
+  reactionFromMe: string;
 
   @Default(null)
   @AllowNull

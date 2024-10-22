@@ -3,6 +3,7 @@ import { Client } from "whatsapp-web.js";
 import HandleMessage from "./helpers/HandleMessage";
 import HandleMsgAck from "./helpers/HandleMsgAck";
 import VerifyCall from "./VerifyCall";
+import { HandleMsgReaction } from "./helpers/HandleReaction";
 
 interface Session extends Client {
   id: number;
@@ -10,7 +11,7 @@ interface Session extends Client {
 
 const wbotMessageListener = (wbot: Session): void => {
   // const queue = `whatsapp::${wbot.id}`;
-  wbot.on("message_create", async msg => {
+  wbot.on("message_create", async (msg) => {
     // desconsiderar atualização de status
     if (msg.isStatus) {
       return;
@@ -19,15 +20,19 @@ const wbotMessageListener = (wbot: Session): void => {
     HandleMessage(msg, wbot);
   });
 
-  wbot.on("media_uploaded", async msg => {
+  wbot.on("media_uploaded", async (msg) => {
     HandleMessage(msg, wbot);
   });
 
   wbot.on("message_ack", async (msg, ack) => {
     HandleMsgAck(msg, ack);
   });
+  wbot.on("message_reaction", async (msg) => {
+    HandleMsgReaction(msg);
+    // HandleMsgAck(msg, ack);
+  });
 
-  wbot.on("call", async call => {
+  wbot.on("call", async (call) => {
     VerifyCall(call, wbot);
   });
 };

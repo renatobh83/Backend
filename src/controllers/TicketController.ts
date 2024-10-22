@@ -49,7 +49,7 @@ export const index = async (req: Request, res: Response): Promise<Response> => {
     withUnreadMessages,
     queuesIds,
     isNotAssignedUser,
-    includeNotQueueDefined
+    includeNotQueueDefined,
   } = req.query as IndexQuery;
 
   const userId = req.user.id;
@@ -66,7 +66,7 @@ export const index = async (req: Request, res: Response): Promise<Response> => {
     isNotAssignedUser,
     includeNotQueueDefined,
     tenantId,
-    profile
+    profile,
   });
 
   return res.status(200).json({ tickets, count, hasMore });
@@ -83,7 +83,7 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
     userId,
     tenantId,
     channel,
-    channelId
+    channelId,
   });
 
   // se ticket criado pelo próprio usuário, não emitir socket.
@@ -91,7 +91,7 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
     const io = getIO();
     io.to(`${tenantId}:${ticket.status}`).emit(`${tenantId}:ticket`, {
       action: "create",
-      ticket
+      ticket,
     });
   }
 
@@ -99,13 +99,12 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
 };
 
 export const show = async (req: Request, res: Response): Promise<Response> => {
-  const { ticketId: tickerP} = req.params;
+  const { ticketId: tickerP } = req.params;
   const { tenantId } = req.user;
 
   const userId = Number(req.user.id);
 
-  const ticketId = Number(tickerP)
-
+  const ticketId = Number(tickerP);
 
   const ticket = await ShowTicketService({ id: ticketId, tenantId });
   // const messages = await Message.findAll({
@@ -129,10 +128,10 @@ export const show = async (req: Request, res: Response): Promise<Response> => {
   const where = {
     contactId: ticket.contactId,
     scheduleDate: { [Op.not]: null },
-    status: "pending"
+    status: "pending",
   };
   const scheduledMessages = await Message.findAll({
-    where
+    where,
     // logging: console.log
   });
 
@@ -141,7 +140,7 @@ export const show = async (req: Request, res: Response): Promise<Response> => {
   await CreateLogTicketService({
     userId,
     ticketId,
-    type: "access"
+    type: "access",
   });
 
   return res.status(200).json(ticket);
@@ -156,24 +155,24 @@ export const update = async (
   const userIdRequest = Number(req.user.id);
   const { isTransference } = req.body;
 
-  const ticketId = Number(tickerP)
+  const ticketId = Number(tickerP);
   const ticketData: TicketData = { ...req.body, tenantId };
 
   const { ticket } = await UpdateTicketService({
     ticketData,
     ticketId,
     isTransference,
-    userIdRequest
+    userIdRequest,
   });
 
   if (ticket.status === "closed") {
     const whatsapp = await Whatsapp.findOne({
-      where: { id: ticket.whatsappId, tenantId }
+      where: { id: ticket.whatsappId, tenantId },
     });
     if (whatsapp?.farewellMessage) {
       const body = pupa(whatsapp.farewellMessage || "", {
         protocol: ticket.protocol,
-        name: ticket.contact.name
+        name: ticket.contact.name,
       });
       const messageData = {
         msg: { body, fromMe: true, read: true },
@@ -183,7 +182,7 @@ export const update = async (
         sendType: "bot",
         status: "pending",
         isTransfer: false,
-        note: false
+        note: false,
       };
       await CreateMessageSystemService(messageData);
       ticket.update({ isFarewellMessage: true });
@@ -209,7 +208,7 @@ export const remove = async (
     .to(`${tenantId}:notification`)
     .emit(`${tenantId}:ticket`, {
       action: "delete",
-      ticketId: +ticketId
+      ticketId: +ticketId,
     });
 
   return res.status(200).json({ message: "ticket deleted" });

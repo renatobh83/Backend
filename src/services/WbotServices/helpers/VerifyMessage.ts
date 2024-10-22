@@ -21,13 +21,13 @@ const VerifyMessage = async (
     read: msg.fromMe,
     quotedMsgId: quotedMsg?.id,
     timestamp: msg.timestamp,
-    status: "received"
+    status: "received",
   };
 
   await ticket.update({
     lastMessage: msg.body,
     lastMessageAt: new Date().getTime(),
-    answered: msg.fromMe || false
+    answered: msg.fromMe || false,
   });
   await CreateMessageService({ messageData, tenantId: ticket.tenantId });
 };

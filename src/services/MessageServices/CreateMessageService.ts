@@ -16,15 +16,15 @@ interface MessageData {
 }
 interface Request {
   messageData: MessageData;
-  tenantId:  number;
+  tenantId: number;
 }
 
 const CreateMessageService = async ({
   messageData,
-  tenantId
+  tenantId,
 }: Request): Promise<Message> => {
   const msg = await Message.findOne({
-    where: { messageId: messageData.messageId, tenantId }
+    where: { messageId: messageData.messageId, tenantId },
   });
   if (!msg) {
     await Message.create({ ...messageData, tenantId });
@@ -38,14 +38,14 @@ const CreateMessageService = async ({
         model: Ticket,
         as: "ticket",
         where: { tenantId },
-        include: ["contact"]
+        include: ["contact"],
       },
       {
         model: Message,
         as: "quotedMsg",
-        include: ["contact"]
-      }
-    ]
+        include: ["contact"],
+      },
+    ],
   });
 
   if (!message) {
@@ -56,7 +56,7 @@ const CreateMessageService = async ({
   socketEmit({
     tenantId,
     type: "chat:create",
-    payload: message
+    payload: message,
   });
 
   return message;

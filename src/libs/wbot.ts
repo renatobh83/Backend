@@ -1,6 +1,6 @@
 /* eslint-disable camelcase */
 import { Client, LocalAuth, DefaultOptions } from "whatsapp-web.js";
-import qrGen from "qrcode-terminal"
+import qrGen from "qrcode-terminal";
 import path from "path";
 import { rm } from "fs/promises";
 import { getIO } from "./socket";
@@ -11,7 +11,7 @@ import AppError from "../errors/AppError";
 
 interface Session extends Client {
   id: number;
-  requestPairingCode(phoneNumber: string): Promise<string>
+  requestPairingCode(phoneNumber: string): Promise<string>;
 }
 
 const sessions: Session[] = [];
@@ -52,7 +52,7 @@ const minimal_args = [
   "--no-zygote",
   "--password-store=basic",
   "--use-gl=swiftshader",
-  "--use-mock-keychain"
+  "--use-mock-keychain",
 ];
 
 export const apagarPastaSessao = async (id: number | string): Promise<void> => {
@@ -68,7 +68,7 @@ export const apagarPastaSessao = async (id: number | string): Promise<void> => {
 
 export const removeWbot = (whatsappId: number): void => {
   try {
-    const sessionIndex = sessions.findIndex(s => s.id === whatsappId);
+    const sessionIndex = sessions.findIndex((s) => s.id === whatsappId);
     if (sessionIndex !== -1) {
       sessions[sessionIndex].destroy();
       sessions.splice(sessionIndex, 1);
@@ -85,7 +85,6 @@ const args: string[] = process.env.CHROME_ARGS
 args.unshift(`--user-agent=${DefaultOptions.userAgent}`);
 
 export const initWbot = async (whatsapp: Whatsapp): Promise<Session> => {
-
   return new Promise((resolve, reject) => {
     try {
       const io = getIO();
@@ -97,15 +96,15 @@ export const initWbot = async (whatsapp: Whatsapp): Promise<Session> => {
         puppeteer: {
           // headless: false,
           executablePath: process.env.CHROME_BIN || undefined,
-          args
+          args,
         },
         webVersion: process.env.WEB_VERSION || "2.2409.2",
         webVersionCache: {
           type: "remote",
           remotePath:
-            "https://raw.githubusercontent.com/wppconnect-team/wa-version/main/html/{version}.html"
+            "https://raw.githubusercontent.com/wppconnect-team/wa-version/main/html/{version}.html",
         },
-        qrMaxRetries: 2
+        qrMaxRetries: 2,
       }) as Session;
 
       wbot.id = whatsapp.id;
@@ -113,12 +112,16 @@ export const initWbot = async (whatsapp: Whatsapp): Promise<Session> => {
       wbot.initialize();
       let pairingCodeRequested = false;
 
-      wbot.on("qr", async qr => {
+      wbot.on("qr", async (qr) => {
         if (whatsapp.pairingCodeEnabled && !pairingCodeRequested) {
           const pairingCode = await wbot.requestPairingCode(whatsapp.wppUser); // enter the target phone number
-          await whatsapp.update({ pairingCode: pairingCode, status: "qrcode", retries: 0 });
+          await whatsapp.update({
+            pairingCode: pairingCode,
+            status: "qrcode",
+            retries: 0,
+          });
           pairingCodeRequested = true;
-      }
+        }
         // qrGen.generate(qr,  {small: true})
         if (whatsapp.status === "CONNECTED") return;
         logger.info(
@@ -126,7 +129,7 @@ export const initWbot = async (whatsapp: Whatsapp): Promise<Session> => {
         );
 
         await whatsapp.update({ qrcode: qr, status: "qrcode", retries: 0 });
-        const sessionIndex = sessions.findIndex(s => s.id === whatsapp.id);
+        const sessionIndex = sessions.findIndex((s) => s.id === whatsapp.id);
         if (sessionIndex === -1) {
           wbot.id = whatsapp.id;
           sessions.push(wbot);
@@ -134,7 +137,7 @@ export const initWbot = async (whatsapp: Whatsapp): Promise<Session> => {
 
         io.emit(`${tenantId}:whatsappSession`, {
           action: "update",
-          session: whatsapp
+          session: whatsapp,
         });
       });
 
@@ -142,26 +145,26 @@ export const initWbot = async (whatsapp: Whatsapp): Promise<Session> => {
         logger.info(`Session: ${sessionName} AUTHENTICATED`);
       });
 
-      wbot.on("auth_failure", async msg => {
+      wbot.on("auth_failure", async (msg) => {
         logger.error(
           `Session: ${sessionName}-AUTHENTICATION FAILURE :: ${msg}`
         );
         if (whatsapp.retries > 1) {
           await whatsapp.update({
             retries: 0,
-            session: ""
+            session: "",
           });
         }
 
         const retry = whatsapp.retries;
         await whatsapp.update({
           status: "DISCONNECTED",
-          retries: retry + 1
+          retries: retry + 1,
         });
 
         io.emit(`${tenantId}:whatsappSession`, {
           action: "update",
-          session: whatsapp
+          session: whatsapp,
         });
         reject(new Error("Error starting whatsapp session."));
       });
@@ -180,22 +183,22 @@ export const initWbot = async (whatsapp: Whatsapp): Promise<Session> => {
           phone: {
             ...(info || {}),
             wbotVersion,
-            wbotBrowser
+            wbotBrowser,
           },
-          session: sessionName
+          session: sessionName,
         });
 
         io.emit(`${tenantId}:whatsappSession`, {
           action: "update",
-          session: whatsapp
+          session: whatsapp,
         });
 
         io.emit(`${tenantId}:whatsappSession`, {
           action: "readySession",
-          session: whatsapp
+          session: whatsapp,
         });
 
-        const sessionIndex = sessions.findIndex(s => s.id === whatsapp.id);
+        const sessionIndex = sessions.findIndex((s) => s.id === whatsapp.id);
         if (sessionIndex === -1) {
           wbot.id = whatsapp.id;
           sessions.push(wbot);
@@ -212,8 +215,7 @@ export const initWbot = async (whatsapp: Whatsapp): Promise<Session> => {
 };
 
 export const getWbot = (whatsappId: number): Session => {
-
-  const sessionIndex = sessions.findIndex(s => s.id === Number(whatsappId));
+  const sessionIndex = sessions.findIndex((s) => s.id === Number(whatsappId));
   if (sessionIndex === -1) {
     throw new AppError("ERR_WAPP_NOT_INITIALIZED");
   }

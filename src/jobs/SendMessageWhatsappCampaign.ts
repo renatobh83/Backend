@@ -20,7 +20,6 @@ export default {
   // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
   async handle({ data }: any) {
     try {
-      console.log(data);
       /// feito por está apresentando problema com o tipo
       const wbot = getWbot(data.whatsappId);
       let message = {} as WbotMessage;

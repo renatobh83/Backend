@@ -68,7 +68,7 @@ interface Request {
 const downloadMedia = async (msg: any): Promise<any> => {
   try {
     const request = await axios.get(msg.mediaUrl, {
-      responseType: "stream"
+      responseType: "stream",
     });
     const cType = request.headers["content-type"];
     const tMine: any = mime;
@@ -80,7 +80,7 @@ const downloadMedia = async (msg: any): Promise<any> => {
     const mediaData = {
       originalname: fileName,
       filename: fileName,
-      mediaType: fileExt
+      mediaType: fileExt,
     };
     await new Promise((resolve, reject) => {
       request.data
@@ -105,13 +105,13 @@ const downloadMedia = async (msg: any): Promise<any> => {
         externalKey: msg.externalKey,
         error: error.message,
         authToken: msg.apiConfig.authToken,
-        type: "hookMessageStatus"
+        type: "hookMessageStatus",
       };
       if (msg?.apiConfig?.urlMessageStatus) {
         Queue.add("WebHooksAPI", {
           url: msg.apiConfig.urlMessageStatus,
           type: payload.type,
-          payload
+          payload,
         });
       }
       return {};
@@ -129,7 +129,7 @@ const CreateMessageSystemService = async ({
   scheduleDate,
   sendType,
   status,
-  idFront
+  idFront,
 }: Request): Promise<void> => {
   const messageData: MessageData = {
     ticketId: ticket.id,
@@ -149,16 +149,15 @@ const CreateMessageSystemService = async ({
     sendType,
     status,
     tenantId,
-    idFront
+    idFront,
   };
-
   try {
     // Alter template message
     if (msg.body && !Array.isArray(msg.body)) {
       messageData.body = pupa(msg.body || "", {
         // greeting: será considerado conforme data/hora da mensagem internamente na função pupa
         protocol: ticket.protocol,
-        name: ticket.contact.name
+        name: ticket.contact.name,
       });
     }
     if (sendType === "API" && msg.mediaUrl) {
@@ -166,7 +165,6 @@ const CreateMessageSystemService = async ({
       const mediaData = await downloadMedia(msg);
       medias.push(mediaData);
     }
-
 
     if (sendType === "API" && !msg.mediaUrl && msg.media) {
       medias = [];
@@ -190,7 +188,6 @@ const CreateMessageSystemService = async ({
 
           let message: any = {};
 
-
           if (!messageData.scheduleDate) {
             /// enviar mensagem > run time
 
@@ -198,7 +195,7 @@ const CreateMessageSystemService = async ({
               ticket,
               messageData,
               media,
-              userId
+              userId,
             });
             ///
           }
@@ -213,9 +210,8 @@ const CreateMessageSystemService = async ({
             mediaUrl: media.filename,
             mediaType:
               media.mediaType ||
-              media.mimetype.substr(0, media.mimetype.indexOf("/"))
+              media.mimetype.substr(0, media.mimetype.indexOf("/")),
           });
-
 
           const messageCreated = await Message.findByPk(msgCreated.id, {
             include: [
@@ -223,14 +219,14 @@ const CreateMessageSystemService = async ({
                 model: Ticket,
                 as: "ticket",
                 where: { tenantId },
-                include: ["contact"]
+                include: ["contact"],
               },
               {
                 model: Message,
                 as: "quotedMsg",
-                include: ["contact"]
-              }
-            ]
+                include: ["contact"],
+              },
+            ],
           });
 
           if (!messageCreated) {
@@ -239,13 +235,13 @@ const CreateMessageSystemService = async ({
 
           await ticket.update({
             lastMessage: messageCreated.body,
-            lastMessageAt: new Date().getTime()
+            lastMessageAt: new Date().getTime(),
           });
 
           socketEmit({
             tenantId,
             type: "chat:create",
-            payload: messageCreated
+            payload: messageCreated,
           });
         })
       );
@@ -258,7 +254,7 @@ const CreateMessageSystemService = async ({
           ticket,
           messageData,
           media: null,
-          userId
+          userId,
         });
         ///
       }
@@ -269,7 +265,7 @@ const CreateMessageSystemService = async ({
         id: messageData.id,
         userId,
         messageId: message.id?.id || message.messageId || null,
-        mediaType: "chat"
+        mediaType: "chat",
       });
 
       const messageCreated = await Message.findByPk(msgCreated.id, {
@@ -278,14 +274,14 @@ const CreateMessageSystemService = async ({
             model: Ticket,
             as: "ticket",
             where: { tenantId },
-            include: ["contact"]
+            include: ["contact"],
           },
           {
             model: Message,
             as: "quotedMsg",
-            include: ["contact"]
-          }
-        ]
+            include: ["contact"],
+          },
+        ],
       });
 
       if (!messageCreated) {
@@ -296,13 +292,13 @@ const CreateMessageSystemService = async ({
       await ticket.update({
         lastMessage: messageCreated.body,
         lastMessageAt: new Date().getTime(),
-        answered: true
+        answered: true,
       });
 
       socketEmit({
         tenantId,
         type: "chat:create",
-        payload: messageCreated
+        payload: messageCreated,
       });
     }
   } catch (error) {

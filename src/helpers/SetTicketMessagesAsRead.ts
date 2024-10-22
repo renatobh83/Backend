@@ -7,14 +7,13 @@ import GetTicketWbot from "./GetTicketWbot";
 import socketEmit from "./socketEmit";
 
 const SetTicketMessagesAsRead = async (ticket: Ticket): Promise<void> => {
-
   await Message.update(
     { read: true },
     {
       where: {
         ticketId: ticket.id,
-        read: false
-      }
+        read: false,
+      },
     }
   );
 
@@ -26,14 +25,14 @@ const SetTicketMessagesAsRead = async (ticket: Ticket): Promise<void> => {
 
       wbot
         .sendSeen(`${ticket.contact.number}@${ticket.isGroup ? "g" : "c"}.us`)
-        .catch(e => console.error("não foi possível marcar como lido", e));
+        .catch((e) => console.error("não foi possível marcar como lido", e));
     }
     // if (ticket.channel === "messenger") {
     //   const messengerBot = getMessengerBot(ticket.whatsappId);
     //   messengerBot.markSeen(ticket.contact.messengerId);
     // }
   } catch (err) {
-    console.log(err)
+    console.log(err);
     logger.warn(
       `Could not mark messages as read. Maybe whatsapp session disconnected? Err: ${err}`
     );
@@ -42,13 +41,13 @@ const SetTicketMessagesAsRead = async (ticket: Ticket): Promise<void> => {
 
   const ticketReload = await ShowTicketService({
     id: ticket.id,
-    tenantId: ticket.tenantId
+    tenantId: ticket.tenantId,
   });
 
   socketEmit({
     tenantId: ticket.tenantId,
     type: "ticket:update",
-    payload: ticketReload
+    payload: ticketReload,
   });
 };
 
