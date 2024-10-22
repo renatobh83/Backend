@@ -11,5 +11,5 @@ export default async function bootstrap(app: Application): Promise<void> {
   await express(app);
   await database(app);
   await modules(app);
-  // await bullMQ(app); // precisar subir na instancia dos bots
+  await bullMQ(app); // precisar subir na instancia dos bots
 }

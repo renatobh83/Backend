@@ -13,7 +13,8 @@ import {
   isBefore,
   differenceInDays,
 } from "date-fns";
-import { toZonedTime } from "date-fns-tz";
+
+import { formatInTimeZone, toZonedTime } from "date-fns-tz";
 import Campaign from "../../models/Campaign";
 import AppError from "../../errors/AppError";
 import CampaignContacts from "../../models/CampaignContacts";
@@ -154,7 +155,13 @@ const StartCampaignService = async ({
   //   ),
   //   today.getHours()
   // );
-  let dateDelay = toZonedTime(campaign.start, "America/Sao_Paulo");
+  // let dateDelay = toZonedTime(campaign.start, "America/Sao_Paulo");
+  let dateDelay = formatInTimeZone(
+    new Date(campaign.start),
+    "America/Sao_Paulo",
+    "yyyy-MM-dd'T'HH:mm:ss"
+  );
+  // console.log(displayDate);
   const data = campaignContacts.map((campaignContact: CampaignContacts) => {
     dateDelay = addSeconds(dateDelay, timeDelay / 1000);
     return mountMessageData(campaign, campaignContact, {
@@ -163,9 +170,8 @@ const StartCampaignService = async ({
       delay: calcDelay(dateDelay, timeDelay),
     });
   });
-
   Queue.add("SendMessageWhatsappCampaign", data);
-
+  console.log(data);
   await campaign.update({
     status: "scheduled",
   });

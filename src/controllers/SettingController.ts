@@ -31,13 +31,13 @@ export const update = async (
   const setting = await UpdateSettingService({
     key,
     value,
-    tenantId
+    tenantId,
   });
 
   const io = getIO();
   io.emit(`${tenantId}:settings`, {
     action: "update",
-    setting
+    setting,
   });
 
   return res.status(200).json(setting);

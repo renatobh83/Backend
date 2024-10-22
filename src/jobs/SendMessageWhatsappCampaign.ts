@@ -14,12 +14,13 @@ export default {
     // removeOnFail: true,
     backoff: {
       type: "fixed",
-      delay: 60000 * 5 // 5 min
-    }
+      delay: 60000 * 5, // 5 min
+    },
   },
   // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
   async handle({ data }: any) {
     try {
+      console.log(data);
       /// feito por está apresentando problema com o tipo
       const wbot = getWbot(data.whatsappId);
       let message = {} as WbotMessage;
@@ -29,11 +30,11 @@ export default {
         const newMedia = MessageMedia.fromFilePath(mediaPath);
         message = await wbot.sendMessage(`${data.number}@c.us`, newMedia, {
           sendAudioAsVoice: true,
-          caption: data.message
+          caption: data.message,
         });
       } else {
         message = await wbot.sendMessage(`${data.number}@c.us`, data.message, {
-          linkPreview: false
+          linkPreview: false,
         });
       }
 
@@ -44,7 +45,7 @@ export default {
           body: data.message,
           mediaName: data.mediaName,
           timestamp: message.timestamp,
-        //   jobId: data.jobId
+          //   jobId: data.jobId
         },
         { where: { id: data.campaignContact.id } }
       );
@@ -54,5 +55,5 @@ export default {
       logger.error(`Error enviar message campaign: ${error}`);
       throw new Error(error);
     }
-  }
+  },
 };

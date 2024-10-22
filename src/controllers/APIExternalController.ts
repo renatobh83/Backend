@@ -9,6 +9,7 @@ import { StartWhatsAppSession } from "../services/WbotServices/StartWhatsAppSess
 import { getWbot } from "../libs/wbot";
 
 import { API } from "../app/webhookApi";
+import { result } from "lodash";
 
 export default interface Notificacao {
   paciente_nome: string;
@@ -185,27 +186,27 @@ export const TESTEAPIWEBHOOKS = async (
   req: Request,
   res: Response
 ): Promise<Response> => {
-  const dataRequest = {
-    js_paciente: btoa(JSON.stringify(req.body)),
-  };
-  // const agendamento = await API.doGetAgendamentos(73493)
-  // const da = await API.confirmaExame( 228399)
-  // const pr = await API.doGetPreparo(104)
-  // const login= await API.doPacienteLogin('suporte2@exp.net.br','1')
-  try {
-    // const newPaciente = await API.doCadatrarPaciente(btoa(JSON.stringify(req.body)))
-    // const planos = await API.doListaPlano()
-    // const atendimento = await API.doListaAtendimentos(72382)
-    // const medicos = await API.doListaMedicos()
-    // const laudo = await API.doGetLaudo(162824,72382, 1, false)
-    const data = {
-      dt_de: "20241016",
-      dt_ate: "20241016",
-    };
-
-    const confirmacaolista = await API.doListaConfirmacao(data);
-    return res.status(200).send(confirmacaolista);
-  } catch (error) {
-    return res.status(500).send(error.response);
-  }
+  // const dataRequest = {
+  //   js_paciente: btoa(JSON.stringify(req.body)),
+  // };
+  // // const agendamento = await API.doGetAgendamentos(73493)
+  // // const da = await API.confirmaExame( 228399)
+  // // const pr = await API.doGetPreparo(104)
+  // // const login= await API.doPacienteLogin('suporte2@exp.net.br','1')
+  // try {
+  //   // const newPaciente = await API.doCadatrarPaciente(btoa(JSON.stringify(req.body)))
+  //   // const planos = await API.doListaPlano()
+  //   // const atendimento = await API.doListaAtendimentos(72382)
+  //   // const medicos = await API.doListaMedicos()
+  //   // const laudo = await API.doGetLaudo(162824,72382, 1, false)
+  //   const data = {
+  //     dt_de: "20241016",
+  //     dt_ate: "20241016",
+  //   };
+  //   const confirmacaolista = await API.doListaConfirmacao(data);
+  //   return res.status(200).send(confirmacaolista);
+  // } catch (error) {
+  //   return res.status(500).send(error.response);
+  // }
+  return res.status(200).send();
 };

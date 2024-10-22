@@ -25,7 +25,7 @@ interface Request {
 
 const CreateCampaignService = async ({
   campaign,
-  medias
+  medias,
 }: Request): Promise<Campaign> => {
   let mediaData: Express.Multer.File | undefined;
   if (medias) {
@@ -46,7 +46,7 @@ const CreateCampaignService = async ({
 
   const data: any = {
     name: campaign.name,
-    start: parseISO(campaign.start),
+    start: campaign.start,
     message1: campaign.message1,
     message2: campaign.message2,
     message3: campaign.message3,
@@ -55,8 +55,9 @@ const CreateCampaignService = async ({
     mediaUrl: mediaData?.filename,
     mediaType: mediaData?.mimetype.substr(0, mediaData.mimetype.indexOf("/")),
     sessionId: campaign.sessionId,
-    tenantId: campaign.tenantId
+    tenantId: campaign.tenantId,
   };
+
   const campaignData = await Campaign.create(data);
 
   return campaignData;

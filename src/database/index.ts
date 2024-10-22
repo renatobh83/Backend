@@ -32,10 +32,9 @@ import ApiConfirmacao from "../models/ApiConfirmacao";
 import { DatabaseError } from "sequelize";
 
 interface CustomSequelize extends Sequelize {
-    afterConnect?: any;
-    afterDisconnect?: any;
-
-  }
+  afterConnect?: any;
+  afterDisconnect?: any;
+}
 
 // eslint-disable-next-line
 const dbConfig = require("../config/database");
@@ -69,14 +68,20 @@ const models = [
   ApiMessage,
   LogTicket,
   ChatFlow,
-  ApiConfirmacao
+  ApiConfirmacao,
 ];
 
 sequelize.addModels(models);
 
 async function handleSequelizeError(error: any) {
-  if (error instanceof DatabaseError && error.message.includes('Connection terminated unexpectedly')) {
-    logger.error("DATABASE CONNECTION TERMINATED, retrying in 5 seconds:", error);
+  if (
+    error instanceof DatabaseError &&
+    error.message.includes("Connection terminated unexpectedly")
+  ) {
+    logger.error(
+      "DATABASE CONNECTION TERMINATED, retrying in 5 seconds:",
+      error
+    );
 
     setTimeout(() => {
       logger.info("Retrying database connection...");
@@ -84,7 +89,7 @@ async function handleSequelizeError(error: any) {
     }, 5000);
   } else {
     logger.error("Sequelize encountered an error:", error);
-    throw error;  // Lançar o erro para tratamento posterior
+    throw error; // Lançar o erro para tratamento posterior
   }
 }
 // Função para tentar reconectar automaticamente
@@ -96,7 +101,7 @@ async function connectWithRetry() {
     QueueJobs.default.add("VerifyTicketsChatBotInactives", {});
     QueueJobs.default.add("SendMessageSchenduled", {});
   } catch (error) {
-    handleSequelizeError(error);  // Chama o handler para reconexão condicional
+    handleSequelizeError(error); // Chama o handler para reconexão condicional
   }
 }
 

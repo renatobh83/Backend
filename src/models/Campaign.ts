@@ -11,7 +11,7 @@ import {
   UpdatedAt,
   HasMany,
   Default,
-  AfterFind
+  AfterFind,
 } from "sequelize-typescript";
 import CampaignContacts from "./CampaignContacts";
 import Tenant from "./Tenant";
@@ -87,6 +87,7 @@ class Campaign extends Model<Campaign> {
   createdAt: Date;
 
   @UpdatedAt
+  @Column(DataType.DATE(6))
   updatedAt: Date;
 
   @Column

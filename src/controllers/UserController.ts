@@ -23,29 +23,28 @@ export const index = async (req: Request, res: Response): Promise<Response> => {
   const { users, count, hasMore } = await ListUsersService({
     searchParam,
     pageNumber,
-    tenantId
+    tenantId,
   });
 
   return res.json({ users, count, hasMore });
 };
 
 export const store = async (req: Request, res: Response): Promise<Response> => {
-
   const { tenantId } = req.user;
   const { email, password, name, profile } = req.body;
   const { users } = await ListUsersService({ tenantId });
 
   if (users.length >= Number(process.env.USER_LIMIT)) {
-          throw new AppError("ERR_USER_LIMIT_USER_CREATION", 400);
+    throw new AppError("ERR_USER_LIMIT_USER_CREATION", 400);
   }
 
-  else if (
-
+  if (
     req.url === "/signup" &&
     (await CheckSettingsHelper("userCreation")) === "disabled"
   ) {
     throw new AppError("ERR_USER_CREATION_DISABLED", 403);
-  } else if (req.url !== "/signup" && req.user.profile !== "admin") {
+  }
+  if (req.url !== "/signup" && req.user.profile !== "admin") {
     throw new AppError("ERR_NO_PERMISSION", 403);
   }
 
@@ -54,13 +53,13 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
     password,
     name,
     profile,
-    tenantId
+    tenantId,
   });
 
   const io = getIO();
   io.emit(`${tenantId}:user`, {
     action: "create",
-    user
+    user,
   });
 
   return res.status(200).json(user);
@@ -87,14 +86,14 @@ export const update = async (
   const userData = req.body;
   const { tenantId } = req.user;
 
-  const userId = Number(userP)
+  const userId = Number(userP);
 
   const user = await UpdateUserService({ userData, userId, tenantId });
 
   const io = getIO();
   io.emit(`${tenantId}:user`, {
     action: "update",
-    user
+    user,
   });
 
   return res.status(200).json(user);
@@ -134,7 +133,7 @@ export const remove = async (
   const io = getIO();
   io.emit(`${tenantId}:user`, {
     action: "delete",
-    userId
+    userId,
   });
 
   return res.status(200).json({ message: "User deleted" });

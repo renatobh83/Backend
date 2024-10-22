@@ -17,13 +17,13 @@ const SyncUnreadMessagesWbot = async (
 ): Promise<void> => {
   try {
     const chats = await wbot.getChats();
-    console.log('Chats inSyncUnreadMessagesWbot ')
-    await Promise.all(
-      chats.map(async chat => {
+    console.log("Chats inSyncUnreadMessagesWbot ");
 
+    await Promise.all(
+      chats.map(async (chat) => {
         if (chat.unreadCount > 0) {
           const unreadMessages = await chat.fetchMessages({
-            limit: chat.unreadCount
+            limit: chat.unreadCount,
           });
           logger.info(`CHAT: ${chat}`);
 
@@ -38,7 +38,7 @@ const SyncUnreadMessagesWbot = async (
             unreadMessages: chat.unreadCount,
             tenantId,
             isSync: true,
-            channel: "whatsapp"
+            channel: "whatsapp",
           });
 
           if (ticket?.isConfirmacaoMessage) {
@@ -64,7 +64,6 @@ const SyncUnreadMessagesWbot = async (
             }
             // enviar mensagem do bot na ultima mensagem
             if (idx === unreadMessages.length - 1) {
-
               await VerifyStepsChatFlowTicket(msg, ticket);
 
               const apiConfig: any = ticket.apiConfig || {};
@@ -82,14 +81,13 @@ const SyncUnreadMessagesWbot = async (
                   ticketId: ticket.id,
                   externalKey: apiConfig?.externalKey,
                   authToken: apiConfig?.authToken,
-                  type: "hookMessage"
+                  type: "hookMessage",
                 };
-
 
                 Queue.add("WebHooksAPI", {
                   url: apiConfig.urlMessageStatus,
                   type: payload.type,
-                  payload
+                  payload,
                 });
               }
             }
