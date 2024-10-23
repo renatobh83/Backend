@@ -13,7 +13,7 @@ const redis = new Redis({
   host: process.env.IO_REDIS_SERVER,
   port: +(process.env.IO_REDIS_PORT || "6379"),
   password: process.env.IO_REDIS_PASSWORD || undefined,
-  db: 3
+  db: 3,
 });
 
 export default {
@@ -31,6 +31,7 @@ export default {
   // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
   async handle({ data }: any) {
     const wbot = getWbot(data.sessionId);
+
     const phoneNumber = data.body.contato; // Assumindo que 'phoneNumber' é parte do objeto 'data'
     const lockKey = `lock:${phoneNumber}`;
 
@@ -38,17 +39,19 @@ export default {
     if (isLocked) {
       // Se o lock existe, ignora a nova adição à fila
 
-      logger.info(`Mensagem para ${phoneNumber} não foi adicionada à fila (lock ativo).`);
+      logger.info(
+        `Mensagem para ${phoneNumber} não foi adicionada à fila (lock ativo).`
+      );
       return;
     }
-       // Se não existe lock, cria um lock temporário
-    await redis.set(lockKey, 'locked', 'EX', LOCK_TIMEOUT);
+    // Se não existe lock, cria um lock temporário
+    await redis.set(lockKey, "locked", "EX", LOCK_TIMEOUT);
     try {
       logger.info(`Sending message Initiated: ${data.tenantId}`);
       if (sending[data.tenantId]) return;
 
       sending[data.tenantId] = true;
-     await SendMessageSystemConfirmacao(wbot, data)
+      await SendMessageSystemConfirmacao(wbot, data);
       sending[data.tenantId] = false;
       logger.info(`Finalized sending message: ${data.tenantId}`);
     } catch (error) {

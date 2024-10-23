@@ -11,8 +11,8 @@ const upload = multer({
   ...uploadConfig,
   limits: {
     files: 1, // allow only 1 file per request
-    fileSize: 1024 * 1024 * 5 // 5 MB (max file size)
-  }
+    fileSize: 1024 * 1024 * 5, // 5 MB (max file size)
+  },
 
   // fileFilter: (req, file, cb) => {
   //   console.log(file);
@@ -34,8 +34,10 @@ apiExternalRoute.post(
   APIExternalController.startSession
 );
 
-apiExternalRoute.post("/v1/api/external/:apiId/:idWbot/:authToken", APIExternalController.sendMessageConfirmacao)
+apiExternalRoute.post(
+  "/v1/api/external/:apiId/:idWbot/:authToken",
+  APIExternalController.sendMessageConfirmacao
+);
 
-
-apiExternalRoute.get('/teste', APIExternalController.TESTEAPIWEBHOOKS)
+apiExternalRoute.get("/teste", APIExternalController.TESTEAPIWEBHOOKS);
 export default apiExternalRoute;
