@@ -28,8 +28,8 @@ const wbotMessageListener = (wbot: Session): void => {
     HandleMsgAck(msg, ack);
   });
   wbot.on("message_reaction", async (msg) => {
-    HandleMsgReaction(msg);
-    // HandleMsgAck(msg, ack);
+    for await (const _ of HandleMsgReaction(msg)) {
+    }
   });
 
   wbot.on("call", async (call) => {

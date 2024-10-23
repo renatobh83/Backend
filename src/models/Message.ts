@@ -127,10 +127,12 @@ class Message extends Model<Message> {
 
   @Default(null)
   @AllowNull
+  @Column
   reaction: string;
 
   @Default(null)
   @AllowNull
+  @Column
   reactionFromMe: string;
 
   @Default(null)
