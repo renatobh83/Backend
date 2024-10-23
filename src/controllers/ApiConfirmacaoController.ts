@@ -3,21 +3,19 @@ import AppError from "../errors/AppError";
 import GetApiConfirmacaoService from "../services/ApiConfirmacaoServices/GetApiConfirmacaoService";
 import CreateApiConfirmacaoService from "../services/ApiConfirmacaoServices/CreateApiConfirmacaoService";
 import UpdateApiConfirmacaoService from "../services/ApiConfirmacaoServices/updateApiConfirmacaoService";
+import ListApiConfigService from "../services/ApiConfigServices/ListApiConfigService";
 
 interface ApiData {
-
-  urlService: string;
-  usuarioApi: string;
-  senhaApi: string;
+  usuario: string;
+  senha: string;
   tenantId: number;
   action: string[];
 }
 
 interface updateData {
-  id: number
-  urlService?: string;
-  usuarioApi?: string;
-  senhaApi?: string;
+  id: number;
+  usuario?: string;
+  senha?: string;
   action?: string[];
 }
 export const index = async (req: Request, res: Response): Promise<Response> => {
@@ -35,7 +33,6 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
     throw new AppError("ERR_NO_PERMISSION", 403);
   }
   const newApi: ApiData = { ...req.body, tenantId };
-
   const api = await CreateApiConfirmacaoService(newApi);
   return res.json(api);
 };
@@ -44,21 +41,26 @@ export const update = async (
   res: Response
 ): Promise<Response> => {
   const { tenantId } = req.user;
-  const { id : idApi } = req.params
+  const { id: idApi } = req.params;
 
   if (req.user.profile !== "admin") {
     throw new AppError("ERR_NO_PERMISSION", 403);
   }
-  const id = Number(idApi)
-  const updateApi: updateData = { ...req.body, id};
+  const id = Number(idApi);
+  const updateApi: updateData = { ...req.body, id };
 
   // await UpdateApiConfirmacaoService(updateApi)
 
-  return res.send('ola');
+  return res.send("ola");
 };
 export const remove = async (
   req: Request,
   res: Response
 ): Promise<Response> => {
   return res;
+};
+export const list = async (req: Request, res: Response): Promise<Response> => {
+  const { tenantId } = req.user;
+  const apiConfirmacao = await ListApiConfigService({ tenantId });
+  return res.send(apiConfirmacao).sendStatus(200);
 };

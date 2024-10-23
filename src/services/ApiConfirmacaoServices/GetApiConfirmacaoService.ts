@@ -1,24 +1,25 @@
 import ApiConfirmacao from "../../models/ApiConfirmacao";
 
-
 interface Response {
-  link: string,
-  usuario: string,
-  senha: string
+  action: string[];
+  usuario: string;
+  senha: string;
 }
 interface Request {
   tenantId: number;
 }
 
 const GetApiConfirmacaoService = async ({
-  tenantId
+  tenantId,
 }: Request): Promise<Response> => {
+  const apiConfirmacao = (await ApiConfirmacao.findAll({
+    where: { tenantId },
+    attributes: { exclude: ["token", "token2"] }, // Exclui o campo token
+    order: [["usuario", "ASC"]],
+  })) as unknown as Response;
 
-  const {link, senha, usuario } = await ApiConfirmacao.findOne({
-    where: { tenantId }
-  }) as Response
-  return { usuario, link, senha };
+  return apiConfirmacao;
+  // return { usuario, link, senha };
 };
 
 export default GetApiConfirmacaoService;
-

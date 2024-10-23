@@ -1,47 +1,56 @@
 import {
-    Table,
-    Column,
-    CreatedAt,
-    UpdatedAt,
-    Model,
-    DataType,
-    PrimaryKey,
-    ForeignKey,
-    AutoIncrement
-  } from "sequelize-typescript";
+  Table,
+  Column,
+  CreatedAt,
+  UpdatedAt,
+  Model,
+  DataType,
+  PrimaryKey,
+  ForeignKey,
+  AutoIncrement,
+  AllowNull,
+  Default,
+} from "sequelize-typescript";
 
-  import Tenant from "./Tenant";
-  @Table({ tableName: 'ApiConfirmacao' })
-  class ApiConfirmacao extends Model<ApiConfirmacao> {
-    @PrimaryKey
-    @AutoIncrement
-    @Column
-    id: number;
+import Tenant from "./Tenant";
+@Table({ tableName: "ApiConfirmacao" })
+class ApiConfirmacao extends Model<ApiConfirmacao> {
+  @PrimaryKey
+  @AutoIncrement
+  @Column
+  id: number;
 
-    @Column
-    link: string;
+  @Default(null)
+  @AllowNull
+  @Column
+  token: string;
 
-    @Column
-    usuario: string;
+  @Default(null)
+  @AllowNull
+  @Column
+  token2: string;
 
-    @ForeignKey(() => Tenant)
-    @Column
-    tenantId: number;
+  @Column
+  usuario: string;
 
-    @Column
-    senha: string;
+  @ForeignKey(() => Tenant)
+  @Column
+  tenantId: number;
 
-    @Column(DataType.JSONB)
-    action: string[];
+  @Column
+  senha: string;
 
-    @CreatedAt
-    @Column(DataType.DATE(6))
-    createdAt: Date;
+  @AllowNull
+  @Column(DataType.JSONB)
+  action: string[];
 
-    @UpdatedAt
-    @Column(DataType.DATE(6))
-    updatedAt: Date;
+  @CreatedAt
+  @Column(DataType.DATE(6))
+  createdAt: Date;
 
-  }
+  @UpdatedAt
+  @Column(DataType.DATE(6))
+  updatedAt: Date;
+}
 
-  export default ApiConfirmacao;
+export default ApiConfirmacao;
