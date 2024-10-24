@@ -1,3 +1,4 @@
+import AppError from "../../errors/AppError";
 import { logger } from "../../utils/logger";
 const fs = require("fs");
 const path = require("path");
@@ -15,7 +16,6 @@ class ApiGenesis {
     this.pw = pw;
     this.token = null;
     this.linkApi = link;
-    this.initialized = this.initialize();
   }
 
   async initialize() {
@@ -25,12 +25,16 @@ class ApiGenesis {
       );
 
       this.token = response.data[0].ds_token;
-      logger.info("api already in server!");
     } catch (error) {
-      console.error("Error fetching token:", error);
+      logger.error(`StatConectionApi | Error: ${error}`);
+      throw new AppError("ERR_USER_NOT_FOUND", 404);
     }
   }
-
+  static async create(usuario, senha, linkApi) {
+    const instance = new ApiGenesis(usuario, senha, linkApi);
+    await instance.initialize();
+    return instance;
+  }
   async confirmaExame(atendimento) {
     await this.initialized;
     const url = `${this.linkApi}/doAgendaConfirmar?cd_atendimento=${atendimento}`;

@@ -5,6 +5,8 @@ import CreateApiConfirmacaoService from "../services/ApiConfirmacaoServices/Crea
 import UpdateApiConfirmacaoService from "../services/ApiConfirmacaoServices/updateApiConfirmacaoService";
 import ListApiConfigService from "../services/ApiConfigServices/ListApiConfigService";
 import DeleteApiService from "../services/ApiConfirmacaoServices/DeleteApiService";
+import { StartApiSession } from "../services/ApiExternaService/StartApiSession";
+import UpdateApiStatusService from "../services/ApiConfirmacaoServices/UpdateApiStatusService";
 
 interface ApiData {
   usuario: string;
@@ -79,5 +81,36 @@ export const remove = async (
 export const list = async (req: Request, res: Response): Promise<Response> => {
   const { tenantId } = req.user;
   const apiConfirmacao = await ListApiConfigService({ tenantId });
-  return res.send(apiConfirmacao).sendStatus(200);
+  return res.status(200).json(apiConfirmacao);
+};
+
+export const connect = async (
+  req: Request,
+  res: Response
+): Promise<Response> => {
+  try {
+    await StartApiSession(req.body);
+
+    return res.sendStatus(200);
+  } catch (error) {
+    // Responder com o status de erro e a mensagem apropriada
+    if (error instanceof AppError) {
+      return res.status(error.statusCode).json({ message: error.message });
+    }
+    return res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
+export const updateStatus = async (
+  req: Request,
+  res: Response
+): Promise<Response> => {
+  const { tenantId } = req.user;
+
+  if (req.user.profile !== "admin") {
+    throw new AppError("ERR_NO_PERMISSION", 403);
+  }
+  const { id, status } = req.params;
+  const data = await UpdateApiStatusService({ id, status, tenantId });
+  return res.status(200).json(data);
 };

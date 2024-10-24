@@ -13,6 +13,12 @@ apiConfirmacaoRoutes.post(
   isAuth,
   ApiConfirmacaoController.store
 );
+
+apiConfirmacaoRoutes.post(
+  "/api-confirma/:id",
+  isAuth,
+  ApiConfirmacaoController.connect
+);
 apiConfirmacaoRoutes.delete(
   "/api-confirma/:id",
   isAuth,
@@ -23,5 +29,11 @@ apiConfirmacaoRoutes.put(
   "/api-confirma/:id",
   isAuth,
   ApiConfirmacaoController.update
+);
+
+apiConfirmacaoRoutes.put(
+  "/api-confirma/:id/:status",
+  isAuth,
+  ApiConfirmacaoController.updateStatus
 );
 export default apiConfirmacaoRoutes;

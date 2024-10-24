@@ -32,7 +32,7 @@ const HandleMessage = async (
       if (!IsValidMsg(msg)) {
         return;
       }
-      console.log("Handle Message", msg);
+      console.log("Handle Message");
       const whatsapp = await ShowWhatsAppService({ id: wbot.id });
 
       const { tenantId } = whatsapp;

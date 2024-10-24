@@ -78,6 +78,8 @@ class ApiConfirmacao extends Model<ApiConfirmacao> {
       const expTimestamp = payload.exp;
       const expDate = new Date(expTimestamp * 1000);
       api.expDate = expDate; // Definindo a data de expiração
+    } else {
+      api.expDate = null;
     }
   }
 }

@@ -3,39 +3,19 @@ import ApiConfirmacao from "../../models/ApiConfirmacao";
 import AppError from "../../errors/AppError";
 
 interface Request {
-  id: number;
+  id: string;
   status?: string;
-  usuario?: string;
-  senha?: string;
-  action?: string[];
-  token: string;
-  token2: string;
-  expDate: Date;
-  nomeApi: string;
   tenantId: number;
 }
 
-const UpdateApiConfirmacaoService = async ({
+const UpdateApiStatusService = async ({
   id,
   status,
-  usuario,
-  senha,
-  action,
-  token,
-  token2,
-  expDate,
-  nomeApi,
   tenantId,
 }: Request): Promise<ApiConfirmacao> => {
   const apiData = {
     status,
-    usuario,
-    senha,
-    action,
-    nomeApi,
-    expDate,
-    token,
-    token2,
+    token: null,
   };
 
   const api = await ApiConfirmacao.findOne({
@@ -45,10 +25,10 @@ const UpdateApiConfirmacaoService = async ({
   if (!api) {
     throw new AppError("ERR_NO_API_FOUND", 404);
   }
-
+  console.log(apiData);
   await api.update(apiData);
   await api.reload();
   return api;
 };
 
-export default UpdateApiConfirmacaoService;
+export default UpdateApiStatusService;
