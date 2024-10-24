@@ -4,19 +4,28 @@ import GetApiConfirmacaoService from "../services/ApiConfirmacaoServices/GetApiC
 import CreateApiConfirmacaoService from "../services/ApiConfirmacaoServices/CreateApiConfirmacaoService";
 import UpdateApiConfirmacaoService from "../services/ApiConfirmacaoServices/updateApiConfirmacaoService";
 import ListApiConfigService from "../services/ApiConfigServices/ListApiConfigService";
+import DeleteApiService from "../services/ApiConfirmacaoServices/DeleteApiService";
 
 interface ApiData {
   usuario: string;
   senha: string;
   tenantId: number;
+  status: string;
+  nomeApi: string;
   action: string[];
 }
 
 interface updateData {
   id: number;
+  status?: string;
   usuario?: string;
   senha?: string;
   action?: string[];
+  token: string;
+  token2: string;
+  expDate: Date;
+  nomeApi: string;
+  tenantId: number;
 }
 export const index = async (req: Request, res: Response): Promise<Response> => {
   const { tenantId } = req.user;
@@ -40,25 +49,33 @@ export const update = async (
   req: Request,
   res: Response
 ): Promise<Response> => {
-  const { tenantId } = req.user;
-  const { id: idApi } = req.params;
-
   if (req.user.profile !== "admin") {
     throw new AppError("ERR_NO_PERMISSION", 403);
   }
+  const { tenantId } = req.user;
+  const { id: idApi } = req.params;
+
   const id = Number(idApi);
   const updateApi: updateData = { ...req.body, id };
 
-  // await UpdateApiConfirmacaoService(updateApi)
+  const api = await UpdateApiConfirmacaoService(updateApi);
 
-  return res.send("ola");
+  return res.status(200).json(api);
 };
+
 export const remove = async (
   req: Request,
   res: Response
 ): Promise<Response> => {
-  return res;
+  const { tenantId } = req.user;
+  if (req.user.profile !== "admin") {
+    throw new AppError("ERR_NO_PERMISSION", 403);
+  }
+  const { id } = req.params;
+  await DeleteApiService({ id, tenantId });
+  return res.status(200).json({ message: "Api deleted" });
 };
+
 export const list = async (req: Request, res: Response): Promise<Response> => {
   const { tenantId } = req.user;
   const apiConfirmacao = await ListApiConfigService({ tenantId });

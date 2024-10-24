@@ -1,40 +1,54 @@
-import {  Sequelize } from "sequelize";
+import { Sequelize } from "sequelize";
 import ApiConfirmacao from "../../models/ApiConfirmacao";
-
+import AppError from "../../errors/AppError";
 
 interface Request {
-    id: Number,
-    urlService?: string;
-    usuarioApi?: string;
-    senhaApi?: string;
-    action?: string[];
+  id: number;
+  status?: string;
+  usuario?: string;
+  senha?: string;
+  action?: string[];
+  token: string;
+  token2: string;
+  expDate: Date;
+  nomeApi: string;
+  tenantId: number;
+}
+
+const UpdateApiConfirmacaoService = async ({
+  id,
+  status,
+  usuario,
+  senha,
+  action,
+  token,
+  token2,
+  expDate,
+  nomeApi,
+  tenantId,
+}: Request): Promise<ApiConfirmacao> => {
+  const apiData = {
+    status,
+    usuario,
+    senha,
+    action,
+    nomeApi,
+    expDate,
+    token,
+    token2,
+  };
+
+  const api = await ApiConfirmacao.findOne({
+    where: { id: id, tenantId },
+  });
+
+  if (!api) {
+    throw new AppError("ERR_NO_AUTO_REPLY_FOUND", 404);
   }
 
-  const UpdateApiConfirmacaoService = async ({
-    id,
-    urlService,
-    usuarioApi,
-    senhaApi,
-    action,
-  }: Request): Promise<void> => {
+  await api.update(apiData);
+  await api.reload();
+  return api;
+};
 
-    const apiData = {
-        link: urlService,
-        usuario: usuarioApi,
-        senha: senhaApi,
-        action
-    }
-
-//    await ApiConfirmacao.update({
-//     action: Sequelize.literal(
-//         `action || '${apiData.action}'`
-//       ),
-//       link: apiData.link,
-//    },{
-//        where:id
-//     })
-   }
-
-
-
-export default UpdateApiConfirmacaoService
+export default UpdateApiConfirmacaoService;

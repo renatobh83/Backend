@@ -6,6 +6,8 @@ interface Request {
   senha: string;
   tenantId: number;
   action: string[];
+  nomeApi: string;
+  status: string;
 }
 
 const CreateApiConfirmacaoService = async ({
@@ -13,12 +15,16 @@ const CreateApiConfirmacaoService = async ({
   senha,
   usuario,
   tenantId,
+  nomeApi,
+  status,
 }: Request): Promise<ApiConfirmacao> => {
   const apiData = {
     usuario,
     tenantId,
     senha,
     action,
+    nomeApi,
+    status,
   };
 
   const apiConfirmacao = await ApiConfirmacao.create(apiData);
