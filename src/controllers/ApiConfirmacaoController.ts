@@ -1,4 +1,4 @@
-import { Request, Response } from "express";
+import type { Request, Response } from "express";
 import AppError from "../errors/AppError";
 import GetApiConfirmacaoService from "../services/ApiConfirmacaoServices/GetApiConfirmacaoService";
 import CreateApiConfirmacaoService from "../services/ApiConfirmacaoServices/CreateApiConfirmacaoService";
@@ -15,6 +15,7 @@ interface ApiData {
   status: string;
   nomeApi: string;
   action: string[];
+  baseURl: string;
 }
 
 interface updateData {
@@ -28,6 +29,7 @@ interface updateData {
   expDate: Date;
   nomeApi: string;
   tenantId: number;
+  baseURl: string;
 }
 export const index = async (req: Request, res: Response): Promise<Response> => {
   const { tenantId } = req.user;
@@ -54,7 +56,7 @@ export const update = async (
   if (req.user.profile !== "admin") {
     throw new AppError("ERR_NO_PERMISSION", 403);
   }
-  const { tenantId } = req.user;
+
   const { id: idApi } = req.params;
 
   const id = Number(idApi);
@@ -97,6 +99,7 @@ export const connect = async (
     if (error instanceof AppError) {
       return res.status(error.statusCode).json({ message: error.message });
     }
+
     return res.status(500).json({ message: "Internal Server Error" });
   }
 };

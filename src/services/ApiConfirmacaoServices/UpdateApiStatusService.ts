@@ -25,7 +25,6 @@ const UpdateApiStatusService = async ({
   if (!api) {
     throw new AppError("ERR_NO_API_FOUND", 404);
   }
-  console.log(apiData);
   await api.update(apiData);
   await api.reload();
   return api;

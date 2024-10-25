@@ -54,6 +54,10 @@ class ApiConfirmacao extends Model<ApiConfirmacao> {
   @Column
   nomeApi: string;
 
+  @AllowNull
+  @Column
+  baseURl: string;
+
   @Column(DataType.DATE(6))
   expDate: Date;
 

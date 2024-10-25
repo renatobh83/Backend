@@ -9,7 +9,14 @@ import { StartWhatsAppSession } from "../services/WbotServices/StartWhatsAppSess
 import { getWbot } from "../libs/wbot";
 
 import { API } from "../app/webhookApi";
-import { result } from "lodash";
+import { find, result } from "lodash";
+import ShowApiListService from "../services/ApiConfirmacaoServices/ShowApiListService";
+import {
+  consultaPaciente,
+  doGetLaudo,
+  doListaAtendimentos,
+} from "../helpers/SEMNOME";
+import { TemplateConsulta } from "../templates/consultaDados";
 
 export default interface Notificacao {
   paciente_nome: string;
@@ -186,6 +193,64 @@ export const TESTEAPIWEBHOOKS = async (
   req: Request,
   res: Response
 ): Promise<Response> => {
+  const { data } = req.body;
+  const idApi = data.webhook.apiId;
+  const acaoWebhook = data.webhook.acao.toLowerCase();
+
+  const api = await ShowApiListService({ id: idApi, tenantId: 1 });
+  const response = await doListaAtendimentos({ api, codigoPaciente: 72382 });
+  let message =
+    "Prezados, segue a relação de atendimentos recentes que têm laudo:\n\n";
+  response.forEach((item, index) => {
+    message += `${index + 1}. Data do Exame: ${item.dt_data}\n`;
+    message += `   Médico: ${item.ds_medico}\n`;
+    message += `   Descrição do Exame: ${item.ds_procedimento}\n\n`;
+  });
+  console.log(message);
+  // const actionIsInclude = api.action.includes(acaoWebhook);
+
+  // if (!actionIsInclude) {
+  //   throw new Error("Actions is not defined to api");
+  // }
+
+  // if (acaoWebhook === "consulta") {
+  //   try {
+  //     const data = await consultaPaciente({
+  //       api,
+  //       params: { NomePaciente: "Renato Mendonca" },
+  //     });
+
+  //     if (data.length > 1) {
+  //       const findRegistro = data.find((i) => i.CPF === "22895523053");
+  //       if (findRegistro) {
+  //         // REGISTRO LOCALIZADO
+  //         return res.status(200).json(findRegistro);
+  //       }
+  //       // REGISTRO NAO LOCALIZADO
+  //       console.log(findRegistro);
+  //     }
+  //     // REGISTRO LOCALIZADO
+  //     return res.status(200).json(data);
+  //   } catch (error) {
+  //     // Responder com o status de erro e a mensagem apropriada
+  //     if (error instanceof AppError) {
+  //       return res.status(error.statusCode).json({ message: error.message });
+  //     }
+
+  //     return res.status(500).json({ message: error });
+  //   }
+  // }
+  //    const token = "aa5234f21048750108464e50cf9ddf5ab86972861a6d62c7d540525e989c097d"
+  // const urlTeste = "http://otrsweb.zapto.org/clinuxintegra/consultapacientes"
+  // const nome = ticket.contact.name
+  // const {data } = await axios.post(urlTeste, {
+  //   NomePaciente: nome
+  // }, {
+  //   headers: {
+  //     'Authorization': token,
+  //     'Content-Type': 'application/json'
+  //   }
+  // })
   // const dataRequest = {
   //   js_paciente: btoa(JSON.stringify(req.body)),
   // };
@@ -208,5 +273,5 @@ export const TESTEAPIWEBHOOKS = async (
   // } catch (error) {
   //   return res.status(500).send(error.response);
   // }
-  return res.status(200).send();
+  return res.status(200).json("data");
 };

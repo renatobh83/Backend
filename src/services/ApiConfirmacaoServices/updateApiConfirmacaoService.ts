@@ -13,6 +13,7 @@ interface Request {
   expDate: Date;
   nomeApi: string;
   tenantId: number;
+  baseURl: string;
 }
 
 const UpdateApiConfirmacaoService = async ({
@@ -26,6 +27,7 @@ const UpdateApiConfirmacaoService = async ({
   expDate,
   nomeApi,
   tenantId,
+  baseURl,
 }: Request): Promise<ApiConfirmacao> => {
   const apiData = {
     status,
@@ -36,6 +38,7 @@ const UpdateApiConfirmacaoService = async ({
     expDate,
     token,
     token2,
+    baseURl,
   };
 
   const api = await ApiConfirmacao.findOne({

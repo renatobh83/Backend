@@ -4,6 +4,7 @@ import isAPIAuth from "../middleware/isAPIAuth";
 import uploadConfig from "../config/upload";
 
 import * as APIExternalController from "../controllers/APIExternalController";
+import isAuth from "../middleware/isAuth";
 
 const apiExternalRoute = express.Router();
 
@@ -39,5 +40,5 @@ apiExternalRoute.post(
   APIExternalController.sendMessageConfirmacao
 );
 
-apiExternalRoute.get("/teste", APIExternalController.TESTEAPIWEBHOOKS);
+apiExternalRoute.get("/teste", isAuth, APIExternalController.TESTEAPIWEBHOOKS);
 export default apiExternalRoute;

@@ -1,11 +1,12 @@
-import Contato from "../../controllers/APIExternalController";
+import type Contato from "../../controllers/APIExternalController";
 
 interface Request {
   msg: Contato;
-  hora: string
+  hora: string;
 }
-export default function CreateTemplateMessageService  ({ msg, hora }: Request): { body: string }  {
-
+export default function CreateTemplateMessageService({ msg, hora }: Request): {
+  body: string;
+} {
   const nome = msg.paciente_nome;
   const atendimentoData = msg.atendimento_data;
   const atendimentoHora = hora;
@@ -31,14 +32,12 @@ Podemos confirmar sua presença?
   };
 
   return template;
-};
-export  function CreateTemplateMessageConsulta ({ msg }: any): { body: string } {
-
+}
+export function CreateTemplateMessageConsulta({ msg }: any): { body: string } {
   const nome = msg.ds_paciente;
   const atendimentoData = msg.dt_data;
-  const horaAgendamento  = msg.dt_hora
-  const chegada = msg.dt_hora_chegada
-
+  const horaAgendamento = msg.dt_hora;
+  const chegada = msg.dt_hora_chegada;
 
   const template = {
     body: `
@@ -60,5 +59,4 @@ Podemos confirmar sua presença?
   };
 
   return template;
-};
-
+}

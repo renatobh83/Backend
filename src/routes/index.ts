@@ -21,7 +21,7 @@ import chatFlowRoutes from "./chatFlowRoutes";
 import tenantRoutes from "./tenantRoutes";
 import WebHooksRoutes from "./WebHooksRoutes";
 import adminRoutes from "./adminRoutes";
-import apiConfirmacaoRoutes from "./apiConfirmacaoRoutes"
+import apiConfirmacaoRoutes from "./apiConfirmacaoRoutes";
 
 const routes = Router();
 
@@ -46,6 +46,6 @@ routes.use(chatFlowRoutes);
 routes.use(tenantRoutes);
 routes.use(WebHooksRoutes);
 routes.use(adminRoutes);
-routes.use(apiConfirmacaoRoutes)
+routes.use(apiConfirmacaoRoutes);
 
 export default routes;

@@ -5,9 +5,11 @@ import Ticket from "../../models/Ticket";
 import Message from "../../models/Message";
 import socketEmit from "../../helpers/socketEmit";
 import SendMessageSystemProxy from "../../helpers/SendMessageSystemProxy";
-import axios from "axios";
-import ProcessBodyData from "../../helpers/ProcessBodyData";
-import { CreateTemplateMessageConsulta } from "../MessageServices/CreateTemplateMessageService";
+import ShowApiListService from "../ApiConfirmacaoServices/ShowApiListService";
+import { ConsultaPaciente } from "../ApiConfirmacaoServices/Helpers/ConsultaPacientes";
+import { TemplateConsulta } from "../../templates/consultaDados";
+import { doGetLaudo } from "../../helpers/SEMNOME";
+import { ConsultarLaudos } from "../ApiConfirmacaoServices/Helpers/ConsultarLaudos";
 
 interface MessageData {
   id?: string;
@@ -29,6 +31,10 @@ interface MessageData {
   status?: string;
 }
 
+interface WebhookProps {
+  apiId: string;
+  acao: string;
+}
 interface MessageRequest {
   data: {
     message?: string;
@@ -38,7 +44,7 @@ interface MessageRequest {
     mediaUrl?: string;
     name?: string;
     type?: string;
-    webhook?: string;
+    webhook?: WebhookProps;
   };
   id: string;
   type: "MessageField" | "MessageOptionsField" | "MediaField" | "WebhookField";
@@ -50,6 +56,11 @@ interface Request {
   ticket: Ticket;
   userId?: number | string;
 }
+
+const formatarNumero = (numero) => {
+  // Remove o código do país (55) e retorna apenas o DDD + número local
+  return numero.replace(/^55/, "");
+};
 
 // const writeFileAsync = promisify(writeFile);
 
@@ -75,7 +86,6 @@ const BuildSendMessageService = async ({
     status: "pending",
     tenantId,
   };
-
   try {
     if (msg.type === "MediaField" && msg.data.mediaUrl) {
       const urlSplit = msg.data.mediaUrl.split("/");
@@ -143,6 +153,76 @@ const BuildSendMessageService = async ({
         payload: messageCreated,
       });
     } else if (msg.type === "WebhookField") {
+      let mensagem: string;
+      let codPaciente: string;
+      const idApi = msg.data.webhook.apiId;
+      const acaoWebhook = msg.data.webhook.acao.toLowerCase();
+
+      const api = await ShowApiListService({ id: idApi, tenantId });
+
+      const actionIsInclude = api.action.includes(acaoWebhook);
+
+      if (!actionIsInclude) {
+        throw new Error("Actions is not defined to api");
+      }
+      const nome = ticket.contact.name;
+      const numero = formatarNumero(ticket.contact.number);
+
+      if (acaoWebhook === "consulta") {
+        const dataResponseConsulta = await ConsultaPaciente({
+          api,
+          params: { NomePaciente: nome },
+        });
+        if (dataResponseConsulta.length > 1) {
+          mensagem = TemplateConsulta({ nome }).variosRegistro;
+        } else {
+          const dados = dataResponseConsulta.find(
+            (i) => i.Celular || i.Whatsapp === numero
+          );
+          if (dados) {
+            // enviar mensagem que foi localizado o registro
+            codPaciente = dados.CodigoPaciente;
+            mensagem = TemplateConsulta({ nome }).registroEncontrado;
+            const messageSent = await SendMessageSystemProxy({
+              ticket,
+              messageData: {
+                ...messageData,
+                body: mensagem,
+              },
+              media: null,
+              userId: null,
+            });
+            return;
+          }
+          // nao conseguimos localizar
+          mensagem = TemplateConsulta({ nome }).nenhumRegistroLocalizado;
+          const messageSent = await SendMessageSystemProxy({
+            ticket,
+            messageData: {
+              ...messageData,
+              body: mensagem,
+            },
+            media: null,
+            userId: null,
+          });
+          return;
+        }
+      }
+      if (acaoWebhook === "laudo") {
+        // const data = await ConsultarLaudos({
+        //   api,
+        //   cdExame: 162824,
+        //   cdPaciente: 72382,
+        //   cdFuncionario: 1,
+        //   entrega: false,
+        // });
+      }
+
+      // {
+      //   type: 'WebhookField',
+      //   id: '33947090-4669-41c3-8b3d-1a84e9fc24e6',
+      //   data: { webhook: { apiId: '19', acao: 'consulta' } }
+      // }162824,72382, 1, false
       // Choice Webhoook
       //   const token = "aa5234f21048750108464e50cf9ddf5ab86972861a6d62c7d540525e989c097d"
       //   const urlTeste = "http://otrsweb.zapto.org/clinuxintegra/consultapacientes"
