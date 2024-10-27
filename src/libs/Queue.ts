@@ -12,7 +12,11 @@ const queues = Object.values(jobs).map((job: any) => ({
       host: process.env.IO_REDIS_SERVER,
       port: +(process.env.IO_REDIS_PORT || "6379"),
       password: process.env.IO_REDIS_PASSWORD || undefined,
-      db: 3
+      db: 3,
+      retryStrategy: function(times) {
+      // Tenta reconectar após 2 segundos, aumentando gradualmente até 20 segundos
+      return Math.min(times * 2000, 20000);
+    }
     }
   }),
   name: job.key,
