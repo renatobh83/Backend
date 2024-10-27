@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Painel de Monitoramento</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; }
+    h1 { color: #333; }
+    table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+    table, th, td { border: 1px solid #ddd; }
+    th, td { padding: 10px; text-align: left; }
+    th { background-color: #f4f4f4; }
+  </style>
+</head>
+<body>
+  <h1>Painel de Monitoramento de Sessões</h1>
+  <div id="system-resources">
+    <p>Uso de CPU: <span id="cpu-usage">-</span></p>
+    <p>Uso de Memória: <span id="memory-usage">-</span></p>
+  </div>
+  <h2>Sessões Ativas</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Número</th>
+        <th>Status</th>
+        <th>Última Atividade</th>
+      </tr>
+    </thead>
+    <tbody id="session-table">
+      <!-- Sessões serão inseridas aqui -->
+    </tbody>
+  </table>
+
+  <script>
+    async function fetchSessionData() {
+      try {
+        const response = await fetch("/api/sessions");
+        const data = await response.json();
+
+        // Atualiza recursos do sistema
+        document.getElementById("cpu-usage").textContent = data.systemResources.cpuUsage;
+        document.getElementById("memory-usage").textContent = data.systemResources.memoryUsage;
+
+        // Atualiza tabela de sessões
+        const sessionTable = document.getElementById("session-table");
+        sessionTable.innerHTML = ""; // Limpa a tabela
+
+        data.sessions.forEach((session) => {
+          const row = document.createElement("tr");
+
+          row.innerHTML = `
+            <td>${session.id}</td>
+            <td>${session.phoneNumber}</td>
+            <td>${session.status}</td>
+            <td>${new Date(session.lastActivity).toLocaleString()}</td>
+          `;
+
+          sessionTable.appendChild(row);
+        });
+      } catch (error) {
+        console.error("Erro ao buscar dados de sessão:", error);
+      }
+    }
+
+    // Atualiza o painel a cada 5 segundos
+    setInterval(fetchSessionData, 5000);
+    fetchSessionData(); // Inicializa o painel na primeira vez
+  </script>
+</body>
+</html>
