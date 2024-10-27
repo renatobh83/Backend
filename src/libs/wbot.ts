@@ -66,11 +66,25 @@ export const apagarPastaSessao = async (id: number | string): Promise<void> => {
   }
 };
 
-export const removeWbot = (whatsappId: number): void => {
+// export const removeWbot = (whatsappId: number): void => {
+//   try {
+//     const sessionIndex = sessions.findIndex((s) => s.id === whatsappId);
+//     if (sessionIndex !== -1) {
+//       sessions[sessionIndex].destroy();
+//       sessions.splice(sessionIndex, 1);
+//     }
+//   } catch (err) {
+//     logger.error(`removeWbot | Error: ${err}`);
+//   }
+// };
+const removeWbot = (whatsappId: number): void => {
   try {
     const sessionIndex = sessions.findIndex((s) => s.id === whatsappId);
     if (sessionIndex !== -1) {
       sessions[sessionIndex].destroy();
+      if (sessions[sessionIndex].pupBrowser) {
+        sessions[sessionIndex].pupBrowser.close(); // Fecha o navegador Puppeteer
+      }
       sessions.splice(sessionIndex, 1);
     }
   } catch (err) {
