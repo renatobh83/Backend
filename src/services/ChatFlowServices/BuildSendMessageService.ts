@@ -313,6 +313,7 @@ const BuildSendMessageService = async ({
       }
       if (acaoWebhook === "consultacpf") {
         console.log(ticket.lastMessage);
+
         // const dataResponseConsulta = await ConsultaPaciente({
         //   api,
         //   params: {

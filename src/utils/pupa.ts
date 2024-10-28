@@ -21,7 +21,10 @@ const _htmlUnescape = (htmlString: string): string =>
     .replace(/&quot;/g, '"')
     .replace(/&amp;/g, "&"); // Deve ocorrer por último para evitar unescape incorreto
 
-export function htmlEscape(strings: TemplateStringsArray | string, ...values: any[]): string {
+export function htmlEscape(
+  strings: TemplateStringsArray | string,
+  ...values: any[]
+): string {
   if (typeof strings === "string") {
     return _htmlEscape(strings);
   }
@@ -34,7 +37,10 @@ export function htmlEscape(strings: TemplateStringsArray | string, ...values: an
   return output;
 }
 
-export function htmlUnescape(strings: TemplateStringsArray | string, ...values: any[]): string {
+export function htmlUnescape(
+  strings: TemplateStringsArray | string,
+  ...values: any[]
+): string {
   if (typeof strings === "string") {
     return _htmlUnescape(strings);
   }
@@ -64,7 +70,7 @@ export const pupa = function pupa(
   data: Record<string, any>,
   options: {
     ignoreMissing?: boolean;
-    transform?: ({ value, key }: { value: any, key: string }) => any
+    transform?: ({ value, key }: { value: any; key: string }) => any;
   } = {}
 ): string {
   const { ignoreMissing = true, transform = ({ value }) => value } = options;
@@ -105,8 +111,8 @@ export const pupa = function pupa(
 
   const composeHtmlEscape =
     (replacer: (...args: any[]) => string) =>
-      (...args: any[]) =>
-        htmlEscape(replacer(...args));
+    (...args: any[]) =>
+      htmlEscape(replacer(...args));
 
   // Regex para identificar {{ }} e {}
   const doubleBraceRegex = /{{(\d+|[a-z$_][\w\-$]*?(?:\.[\w\-$]*?)*?)}}/gi;
