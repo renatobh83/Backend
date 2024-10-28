@@ -3,12 +3,9 @@
 import { Job } from "bull";
 import axios from "axios";
 
-/* eslint-disable no-use-before-define */
-/* eslint-disable no-shadow */
-
 export enum ExecutionType {
   DELAY = "delay",
-  REPEAT = "repeat"
+  REPEAT = "repeat",
 }
 
 export type ExecutionOption = {
@@ -34,13 +31,24 @@ export type RabbitMQJob = {
   queue: string;
 };
 
+// biome-ignore lint/complexity/noStaticOnlyClass: <explanation>
 export default class QueueListener {
+  static logLevel: "DEBUG" | "INFO" | "ERROR" = "INFO"; // Configuração do nível de log
+
   static onError(err: Error): void {
     console.error(err);
   }
-
+  static log(message: string, level: "DEBUG" | "INFO" | "ERROR" = "INFO") {
+    if (
+      QueueListener.logLevel === level ||
+      QueueListener.logLevel === "DEBUG"
+    ) {
+      console.log(`[${level}] ${message}`);
+    }
+  }
   static onWaiting(jobId: string): void {
-    // console.log(`Job with ID ${jobId} is waiting`);
+    QueueListener.log(`Job with ID ${jobId} is waiting`, "DEBUG");
+    console.log(`Job with ID ${jobId} is waiting`);
   }
 
   static onActive(
@@ -48,7 +56,7 @@ export default class QueueListener {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     jobPromise: Promise<Job<JobConfig>>
   ): void {
-    // console.log(`Job with ID ${job.id} active`);
+    console.log(`Job with ID ${job.id} active`);
   }
 
   static onStalled(job: Job<JobConfig>): void {
@@ -56,9 +64,12 @@ export default class QueueListener {
     // TODO: log stalled request. These requests are most probably double processed.
   }
 
+  // biome-ignore lint/suspicious/noExplicitAny: <explanation>
   static onCompleted(job: Job<JobConfig>, result: any): void {
-    // console.log(`Job with ID ${job.id} completed`);
-    // console.log({ result });
+    QueueListener.log(`Job with ID ${job.id} completed`, "INFO");
+    QueueListener.log(`Result: ${JSON.stringify(result)}`, "DEBUG");
+    console.log(`Job with ID ${job.id} completed`);
+    console.log({ result });
   }
 
   // eslint-disable-next-line consistent-return
@@ -67,47 +78,55 @@ export default class QueueListener {
       `Job with ID ${job.id} failed. Attempts made ${job.attemptsMade}. Max attempts ${job.opts.attempts}`,
       err
     );
-    if (job.opts.attempts && job.attemptsMade === job.opts.attempts) {
-      // if max attempts reached, execute fallback logic.
-      const jobConfig = job.data;
-      if (jobConfig.retryOptions?.fallbackUrl) {
-        const apiBody = {
-          ...jobConfig,
-          id: job.id,
-          error: err
-        };
-        // console.log("Sending fallback hook");
-        return axios.post(jobConfig.retryOptions.fallbackUrl, apiBody);
-      }
-      // if no fallback, mail admin that the job has failed repeatedly
-      const {
-        id: jobId,
-        data: jobData,
-        name: jobName,
-        opts: jobOpts,
-        timestamp
-      } = job;
-      const subject = `Job - ${jobId} failed ${job.attemptsMade} times`;
-      const mailBody = `
-                    <h1> Job Failed Repeatedly </h1>
-                    <div>
-                        <p> Job ID : ${jobId} </p>
-                        <p> Job Name: ${jobName} </p>
-                        <p> Timestamp: ${timestamp} </p
-                        <div> <p> JobData : </p>
-                        <code> ${JSON.stringify(jobData)} </code> </div>
-                        <div> <p> JobOptions : </p>
-                        <code> ${JSON.stringify(jobOpts)} </code> </div>
-                    </div>
-               `;
-      // return Mailer.sendMail(mailBody, subject);
-      console.error("On Failed", subject, mailBody);
-    }
+    // if (job.opts.attempts && job.attemptsMade === job.opts.attempts) {
+    //   // if max attempts reached, execute fallback logic.
+    //   const jobConfig = job.data;
+    //   if (jobConfig.retryOptions?.fallbackUrl) {
+    //     const apiBody = {
+    //       ...jobConfig,
+    //       id: job.id,
+    //       error: err
+    //     };
+    //     // console.log("Sending fallback hook");
+    //     return axios.post(jobConfig.retryOptions.fallbackUrl, apiBody);
+    //   }
+    //   // if no fallback, mail admin that the job has failed repeatedly
+    //   const {
+    //     id: jobId,
+    //     data: jobData,
+    //     name: jobName,
+    //     opts: jobOpts,
+    //     timestamp
+    //   } = job;
+    //   const subject = `Job - ${jobId} failed ${job.attemptsMade} times`;
+    //   const mailBody = `
+    //                 <h1> Job Failed Repeatedly </h1>
+    //                 <div>
+    //                     <p> Job ID : ${jobId} </p>
+    //                     <p> Job Name: ${jobName} </p>
+    //                     <p> Timestamp: ${timestamp} </p
+    //                     <div> <p> JobData : </p>
+    //                     <code> ${JSON.stringify(jobData)} </code> </div>
+    //                     <div> <p> JobOptions : </p>
+    //                     <code> ${JSON.stringify(jobOpts)} </code> </div>
+    //                 </div>
+    //            `;
+    //   // return Mailer.sendMail(mailBody, subject);
+    //   console.error("On Failed", subject, mailBody);
+    // }
   }
 
   static onClean(jobs: Job<JobConfig>[], type: string): void {
-    // console.log(`Jobs cleaned ${jobs.length} - ${type}`);
-    // console.log(JSON.stringify(jobs));
+    const filteredJobs = jobs.filter(
+      (job) =>
+        job.finishedOn && Date.now() - job.finishedOn > 24 * 60 * 60 * 1000
+    ); // Exemplo: jobs mais antigos que um dia
+    QueueListener.log(
+      `Cleaned ${filteredJobs.length} jobs of type ${type}`,
+      "INFO"
+    );
+    console.log(`Jobs cleaned ${jobs.length} - ${type}`);
+    console.log(JSON.stringify(jobs));
   }
 
   static onRemoved(job: Job<JobConfig>): void {

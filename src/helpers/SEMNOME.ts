@@ -2,54 +2,55 @@ const fs = require("fs");
 const path = require("path");
 import { createApiInstance, createApiInstanceJTW } from "../utils/ApiWebhook";
 
-export async function confirmarAtendimentos(
-  atendimentos,
-  instanceApi: ApiConfirma
-) {
-  try {
-    // Mapeia cada atendimento para uma promessa
-    const promessas = atendimentos.map(async (atendimento) => {
-      const response = await instanceApi.confirmaExame(atendimento);
-      return response;
-    });
+// export async function confirmarAtendimentos(
+//   atendimentos,
+//   instanceApi: ApiConfirma
+// ) {
+//   try {
+//     // Mapeia cada atendimento para uma promessa
+//     const promessas = atendimentos.map(async (atendimento) => {
+//       const response = await instanceApi.confirmaExame(atendimento);
+//       return response;
+//     });
 
-    // Aguarda todas as promessas serem resolvidas
-    const responses = await Promise.allSettled(promessas);
+//     // Aguarda todas as promessas serem resolvidas
+//     const responses = await Promise.allSettled(promessas);
 
-    // Verifica se todos os status são 200
-    const todosSucesso = responses.every(
-      (response) => response.status === "fulfilled"
-    );
+//     // Verifica se todos os status são 200
+//     const todosSucesso = responses.every(
+//       (response) => response.status === "fulfilled"
+//     );
 
-    if (todosSucesso) {
-      // A FAZER
-      // - ENVIAR MENSAGEM DE EXAME CONFIRMADO
-      console.log("Todos os atendimentos foram confirmados com sucesso.");
-      //await getPreparos(data.procedimentos)
-      return true;
-      // biome-ignore lint/style/noUselessElse: <explanation>
-    } else {
-      console.log("Nem todos os atendimentos foram confirmados com sucesso.");
-      return false;
-    }
-  } catch (error) {
-    console.error(
-      "Ocorreu um erro durante a confirmação dos atendimentos:",
-      error
-    );
-  }
-}
+//     if (todosSucesso) {
+//       // A FAZER
+//       // - ENVIAR MENSAGEM DE EXAME CONFIRMADO
+//       console.log("Todos os atendimentos foram confirmados com sucesso.");
+//       //await getPreparos(data.procedimentos)
+//       return true;
+//       // biome-ignore lint/style/noUselessElse: <explanation>
+//     } else {
+//       console.log("Nem todos os atendimentos foram confirmados com sucesso.");
+//       return false;
+//     }
+//   } catch (error) {
+//     console.error(
+//       "Ocorreu um erro durante a confirmação dos atendimentos:",
+//       error
+//     );
+//   }
+// }
 
-export async function getPreparos(
-  procedimentos: number[],
-  instanceApi: ApiConfirma
-) {
-  const promessas = procedimentos.map(async (procedimento) => {
-    const response = await instanceApi.doGetPreparo(procedimento);
-    return response;
-  });
-  const responses = await Promise.all(promessas);
-}
+// export async function getPreparos(
+//   procedimentos: number[],
+//   instanceApi: ApiConfirma
+// ) {
+
+//   const promessas = procedimentos.map(async (procedimento) => {
+//     const response = await instanceApi.doGetPreparo(procedimento);
+//     return response;
+//   });
+//   const responses = await Promise.all(promessas);
+// }
 interface InstanceAxios {
   baseURl: string;
   token2: string;
@@ -130,7 +131,7 @@ export async function doGetLaudo({
     const writer = fs.createWriteStream(filePath);
     response.data.pipe(writer);
 
-    return "PDF salvo com sucesso.";
+    return true;
   } catch (error) {
     console.error("Error :", error);
     throw error;
@@ -159,7 +160,7 @@ export async function doListaAtendimentos({
         .sort((a, b) => {
           const dateA = new Date(a.dt_data.split("/").reverse().join("-"));
           const dateB = new Date(b.dt_data.split("/").reverse().join("-"));
-          return dateB - dateA;
+          return dateB.getTime() - dateA.getTime();
         })
         .slice(0, 5); // Seleciona os 5 registros mais recentes
     }

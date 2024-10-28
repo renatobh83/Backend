@@ -147,27 +147,13 @@ const StartCampaignService = async ({
   }
 
   const timeDelay = campaign.delay ? campaign.delay * 1000 : 20000;
-  // const today = zonedTimeToUtc(new Date(), "America/Sao_Paulo");
-  // let dateDelay = setHours(
-  //   setMinutes(
-  //     zonedTimeToUtc(campaign.start, "America/Sao_Paulo"),
-  //     today.getMinutes() + 1
-  //   ),
-  //   today.getHours()
-  // );
-  // let dateDelay = toZonedTime(campaign.start, "America/Sao_Paulo");
-  let dateDelay = formatInTimeZone(
-    new Date(campaign.start),
-    "America/Sao_Paulo",
-    "yyyy-MM-dd'T'HH:mm:ss"
-  );
-  // console.log(displayDate);
+  let dateDelay = toZonedTime(campaign.start, "America/Sao_Paulo");
   const data = campaignContacts.map((campaignContact: CampaignContacts) => {
     dateDelay = addSeconds(dateDelay, timeDelay / 1000);
     return mountMessageData(campaign, campaignContact, {
       ...options,
       jobId: `campaginId_${campaign.id}_contact_${campaignContact.contactId}_id_${campaignContact.id}`,
-      delay: calcDelay(dateDelay, timeDelay),
+      delay: calcDelay(new Date(dateDelay), timeDelay),
     });
   });
   Queue.add("SendMessageWhatsappCampaign", data);

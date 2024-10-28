@@ -1,4 +1,4 @@
-import { join } from "path";
+import path, { join } from "path";
 import { pupa } from "../../utils/pupa";
 import { logger } from "../../utils/logger";
 import Ticket from "../../models/Ticket";
@@ -8,9 +8,11 @@ import SendMessageSystemProxy from "../../helpers/SendMessageSystemProxy";
 import ShowApiListService from "../ApiConfirmacaoServices/ShowApiListService";
 import { ConsultaPaciente } from "../ApiConfirmacaoServices/Helpers/ConsultaPacientes";
 import { TemplateConsulta } from "../../templates/consultaDados";
-import { doGetLaudo } from "../../helpers/SEMNOME";
+import { doGetLaudo, doListaAtendimentos } from "../../helpers/SEMNOME";
 import { ConsultarLaudos } from "../ApiConfirmacaoServices/Helpers/ConsultarLaudos";
-
+import { TemplateListaAtendimentos } from "../../templates/ListaAtendimentos";
+import { existsSync } from "fs";
+import { promisify } from "util";
 interface MessageData {
   id?: string;
   ticketId: number;
@@ -58,12 +60,38 @@ interface Request {
 }
 
 const formatarNumero = (numero) => {
-  // Remove o código do país (55) e retorna apenas o DDD + número local
-  return numero.replace(/^55/, "");
+  let numeroFormatado = numero.replace(/^55/, "");
+
+  // Adiciona o dígito '9' após o DDD se ele estiver ausente
+  if (numeroFormatado.length === 10) {
+    numeroFormatado = `${numeroFormatado.slice(0, 2)}9${numeroFormatado.slice(
+      2
+    )}`;
+  }
+
+  return numeroFormatado;
 };
-
+interface ResponseListaAtendimento {
+  ds_medico: string;
+  dt_data: string;
+  ds_procedimento: string;
+  cd_exame: string;
+}
 // const writeFileAsync = promisify(writeFile);
+let codPaciente: number;
+let listaAtendimentos: ResponseListaAtendimento[];
 
+const delay = promisify(setTimeout);
+
+async function verificarArquivo(mediaPath, intervalo = 500, tentativas = 20) {
+  for (let i = 0; i < tentativas; i++) {
+    if (existsSync(mediaPath)) {
+      return true;
+    }
+    await delay(intervalo);
+  }
+  return false;
+}
 const BuildSendMessageService = async ({
   msg,
   tenantId,
@@ -86,6 +114,7 @@ const BuildSendMessageService = async ({
     status: "pending",
     tenantId,
   };
+
   try {
     if (msg.type === "MediaField" && msg.data.mediaUrl) {
       const urlSplit = msg.data.mediaUrl.split("/");
@@ -154,7 +183,7 @@ const BuildSendMessageService = async ({
       });
     } else if (msg.type === "WebhookField") {
       let mensagem: string;
-      let codPaciente: string;
+
       const idApi = msg.data.webhook.apiId;
       const acaoWebhook = msg.data.webhook.acao.toLowerCase();
 
@@ -192,6 +221,38 @@ const BuildSendMessageService = async ({
               media: null,
               userId: null,
             });
+            const msgCreated = await Message.create({
+              ...messageData,
+              ...messageSent,
+              id: messageData.id,
+              messageId: messageSent.id?.id || messageSent.messageId || null,
+              mediaType: "bot",
+            });
+            const messageCreated = await Message.findByPk(msgCreated.id, {
+              include: [
+                {
+                  model: Ticket,
+                  as: "ticket",
+                  where: { tenantId },
+                  include: ["contact"],
+                },
+                {
+                  model: Message,
+                  as: "quotedMsg",
+                  include: ["contact"],
+                },
+              ],
+            });
+
+            if (!messageCreated) {
+              throw new Error("ERR_CREATING_MESSAGE_SYSTEM");
+            }
+
+            await ticket.update({
+              lastMessage: messageCreated.body,
+              lastMessageAt: new Date().getTime(),
+              answered: true,
+            });
             return;
           }
           // nao conseguimos localizar
@@ -205,19 +266,153 @@ const BuildSendMessageService = async ({
             media: null,
             userId: null,
           });
+          const msgCreated = await Message.create({
+            ...messageData,
+            ...messageSent,
+            id: messageData.id,
+            messageId: messageSent.id?.id || messageSent.messageId || null,
+            mediaType: "bot",
+          });
+          const messageCreated = await Message.findByPk(msgCreated.id, {
+            include: [
+              {
+                model: Ticket,
+                as: "ticket",
+                where: { tenantId },
+                include: ["contact"],
+              },
+              {
+                model: Message,
+                as: "quotedMsg",
+                include: ["contact"],
+              },
+            ],
+          });
+
+          if (!messageCreated) {
+            throw new Error("ERR_CREATING_MESSAGE_SYSTEM");
+          }
+
+          await ticket.update({
+            lastMessage: messageCreated.body,
+            lastMessageAt: new Date().getTime(),
+            answered: true,
+          });
           return;
         }
       }
       if (acaoWebhook === "laudo") {
-        // const data = await ConsultarLaudos({
-        //   api,
-        //   cdExame: 162824,
-        //   cdPaciente: 72382,
-        //   cdFuncionario: 1,
-        //   entrega: false,
-        // });
-      }
+        listaAtendimentos = await doListaAtendimentos({
+          api,
+          codigoPaciente: codPaciente,
+        });
+        mensagem = TemplateListaAtendimentos({
+          listaAtendimentos,
+        }).atendimentosRecentes;
+        const messageSent = await SendMessageSystemProxy({
+          ticket,
+          messageData: {
+            ...messageData,
+            body: mensagem,
+          },
+          media: null,
+          userId: null,
+        });
+        const msgCreated = await Message.create({
+          ...messageData,
+          ...messageSent,
+          id: messageData.id,
+          messageId: messageSent.id?.id || messageSent.messageId || null,
+          mediaType: "bot",
+        });
+        const messageCreated = await Message.findByPk(msgCreated.id, {
+          include: [
+            {
+              model: Ticket,
+              as: "ticket",
+              where: { tenantId },
+              include: ["contact"],
+            },
+            {
+              model: Message,
+              as: "quotedMsg",
+              include: ["contact"],
+            },
+          ],
+        });
 
+        if (!messageCreated) {
+          throw new Error("ERR_CREATING_MESSAGE_SYSTEM");
+        }
+
+        await ticket.update({
+          lastMessage: messageCreated.body,
+          lastMessageAt: new Date().getTime(),
+          answered: true,
+        });
+        return;
+      }
+      if (acaoWebhook === "pdf") {
+        const chosenIndex = +ticket.lastMessage;
+        const selectedLaudo = listaAtendimentos[chosenIndex - 1];
+        await ConsultarLaudos({
+          api,
+          cdExame: +selectedLaudo.cd_exame,
+          cdPaciente: codPaciente,
+          cdFuncionario: 1,
+          entrega: false,
+        });
+        const customPath = join(__dirname, "..", "..", "..", "public");
+        const mediaName = `${+selectedLaudo.cd_exame}.pdf`;
+        const mediaPath = join(customPath, mediaName);
+        const arquivoExiste = await verificarArquivo(mediaPath);
+        if (arquivoExiste) {
+          const messageSent = await SendMessageSystemProxy({
+            ticket,
+            messageData: {
+              ...messageData,
+              mediaName: mediaName,
+            },
+            media: {
+              path: mediaPath,
+            },
+            userId: null,
+          });
+          const msgCreated = await Message.create({
+            ...messageData,
+            ...messageSent,
+            id: messageData.id,
+            messageId: messageSent.id?.id || messageSent.messageId || null,
+            mediaType: "bot",
+          });
+          const messageCreated = await Message.findByPk(msgCreated.id, {
+            include: [
+              {
+                model: Ticket,
+                as: "ticket",
+                where: { tenantId },
+                include: ["contact"],
+              },
+              {
+                model: Message,
+                as: "quotedMsg",
+                include: ["contact"],
+              },
+            ],
+          });
+
+          if (!messageCreated) {
+            throw new Error("ERR_CREATING_MESSAGE_SYSTEM");
+          }
+
+          await ticket.update({
+            lastMessage: messageCreated.body,
+            lastMessageAt: new Date().getTime(),
+            answered: true,
+          });
+        }
+        return;
+      }
       // {
       //   type: 'WebhookField',
       //   id: '33947090-4669-41c3-8b3d-1a84e9fc24e6',

@@ -4,8 +4,6 @@ import Queue from "bull";
 import QueueListeners from "./QueueListeners";
 import * as jobs from "../jobs/Index";
 
-
-
 const queues = Object.values(jobs).map((job: any) => ({
   bull: new Queue(job.key, {
     redis: {
@@ -13,21 +11,23 @@ const queues = Object.values(jobs).map((job: any) => ({
       port: +(process.env.IO_REDIS_PORT || "6379"),
       password: process.env.IO_REDIS_PASSWORD || undefined,
       db: 3,
-      retryStrategy: function(times) {
-      // Tenta reconectar após 2 segundos, aumentando gradualmente até 20 segundos
-      return Math.min(times * 2000, 20000);
-    }
-    }
+      retryStrategy: (times) => {
+        const delay = Math.min(times * 2000, 20000);
+        console.log(
+          `Tentando reconectar ao Redis após ${delay}ms (tentativa ${times})`
+        );
+        return delay;
+      },
+    },
   }),
   name: job.key,
   handle: job.handle,
-  options: job.options
+  options: job.options,
 }));
 
 export default {
   queues,
   async add(name: string, data: any | any[]) {
-
     const queue = this.queues.find((q: any) => q.name === name);
     if (!queue) {
       throw new Error(`Queue ${name} not exists`);
@@ -38,17 +38,18 @@ export default {
           data: jobData,
           opts: {
             ...queue.options,
-            ...jobData?.options
-          }
+            ...jobData?.options,
+          },
         };
       });
       return queue.bull.addBulk(parsedJobs);
     }
     return queue.bull.add(data, { ...queue.options, ...data.options });
   },
-  process() {
-    return this.queues.forEach(queue => {
-      queue.bull.process(200, queue.handle);
+  process(concurrency = 10) {
+    // biome-ignore lint/complexity/noForEach: <explanation>
+    return this.queues.forEach((queue) => {
+      queue.bull.process(concurrency, queue.handle);
 
       queue.bull
         .on("active", QueueListeners.onActive)
@@ -58,7 +59,8 @@ export default {
         .on("stalled", QueueListeners.onStalled)
         .on("failed", QueueListeners.onFailed)
         .on("cleaned", QueueListeners.onClean)
-        .on("removed", QueueListeners.onRemoved);
+        .on("removed", QueueListeners.onRemoved)
+        .on("log", QueueListeners.log);
     });
-  }
+  },
 };

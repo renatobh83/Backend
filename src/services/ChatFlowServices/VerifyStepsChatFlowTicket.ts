@@ -19,7 +19,7 @@ const isNextSteps = async (
     await ticket.update({
       stepChatFlow: stepCondition.nextStepId,
       botRetries: 0,
-      lastInteractionBot: new Date()
+      lastInteractionBot: new Date(),
     });
 
     const nodesList = [...chatFlow.flow.nodeList];
@@ -35,7 +35,7 @@ const isNextSteps = async (
       await BuildSendMessageService({
         msg: interaction,
         tenantId: ticket.tenantId,
-        ticket
+        ticket,
       });
     }
     // await SetTicketMessagesAsRead(ticket);
@@ -55,13 +55,13 @@ const isQueueDefine = async (
       chatFlowId: null,
       stepChatFlow: null,
       botRetries: 0,
-      lastInteractionBot: new Date()
+      lastInteractionBot: new Date(),
     });
 
     await CreateLogTicketService({
       ticketId: ticket.id,
       type: "queue",
-      queueId: stepCondition.queueId
+      queueId: stepCondition.queueId,
     });
 
     if (flowConfig?.data?.autoDistributeTickets) {
@@ -77,7 +77,7 @@ const isQueueDefine = async (
     socketEmit({
       tenantId: ticket.tenantId,
       type: "ticket:update",
-      payload: ticket
+      payload: ticket,
     });
   }
 };
@@ -95,7 +95,7 @@ const isUserDefine = async (
       chatFlowId: null,
       stepChatFlow: null,
       botRetries: 0,
-      lastInteractionBot: new Date()
+      lastInteractionBot: new Date(),
     });
 
     ticket.reload();
@@ -103,14 +103,57 @@ const isUserDefine = async (
     socketEmit({
       tenantId: ticket.tenantId,
       type: "ticket:update",
-      payload: ticket
+      payload: ticket,
     });
 
     await CreateLogTicketService({
       userId: stepCondition.userIdDestination,
       ticketId: ticket.id,
-      type: "userDefine"
+      type: "userDefine",
     });
+  }
+};
+
+const isCloseDefine = async (ticket, actionDetails) => {
+  if (actionDetails.action === 3) {
+    const closeTicketMessage = { message: actionDetails.closeTicket };
+
+    const messageField = {
+      data: closeTicketMessage,
+      id: actionDetails.id,
+      type: "MessageField",
+    };
+    const messageArray = [messageField];
+    const firstMessage = messageArray[0];
+
+    const sendMessageParams = {
+      msg: messageField,
+      tenantId: ticket.tenantId,
+      ticket: ticket,
+    };
+    await BuildSendMessageService(sendMessageParams);
+
+    ticket.update({
+      status: "closed",
+      chatFlowId: null,
+      stepChatFlow: null,
+      botRetries: 0,
+      lastInteractionBot: new Date(),
+    });
+    const showTicketParams = {
+      id: ticket.id,
+      tenantId: ticket.tenantId,
+    };
+    console.log(showTicketParams);
+    // const updatedTicket = yield ShowTicketServiceZPRO_1.default(
+    //     showTicketParams
+    //   ),
+    //   socketParams = {
+    //     tenantId: ticket.tenantId,
+    //     type: "ticket:update",
+    //     payload: updatedTicket,
+    //   };
+    // socketEmitZPRO_1.default(socketParams);
   }
 };
 
@@ -124,7 +167,7 @@ const sendWelcomeMessage = async (
       body: flowConfig.data?.welcomeMessage.message,
       fromMe: true,
       read: true,
-      sendType: "bot"
+      sendType: "bot",
     };
 
     await CreateMessageSystemService({
@@ -132,7 +175,7 @@ const sendWelcomeMessage = async (
       tenantId: ticket.tenantId,
       ticket,
       sendType: messageData.sendType,
-      status: "pending"
+      status: "pending",
     });
   }
 };
@@ -154,11 +197,11 @@ const isRetriesLimit = async (
       chatFlowId: null,
       stepChatFlow: null,
       botRetries: 0,
-      lastInteractionBot: new Date()
+      lastInteractionBot: new Date(),
     };
     const logsRetry: any = {
       ticketId: ticket.id,
-      type: destinyType === 1 ? "retriesLimitQueue" : "retriesLimitUserDefine"
+      type: destinyType === 1 ? "retriesLimitQueue" : "retriesLimitUserDefine",
     };
 
     // enviar para fila
@@ -176,7 +219,7 @@ const isRetriesLimit = async (
     socketEmit({
       tenantId: ticket.tenantId,
       type: "ticket:update",
-      payload: ticket
+      payload: ticket,
     });
     await CreateLogTicketService(logsRetry);
 
@@ -200,14 +243,12 @@ const isAnswerCloseTicket = async (
   }
 
   // verificar condição com a ação
-  const params = flowConfig.data.answerCloseTicket.find(
-    (condition: any) => {
-      return (
-        String(condition).toLowerCase().trim() ===
-        String(message).toLowerCase().trim()
-      );
-    }
-  );
+  const params = flowConfig.data.answerCloseTicket.find((condition: any) => {
+    return (
+      String(condition).toLowerCase().trim() ===
+      String(message).toLowerCase().trim()
+    );
+  });
 
   if (params) {
     await ticket.update({
@@ -217,18 +258,18 @@ const isAnswerCloseTicket = async (
       lastInteractionBot: new Date(),
       unreadMessages: 0,
       answered: false,
-      status: "closed"
+      status: "closed",
     });
 
     await CreateLogTicketService({
       ticketId: ticket.id,
-      type: "autoClose"
+      type: "autoClose",
     });
 
     socketEmit({
       tenantId: ticket.tenantId,
       type: "ticket:update",
-      payload: ticket
+      payload: ticket,
     });
 
     return true;
@@ -240,7 +281,7 @@ const VerifyStepsChatFlowTicket = async (
   msg: WbotMessage | any,
   ticket: Ticket | any
 ): Promise<void> => {
-  let celularTeste; // ticket.chatFlow?.celularTeste;
+  let celularTeste: string; // ticket.chatFlow?.celularTeste;
 
   if (
     ticket.chatFlowId &&
@@ -270,9 +311,12 @@ const VerifyStepsChatFlowTicket = async (
           String(c).toLowerCase().trim()
         );
         const message = String(msg.body).toLowerCase().trim();
-        return newConditions.includes(message);
+        return conditions.condition.some(
+          (c: any) => String(c).toLowerCase().trim() === message
+        );
       });
-       if (
+
+      if (
         !ticket.isCreated &&
         (await isAnswerCloseTicket(flowConfig, ticket, msg.body))
       )
@@ -299,10 +343,13 @@ const VerifyStepsChatFlowTicket = async (
         // action = 2: enviar para determinado usuário
         await isUserDefine(ticket, step, stepCondition);
 
+        // action = 3: encerar atendimento
+        await isCloseDefine(ticket, stepCondition);
+
         socketEmit({
           tenantId: ticket.tenantId,
           type: "ticket:update",
-          payload: ticket
+          payload: ticket,
         });
 
         if (stepCondition.action === 1 || stepCondition.action === 2) {
@@ -329,28 +376,27 @@ const VerifyStepsChatFlowTicket = async (
               "Desculpe! Não entendi sua resposta. Vamos tentar novamente! Escolha uma opção válida.",
             fromMe: true,
             read: true,
-            sendType: "bot"
+            sendType: "bot",
           };
           await CreateMessageSystemService({
             msg: messageData,
             tenantId: ticket.tenantId,
             ticket,
             sendType: messageData.sendType,
-            status: "pending"
+            status: "pending",
           });
 
           // tratar o número de retentativas do bot
           await ticket.update({
             botRetries: ticket.botRetries + 1,
-            lastInteractionBot: new Date()
+            lastInteractionBot: new Date(),
           });
         }
         for (const interaction of step.data.interactions) {
-
           await BuildSendMessageService({
             msg: interaction,
             tenantId: ticket.tenantId,
-            ticket
+            ticket,
           });
         }
       }

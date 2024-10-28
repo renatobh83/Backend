@@ -77,7 +77,7 @@ export const apagarPastaSessao = async (id: number | string): Promise<void> => {
 //     logger.error(`removeWbot | Error: ${err}`);
 //   }
 // };
-const removeWbot = (whatsappId: number): void => {
+export const removeWbot = (whatsappId: number): void => {
   try {
     const sessionIndex = sessions.findIndex((s) => s.id === whatsappId);
     if (sessionIndex !== -1) {

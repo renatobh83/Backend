@@ -8,7 +8,6 @@ import ShowWhatsAppService from "../services/WhatsappService/ShowWhatsAppService
 import { StartWhatsAppSession } from "../services/WbotServices/StartWhatsAppSession";
 import { getWbot } from "../libs/wbot";
 
-import { API } from "../app/webhookApi";
 import { find, result } from "lodash";
 import ShowApiListService from "../services/ApiConfirmacaoServices/ShowApiListService";
 import {

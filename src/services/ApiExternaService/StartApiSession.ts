@@ -16,7 +16,8 @@ export const StartApiSession = async (api: ApiConfirmacao) => {
   const link = "https://otrsweb.zapto.org/testeportal/cgi-bin/dwserver.cgi/se1";
   if (findApi.token) {
     const currentDate = new Date();
-    const diffInMilliseconds = findApi.expDate - currentDate;
+    const diffInMilliseconds =
+      findApi.expDate.getTime() - currentDate.getTime();
 
     if (diffInMilliseconds <= 0) {
       try {

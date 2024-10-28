@@ -2,6 +2,7 @@
 // import { getTbot } from "../libs/tbot";
 // import InstagramSendMessagesSystem from "../services/InstagramBotServices/InstagramSendMessagesSystem";
 // import TelegramSendMessagesSystem from "../services/TbotServices/TelegramSendMessagesSystem";
+import { Message } from "whatsapp-web.js";
 import SendWhatsAppMedia from "../services/WbotServices/SendWhatsAppMedia";
 import SendWhatsAppMessage from "../services/WbotServices/SendWhatsAppMessage";
 
@@ -16,10 +17,9 @@ const SendMessageSystemProxy = async ({
   ticket,
   messageData,
   media,
-  userId
+  userId,
 }: Payload): Promise<any> => {
-  let message;
-
+  let message: Message;
 
   if (messageData.mediaName) {
     message = await SendWhatsAppMedia({ media, ticket, userId });
@@ -49,10 +49,10 @@ const SendMessageSystemProxy = async ({
 
   if (!media) {
     message = await SendWhatsAppMessage({
-        body: messageData.body,
-        ticket,
-        quotedMsg: messageData?.quotedMsg
-      });
+      body: messageData.body,
+      ticket,
+      quotedMsg: messageData?.quotedMsg,
+    });
     // switch (ticket.channel) {
     //   case "instagram":
     //     message = await InstagramSendMessagesSystem(

@@ -1,14 +1,12 @@
-
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { logger } from "../utils/logger";
-import ApiConfirma from "../services/ApiConfirmacaoServices/ApiGenesis";
-import GetApiConfirmacaoService from "../services/ApiConfirmacaoServices/GetApiConfirmacaoService";
-import { confirmarAtendimentos } from "../helpers/SEMNOME";
 
+import GetApiConfirmacaoService from "../services/ApiConfirmacaoServices/GetApiConfirmacaoService";
+// import { confirmarAtendimentos } from "../helpers/SEMNOME";
 
 interface Data {
-  idexterno: number[]
-  procedimentos: number[]
+  idexterno: number[];
+  procedimentos: number[];
   tenantId: string;
 }
 
@@ -29,21 +27,16 @@ export default {
   // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
   async handle({ data }: HandlerPayload) {
     try {
+      //   const { link, usuario, senha } = await GetApiConfirmacaoService({ tenantId: Number(data.tenantId)})
+      //   const instanceApi = new ApiConfirma(usuario, senha, link);
 
-      const { link, usuario, senha } = await GetApiConfirmacaoService({ tenantId: Number(data.tenantId)})
-      const instanceApi = new ApiConfirma(usuario, senha, link);
+      // //   const response = await instanceApi.confirmaExame()
+      //     if(confirmarAtendimentos(data.idexterno, instanceApi)){
+      //         console.log('CONFIRMADo')
+      //     }
 
-
-
-    //   const response = await instanceApi.confirmaExame()
-        if(confirmarAtendimentos(data.idexterno, instanceApi)){
-            console.log('CONFIRMADo')
-        }
-
-      logger.info(
-        `Queue WebHooksAPI success: Data: ${data}`
-      );
-      return true
+      logger.info(`Queue WebHooksAPI success: Data: ${data}`);
+      return true;
     } catch (error) {
       logger.error(`Error send message confirmacao response: ${error}`);
       if (error?.response?.status === 404) {
@@ -51,5 +44,5 @@ export default {
       }
       throw new Error(error);
     }
-  }
+  },
 };

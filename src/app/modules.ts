@@ -2,7 +2,7 @@ import { readFileSync } from "fs";
 
 import expressInstance, { Request, Response, NextFunction } from "express";
 
-import moment from 'moment-timezone';
+import moment from "moment-timezone";
 
 import routes from "../routes";
 import uploadConfig from "../config/upload";
@@ -11,27 +11,27 @@ import { logger } from "../utils/logger";
 
 export default async function modules(app: any): Promise<void> {
   const { version } = JSON.parse(readFileSync("./package.json").toString());
-  const started = new Date()//.toLocaleString("pt-BR", {timeZone: "America/Sao_Paulo"});
+  const started = new Date(); //.toLocaleString("pt-BR", {timeZone: "America/Sao_Paulo"});
   const { env } = process;
 
   // const formattedDate = format(started, 'dd.MM.yyyy');
 
   app.get("/health", async (req: Request, res: Response) => {
-
-    let checkConnection;
+    let checkConnection: string;
     try {
       checkConnection = "Servidor disponível!";
     } catch (e) {
       checkConnection = `Servidor indisponível! ${e}`;
     }
     res.json({
-      started: moment(started).tz("America/Sao_Paulo").format("DD/MM/YYYY HH:mm:ss"),
+      started: moment(started)
+        .tz("America/Sao_Paulo")
+        .format("DD/MM/YYYY HH:mm:ss"),
       currentVersion: version,
       uptime: (Date.now() - Number(started)) / 1000,
-      statusService: checkConnection
+      statusService: checkConnection,
     });
   });
-
 
   app.use("/public", expressInstance.static(uploadConfig.directory));
 

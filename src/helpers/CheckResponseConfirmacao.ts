@@ -16,10 +16,6 @@ const CheckConfirmationResponse = async ({
   tenantId,
   data,
 }: Data): Promise<void> => {
-  const { link, usuario, senha } = await GetApiConfirmacaoService({ tenantId });
-
-  //   const instance = new ApiConfirma(usuario, senha, link);
-
   const msgConfirmacao = await Confirmacao.findOne({
     where: {
       tenantId: tenantId,
