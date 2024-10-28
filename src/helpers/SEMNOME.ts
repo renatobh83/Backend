@@ -80,6 +80,7 @@ export async function consultaPaciente({ api, params }: ConsultaPacienteProps) {
       ...(params.CPF && { CPF: params.CPF }), // Inclui o CPF somente se ele estiver presente em `params`
     };
     const { data } = await apiInstance.post(URL_FINAL, consultaDados);
+    console.log(data);
     return data;
   } catch (error) {
     throw new Error("Url não cadatrada para a api");

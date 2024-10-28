@@ -15,16 +15,18 @@ Olá ${nome}! Estamos felizes em tê-lo conosco e prontos para atender suas nece
 Temos diversos serviços disponíveis:
 Para consultar agendamentos futuros, digite 1.
 Para pegar um laudo, digite 2.
-Para fazer um novo agendamento, digite 3.
+Se preferir atendimento para outra pessoa, digite "outra pessoa".
 Sinta-se à vontade para explorar e nos avisar como podemos ajudar!
 `;
-  const variosRegistro = `Olá! ${nome} Infelizmente, não conseguimos localizar os dados.
-Por favor, informe o número do seu CPF para uma nova consulta.
+  const variosRegistro = `Olá! ${nome} com base no seu nome registrado no whatsapp encontramos mais de um registro em nosa base.
+Para uma pesquisa mais detalhada, por favor, digite CPF.
+Se preferir atendimento para outra pessoa, digite "outra pessoa".
 Se preferir, digite "sair" para ser atendido anonimamente.
 Agradecemos pela sua compreensão!`;
 
   const nenhumRegistroLocalizado = `Olá! ${nome} Infelizmente, não conseguimos localizar os dados.
-Por favor, informe o número do seu CPF para uma nova consulta.
+Para uma pesquisa mais detalhada, por favor, digite CPF.
+Se preferir atendimento para outra pessoa, digite "outra pessoa".
 Se preferir, digite "sair" para ser atendido anonimamente.
 Agradecemos pela sua compreensão!`;
 

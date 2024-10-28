@@ -211,6 +211,7 @@ const BuildSendMessageService = async ({
           api,
           params: { NomePaciente: nome },
         });
+
         if (dataResponseConsulta.length > 1) {
           mensagem = TemplateConsulta({ nome }).variosRegistro;
         } else {
@@ -310,15 +311,39 @@ const BuildSendMessageService = async ({
           return;
         }
       }
-      if (acaoWebhook === "laudo") {
-        listaAtendimentos = await doListaAtendimentos({
-          api,
-          codigoPaciente: codPaciente,
-        });
-        if (listaAtendimentos.length > 0) {
-          mensagem = TemplateListaAtendimentos({
-            listaAtendimentos,
-          }).atendimentosRecentes;
+      if (acaoWebhook === "consultacpf") {
+        console.log(ticket.lastMessage);
+        // const dataResponseConsulta = await ConsultaPaciente({
+        //   api,
+        //   params: {
+        //     NomePaciente: nome,
+        //     CPF: ticket.lastMessage.toLowerCase().trim(),
+        //   },
+        // });
+        // if (dataResponseConsulta.length > 1) {
+        //   mensagem = TemplateConsulta({ nome }).variosRegistro;
+        // } else {
+        //   const dados = dataResponseConsulta.find(
+        //     (i) => i.Celular || i.Whatsapp === numero
+        //   );
+        //   if (dados) {
+        //     // enviar mensagem que foi localizado o registro
+        //     codPaciente = dados.CodigoPaciente;
+        //     mensagem = TemplateConsulta({ nome }).registroEncontrado;
+        //     const messageSent = await SendMessageSystemProxy({
+        //       ticket,
+        //       messageData: {
+        //         ...messageData,
+        //         body: mensagem,
+        //       },
+        //       media: null,
+        //       userId: null,
+        //     });
+
+            return;
+          }
+          // nao conseguimos localizar
+          mensagem = TemplateConsulta({ nome }).nenhumRegistroLocalizado;
           const messageSent = await SendMessageSystemProxy({
             ticket,
             messageData: {
@@ -362,9 +387,21 @@ const BuildSendMessageService = async ({
           });
           return;
         }
-        mensagem = TemplateListaAtendimentos({
-          listaAtendimentos,
-        }).semAtendimentoComLaudo;
+      }
+      if (acaoWebhook === "laudo") {
+        listaAtendimentos = await doListaAtendimentos({
+          api,
+          codigoPaciente: codPaciente,
+        });
+
+        mensagem =
+          listaAtendimentos.length > 0
+            ? TemplateListaAtendimentos({
+                listaAtendimentos,
+              }).atendimentosRecentes
+            : TemplateListaAtendimentos({
+                listaAtendimentos,
+              }).semAtendimentoComLaudo;
 
         const messageSent = await SendMessageSystemProxy({
           ticket,
@@ -407,7 +444,6 @@ const BuildSendMessageService = async ({
           lastMessageAt: new Date().getTime(),
           answered: true,
         });
-
         return;
       }
       if (acaoWebhook === "pdf") {
@@ -632,3 +668,38 @@ const BuildSendMessageService = async ({
 };
 
 export default BuildSendMessageService;
+
+function updateTicket() {
+  const msgCreated = await Message.create({
+    ...messageData,
+    ...messageSent,
+    id: messageData.id,
+    messageId: messageSent.id?.id || messageSent.messageId || null,
+    mediaType: "bot",
+  });
+  const messageCreated = await Message.findByPk(msgCreated.id, {
+    include: [
+      {
+        model: Ticket,
+        as: "ticket",
+        where: { tenantId },
+        include: ["contact"],
+      },
+      {
+        model: Message,
+        as: "quotedMsg",
+        include: ["contact"],
+      },
+    ],
+  });
+
+  if (!messageCreated) {
+    throw new Error("ERR_CREATING_MESSAGE_SYSTEM");
+  }
+
+  await ticket.update({
+    lastMessage: messageCreated.body,
+    lastMessageAt: new Date().getTime(),
+    answered: true,
+  });
+}

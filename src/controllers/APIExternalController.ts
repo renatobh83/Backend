@@ -17,6 +17,7 @@ import {
   doListaAtendimentos,
 } from "../helpers/SEMNOME";
 import { TemplateConsulta } from "../templates/consultaDados";
+import { ConsultaPaciente } from "../services/ApiConfirmacaoServices/Helpers/ConsultaPacientes";
 
 export default interface Notificacao {
   paciente_nome: string;
@@ -198,7 +199,10 @@ export const TESTEAPIWEBHOOKS = async (
   const acaoWebhook = data.webhook.acao.toLowerCase();
 
   const api = await ShowApiListService({ id: idApi, tenantId: 1 });
-  const response = await doGetAgendamentos({ api, codPaciente: 72382 });
+  const response = await ConsultaPaciente({
+    api,
+    params: { NomePaciente: "Renato mendonca" },
+  });
   console.log(response);
   // const actionIsInclude = api.action.includes(acaoWebhook);
 
