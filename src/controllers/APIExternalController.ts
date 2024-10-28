@@ -12,6 +12,7 @@ import { find, result } from "lodash";
 import ShowApiListService from "../services/ApiConfirmacaoServices/ShowApiListService";
 import {
   consultaPaciente,
+  doGetAgendamentos,
   doGetLaudo,
   doListaAtendimentos,
 } from "../helpers/SEMNOME";
@@ -197,15 +198,8 @@ export const TESTEAPIWEBHOOKS = async (
   const acaoWebhook = data.webhook.acao.toLowerCase();
 
   const api = await ShowApiListService({ id: idApi, tenantId: 1 });
-  const response = await doListaAtendimentos({ api, codigoPaciente: 72382 });
-  let message =
-    "Prezados, segue a relação de atendimentos recentes que têm laudo:\n\n";
-  response.forEach((item, index) => {
-    message += `${index + 1}. Data do Exame: ${item.dt_data}\n`;
-    message += `   Médico: ${item.ds_medico}\n`;
-    message += `   Descrição do Exame: ${item.ds_procedimento}\n\n`;
-  });
-  console.log(message);
+  const response = await doGetAgendamentos({ api, codPaciente: 72382 });
+  console.log(response);
   // const actionIsInclude = api.action.includes(acaoWebhook);
 
   // if (!actionIsInclude) {

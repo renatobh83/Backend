@@ -169,3 +169,25 @@ export async function doListaAtendimentos({
     throw error;
   }
 }
+export async function doGetAgendamentos({ api, codPaciente }) {
+  const apiInstance = createApiInstanceJTW(api);
+  const url = `/doListaAgendamento?cd_paciente=${codPaciente}`;
+  const URL_FINAL = `${api.baseURl}${url}`;
+  try {
+    const { data } = await apiInstance.post(URL_FINAL, {});
+    //   console.log("Exame confirmado com sucesso", response.data);
+    if (data.length) {
+      return data
+        .filter((i) => i.ds_status !== "CANCELADO")
+        .sort((a, b) => {
+          const dateA = new Date(a.dt_data.split("/").reverse().join("-"));
+          const dateB = new Date(b.dt_data.split("/").reverse().join("-"));
+          return dateB.getTime() - dateA.getTime();
+        })
+        .slice(0, 5); // Seleciona os 5 registros mais recentes
+    }
+  } catch (error) {
+    console.error("Erro ao confirmar exame:", error);
+    throw error;
+  }
+}

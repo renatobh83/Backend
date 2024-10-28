@@ -19,13 +19,11 @@ Para fazer um novo agendamento, digite 3.
 Sinta-se à vontade para explorar e nos avisar como podemos ajudar!
 `;
   const variosRegistro = `Olá! ${nome} Infelizmente, não conseguimos localizar os dados.
-Se desejar, podemos iniciar um atendimento.
 Por favor, informe o número do seu CPF para uma nova consulta.
 Se preferir, digite "sair" para ser atendido anonimamente.
 Agradecemos pela sua compreensão!`;
 
   const nenhumRegistroLocalizado = `Olá! ${nome} Infelizmente, não conseguimos localizar os dados.
-Se desejar, podemos iniciar um atendimento.
 Por favor, informe o número do seu CPF para uma nova consulta.
 Se preferir, digite "sair" para ser atendido anonimamente.
 Agradecemos pela sua compreensão!`;

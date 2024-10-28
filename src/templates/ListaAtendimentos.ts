@@ -1,6 +1,6 @@
 interface TemplateConsultaReturn {
   atendimentosRecentes: string;
-  // variosRegistro: string;
+  semAtendimentoComLaudo: string;
   // nenhumRegistroLocalizado: string;
 }
 
@@ -26,14 +26,12 @@ export const TemplateListaAtendimentos = ({
   // Adicionando as opções com os índices dos atendimentos
   message +=
     "Caso deseja um laudo de outro periodo favor entrar em contato com nossa central para fazer a sua solicitação.\n";
-  message += "Para retornar o menu de opções, digite 2.\n";
-  message += "Para encerar o atendimento, digite 3.\n";
+  message += "Para retornar o menu de opções, digite 6.\n";
+  message += "Para encerar o atendimento, digite 7.\n";
   const atendimentosRecentes = message;
-  // const variosRegistro = `Olá! ${nome} Infelizmente, não conseguimos localizar os dados.
-  //  Se desejar, podemos iniciar um atendimento.
-  //  Por favor, informe o número do seu CPF para uma nova consulta.
-  //  Se preferir, digite "sair" para ser atendido anonimamente.
-  //  Agradecemos pela sua compreensão!`;
+  const semAtendimentoComLaudo = `Infelizmente, não conseguimos localizar os dados nenhum exame recente com laudo liberado.
+   Favor entrar em contato com a nossa central de atendimento para maiores informções.
+   Agradecemos pela sua compreensão!`;
 
   // const nenhumRegistroLocalizado = `Olá! ${nome} Infelizmente, não conseguimos localizar os dados.
   //  Se desejar, podemos iniciar um atendimento.
@@ -43,7 +41,7 @@ export const TemplateListaAtendimentos = ({
 
   return {
     atendimentosRecentes,
-    //   variosRegistro,
+    semAtendimentoComLaudo,
     //   nenhumRegistroLocalizado,
   };
 };

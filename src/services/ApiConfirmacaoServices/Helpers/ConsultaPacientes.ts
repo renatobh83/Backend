@@ -18,7 +18,6 @@ export const ConsultaPaciente = async ({
 }: ConsultaPacienteProps) => {
   try {
     const data = await consultaPaciente({ api, params });
-
     return data;
   } catch (error) {
     // // Responder com o status de erro e a mensagem apropriada

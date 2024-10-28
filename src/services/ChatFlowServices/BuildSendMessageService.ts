@@ -8,11 +8,19 @@ import SendMessageSystemProxy from "../../helpers/SendMessageSystemProxy";
 import ShowApiListService from "../ApiConfirmacaoServices/ShowApiListService";
 import { ConsultaPaciente } from "../ApiConfirmacaoServices/Helpers/ConsultaPacientes";
 import { TemplateConsulta } from "../../templates/consultaDados";
-import { doGetLaudo, doListaAtendimentos } from "../../helpers/SEMNOME";
+import {
+  doGetAgendamentos,
+  doGetLaudo,
+  doListaAtendimentos,
+} from "../../helpers/SEMNOME";
 import { ConsultarLaudos } from "../ApiConfirmacaoServices/Helpers/ConsultarLaudos";
 import { TemplateListaAtendimentos } from "../../templates/ListaAtendimentos";
 import { existsSync } from "fs";
 import { promisify } from "util";
+import {
+  ResponseListaAgendamentos,
+  TemplateListaAgendamentos,
+} from "../../templates/ListaAgendamentos";
 interface MessageData {
   id?: string;
   ticketId: number;
@@ -80,6 +88,7 @@ interface ResponseListaAtendimento {
 // const writeFileAsync = promisify(writeFile);
 let codPaciente: number;
 let listaAtendimentos: ResponseListaAtendimento[];
+let listaAgendamentos: ResponseListaAgendamentos[];
 
 const delay = promisify(setTimeout);
 
@@ -306,9 +315,57 @@ const BuildSendMessageService = async ({
           api,
           codigoPaciente: codPaciente,
         });
+        if (listaAtendimentos.length > 0) {
+          mensagem = TemplateListaAtendimentos({
+            listaAtendimentos,
+          }).atendimentosRecentes;
+          const messageSent = await SendMessageSystemProxy({
+            ticket,
+            messageData: {
+              ...messageData,
+              body: mensagem,
+            },
+            media: null,
+            userId: null,
+          });
+          const msgCreated = await Message.create({
+            ...messageData,
+            ...messageSent,
+            id: messageData.id,
+            messageId: messageSent.id?.id || messageSent.messageId || null,
+            mediaType: "bot",
+          });
+          const messageCreated = await Message.findByPk(msgCreated.id, {
+            include: [
+              {
+                model: Ticket,
+                as: "ticket",
+                where: { tenantId },
+                include: ["contact"],
+              },
+              {
+                model: Message,
+                as: "quotedMsg",
+                include: ["contact"],
+              },
+            ],
+          });
+
+          if (!messageCreated) {
+            throw new Error("ERR_CREATING_MESSAGE_SYSTEM");
+          }
+
+          await ticket.update({
+            lastMessage: messageCreated.body,
+            lastMessageAt: new Date().getTime(),
+            answered: true,
+          });
+          return;
+        }
         mensagem = TemplateListaAtendimentos({
           listaAtendimentos,
-        }).atendimentosRecentes;
+        }).semAtendimentoComLaudo;
+
         const messageSent = await SendMessageSystemProxy({
           ticket,
           messageData: {
@@ -350,6 +407,7 @@ const BuildSendMessageService = async ({
           lastMessageAt: new Date().getTime(),
           answered: true,
         });
+
         return;
       }
       if (acaoWebhook === "pdf") {
@@ -411,6 +469,64 @@ const BuildSendMessageService = async ({
             answered: true,
           });
         }
+        return;
+      }
+      if (acaoWebhook === "agendamento") {
+        listaAgendamentos = await doGetAgendamentos({
+          api,
+          codPaciente: codPaciente,
+        });
+
+        mensagem =
+          listaAgendamentos.length > 0
+            ? TemplateListaAgendamentos({
+                listaAgendamentos,
+              }).agendamentos
+            : TemplateListaAgendamentos({
+                listaAgendamentos,
+              }).semAgendamento;
+
+        const messageSent = await SendMessageSystemProxy({
+          ticket,
+          messageData: {
+            ...messageData,
+            body: mensagem,
+          },
+          media: null,
+          userId: null,
+        });
+        const msgCreated = await Message.create({
+          ...messageData,
+          ...messageSent,
+          id: messageData.id,
+          messageId: messageSent.id?.id || messageSent.messageId || null,
+          mediaType: "bot",
+        });
+        const messageCreated = await Message.findByPk(msgCreated.id, {
+          include: [
+            {
+              model: Ticket,
+              as: "ticket",
+              where: { tenantId },
+              include: ["contact"],
+            },
+            {
+              model: Message,
+              as: "quotedMsg",
+              include: ["contact"],
+            },
+          ],
+        });
+
+        if (!messageCreated) {
+          throw new Error("ERR_CREATING_MESSAGE_SYSTEM");
+        }
+
+        await ticket.update({
+          lastMessage: messageCreated.body,
+          lastMessageAt: new Date().getTime(),
+          answered: true,
+        });
         return;
       }
       // {
