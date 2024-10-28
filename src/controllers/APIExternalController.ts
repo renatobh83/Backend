@@ -18,6 +18,7 @@ import {
 } from "../helpers/SEMNOME";
 import { TemplateConsulta } from "../templates/consultaDados";
 import { ConsultaPaciente } from "../services/ApiConfirmacaoServices/Helpers/ConsultaPacientes";
+import { validarCPF } from "../utils/ApiWebhook";
 
 export default interface Notificacao {
   paciente_nome: string;
@@ -203,7 +204,7 @@ export const TESTEAPIWEBHOOKS = async (
     api,
     params: { NomePaciente: "Renato mendonca" },
   });
-  console.log(response);
+  console.log(validarCPF("01330415656"));
   // const actionIsInclude = api.action.includes(acaoWebhook);
 
   // if (!actionIsInclude) {
