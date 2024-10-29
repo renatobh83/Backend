@@ -21,6 +21,13 @@ import {
   ResponseListaAgendamentos,
   TemplateListaAgendamentos,
 } from "../../templates/ListaAgendamentos";
+import {
+  apiConsulta,
+  apiConsultaCPF,
+  consultaAtendimentos,
+  getAgendamentos,
+  getLaudoPDF,
+} from "./Helpers/ActionsApi";
 interface MessageData {
   id?: string;
   ticketId: number;
@@ -192,10 +199,10 @@ const BuildSendMessageService = async ({
       });
     } else if (msg.type === "WebhookField") {
       let mensagem: string;
-
+      let messageSent: any;
       const idApi = msg.data.webhook.apiId;
       const acaoWebhook = msg.data.webhook.acao.toLowerCase();
-
+      console.log(acaoWebhook);
       const api = await ShowApiListService({ id: idApi, tenantId });
 
       const actionIsInclude = api.action.includes(acaoWebhook);
@@ -205,290 +212,19 @@ const BuildSendMessageService = async ({
       }
       const nome = ticket.contact.name;
       const numero = formatarNumero(ticket.contact.number);
-
       if (acaoWebhook === "consulta") {
-        const dataResponseConsulta = await ConsultaPaciente({
+        mensagem = await apiConsulta(nome, api, numero);
+      } else if (acaoWebhook === "consultacpf") {
+        mensagem = await apiConsultaCPF(
+          nome,
           api,
-          params: { NomePaciente: nome },
-        });
-        console.log(dataResponseConsulta);
-        if (dataResponseConsulta.length > 1) {
-          mensagem = TemplateConsulta({ nome }).variosRegistro;
-        } else {
-          const dados = dataResponseConsulta.find(
-            (i) => i.Celular || i.Whatsapp === numero
-          );
-          if (dados) {
-            // enviar mensagem que foi localizado o registro
-            codPaciente = dados.CodigoPaciente;
-            mensagem = TemplateConsulta({ nome }).registroEncontrado;
-            const messageSent = await SendMessageSystemProxy({
-              ticket,
-              messageData: {
-                ...messageData,
-                body: mensagem,
-              },
-              media: null,
-              userId: null,
-            });
-            const msgCreated = await Message.create({
-              ...messageData,
-              ...messageSent,
-              id: messageData.id,
-              messageId: messageSent.id?.id || messageSent.messageId || null,
-              mediaType: "bot",
-            });
-            const messageCreated = await Message.findByPk(msgCreated.id, {
-              include: [
-                {
-                  model: Ticket,
-                  as: "ticket",
-                  where: { tenantId },
-                  include: ["contact"],
-                },
-                {
-                  model: Message,
-                  as: "quotedMsg",
-                  include: ["contact"],
-                },
-              ],
-            });
-
-            if (!messageCreated) {
-              throw new Error("ERR_CREATING_MESSAGE_SYSTEM");
-            }
-
-            await ticket.update({
-              lastMessage: messageCreated.body,
-              lastMessageAt: new Date().getTime(),
-              answered: true,
-            });
-            return;
-          }
-          // nao conseguimos localizar
-          mensagem = TemplateConsulta({ nome }).nenhumRegistroLocalizado;
-          const messageSent = await SendMessageSystemProxy({
-            ticket,
-            messageData: {
-              ...messageData,
-              body: mensagem,
-            },
-            media: null,
-            userId: null,
-          });
-          const msgCreated = await Message.create({
-            ...messageData,
-            ...messageSent,
-            id: messageData.id,
-            messageId: messageSent.id?.id || messageSent.messageId || null,
-            mediaType: "bot",
-          });
-          const messageCreated = await Message.findByPk(msgCreated.id, {
-            include: [
-              {
-                model: Ticket,
-                as: "ticket",
-                where: { tenantId },
-                include: ["contact"],
-              },
-              {
-                model: Message,
-                as: "quotedMsg",
-                include: ["contact"],
-              },
-            ],
-          });
-
-          if (!messageCreated) {
-            throw new Error("ERR_CREATING_MESSAGE_SYSTEM");
-          }
-
-          await ticket.update({
-            lastMessage: messageCreated.body,
-            lastMessageAt: new Date().getTime(),
-            answered: true,
-          });
-          return;
-        }
-      }
-      if (acaoWebhook === "consultacpf") {
-        console.log(ticket.lastMessage);
-        const dataResponseConsulta = await ConsultaPaciente({
-          api,
-          params: {
-            NomePaciente: nome,
-            CPF: ticket.lastMessage.toLowerCase().trim(),
-          },
-        });
-        if (dataResponseConsulta.length > 1) {
-          mensagem = TemplateConsulta({ nome }).variosRegistro;
-        } else {
-          const dados = dataResponseConsulta.find(
-            (i) => i.Celular || i.Whatsapp === numero
-          );
-          if (dados) {
-            // enviar mensagem que foi localizado o registro
-            codPaciente = dados.CodigoPaciente;
-            mensagem = TemplateConsulta({ nome }).registroEncontrado;
-            const messageSent = await SendMessageSystemProxy({
-              ticket,
-              messageData: {
-                ...messageData,
-                body: mensagem,
-              },
-              media: null,
-              userId: null,
-            });
-            const msgCreated = await Message.create({
-              ...messageData,
-              ...messageSent,
-              id: messageData.id,
-              messageId: messageSent.id?.id || messageSent.messageId || null,
-              mediaType: "bot",
-            });
-            const messageCreated = await Message.findByPk(msgCreated.id, {
-              include: [
-                {
-                  model: Ticket,
-                  as: "ticket",
-                  where: { tenantId },
-                  include: ["contact"],
-                },
-                {
-                  model: Message,
-                  as: "quotedMsg",
-                  include: ["contact"],
-                },
-              ],
-            });
-
-            if (!messageCreated) {
-              throw new Error("ERR_CREATING_MESSAGE_SYSTEM");
-            }
-
-            await ticket.update({
-              lastMessage: messageCreated.body,
-              lastMessageAt: new Date().getTime(),
-              answered: true,
-            });
-            return;
-          }
-          // nao conseguimos localizar
-          mensagem = TemplateConsulta({ nome }).nenhumRegistroLocalizado;
-          const messageSent = await SendMessageSystemProxy({
-            ticket,
-            messageData: {
-              ...messageData,
-              body: mensagem,
-            },
-            media: null,
-            userId: null,
-          });
-          const msgCreated = await Message.create({
-            ...messageData,
-            ...messageSent,
-            id: messageData.id,
-            messageId: messageSent.id?.id || messageSent.messageId || null,
-            mediaType: "bot",
-          });
-          const messageCreated = await Message.findByPk(msgCreated.id, {
-            include: [
-              {
-                model: Ticket,
-                as: "ticket",
-                where: { tenantId },
-                include: ["contact"],
-              },
-              {
-                model: Message,
-                as: "quotedMsg",
-                include: ["contact"],
-              },
-            ],
-          });
-
-          if (!messageCreated) {
-            throw new Error("ERR_CREATING_MESSAGE_SYSTEM");
-          }
-
-          await ticket.update({
-            lastMessage: messageCreated.body,
-            lastMessageAt: new Date().getTime(),
-            answered: true,
-          });
-          return;
-        }
-      }
-      if (acaoWebhook === "laudo") {
-        listaAtendimentos = await doListaAtendimentos({
-          api,
-          codigoPaciente: codPaciente,
-        });
-
-        mensagem =
-          listaAtendimentos.length > 0
-            ? TemplateListaAtendimentos({
-                listaAtendimentos,
-              }).atendimentosRecentes
-            : TemplateListaAtendimentos({
-                listaAtendimentos,
-              }).semAtendimentoComLaudo;
-
-        const messageSent = await SendMessageSystemProxy({
-          ticket,
-          messageData: {
-            ...messageData,
-            body: mensagem,
-          },
-          media: null,
-          userId: null,
-        });
-        const msgCreated = await Message.create({
-          ...messageData,
-          ...messageSent,
-          id: messageData.id,
-          messageId: messageSent.id?.id || messageSent.messageId || null,
-          mediaType: "bot",
-        });
-        const messageCreated = await Message.findByPk(msgCreated.id, {
-          include: [
-            {
-              model: Ticket,
-              as: "ticket",
-              where: { tenantId },
-              include: ["contact"],
-            },
-            {
-              model: Message,
-              as: "quotedMsg",
-              include: ["contact"],
-            },
-          ],
-        });
-
-        if (!messageCreated) {
-          throw new Error("ERR_CREATING_MESSAGE_SYSTEM");
-        }
-
-        await ticket.update({
-          lastMessage: messageCreated.body,
-          lastMessageAt: new Date().getTime(),
-          answered: true,
-        });
-        return;
-      }
-      if (acaoWebhook === "pdf") {
-        const chosenIndex = +ticket.lastMessage;
-        const selectedLaudo = listaAtendimentos[chosenIndex - 1];
-        await ConsultarLaudos({
-          api,
-          cdExame: +selectedLaudo.cd_exame,
-          cdPaciente: codPaciente,
-          cdFuncionario: 1,
-          entrega: false,
-        });
+          ticket.lastMessage.toString().trim()
+        );
+      } else if (acaoWebhook === "laudo") {
+        mensagem = await consultaAtendimentos(api);
+      } else if (acaoWebhook === "pdf") {
+        const mediaName = await getLaudoPDF(api, +ticket.lastMessage);
         const customPath = join(__dirname, "..", "..", "..", "public");
-        const mediaName = `${+selectedLaudo.cd_exame}.pdf`;
         const mediaPath = join(customPath, mediaName);
         const arquivoExiste = await verificarArquivo(mediaPath);
         if (arquivoExiste) {
@@ -510,6 +246,7 @@ const BuildSendMessageService = async ({
             messageId: messageSent.id?.id || messageSent.messageId || null,
             mediaType: "bot",
           });
+
           const messageCreated = await Message.findByPk(msgCreated.id, {
             include: [
               {
@@ -535,106 +272,72 @@ const BuildSendMessageService = async ({
             lastMessageAt: new Date().getTime(),
             answered: true,
           });
+
+          socketEmit({
+            tenantId,
+            type: "chat:create",
+            payload: messageCreated,
+          });
+          return;
         }
-        return;
+      } else if (acaoWebhook === "agendamento") {
+        mensagem = await getAgendamentos(api);
       }
-      if (acaoWebhook === "agendamento") {
-        listaAgendamentos = await doGetAgendamentos({
-          api,
-          codPaciente: codPaciente,
-        });
 
-        mensagem =
-          listaAgendamentos.length > 0
-            ? TemplateListaAgendamentos({
-                listaAgendamentos,
-              }).agendamentos
-            : TemplateListaAgendamentos({
-                listaAgendamentos,
-              }).semAgendamento;
-
-        const messageSent = await SendMessageSystemProxy({
-          ticket,
-          messageData: {
-            ...messageData,
-            body: mensagem,
-          },
-          media: null,
-          userId: null,
-        });
-        const msgCreated = await Message.create({
+      messageSent = await SendMessageSystemProxy({
+        ticket,
+        messageData: {
           ...messageData,
-          ...messageSent,
-          id: messageData.id,
-          messageId: messageSent.id?.id || messageSent.messageId || null,
-          mediaType: "bot",
-        });
-        const messageCreated = await Message.findByPk(msgCreated.id, {
-          include: [
-            {
-              model: Ticket,
-              as: "ticket",
-              where: { tenantId },
-              include: ["contact"],
-            },
-            {
-              model: Message,
-              as: "quotedMsg",
-              include: ["contact"],
-            },
-          ],
-        });
+          body: mensagem,
+        },
+        media: null,
+        userId: null,
+      });
 
-        if (!messageCreated) {
-          throw new Error("ERR_CREATING_MESSAGE_SYSTEM");
-        }
+      const msgCreated = await Message.create({
+        ...messageData,
+        ...messageSent,
+        id: messageData.id,
+        messageId: messageSent.id?.id || messageSent.messageId || null,
+        mediaType: "bot",
+      });
 
-        await ticket.update({
-          lastMessage: messageCreated.body,
-          lastMessageAt: new Date().getTime(),
-          answered: true,
-        });
-        return;
+      const messageCreated = await Message.findByPk(msgCreated.id, {
+        include: [
+          {
+            model: Ticket,
+            as: "ticket",
+            where: { tenantId },
+            include: ["contact"],
+          },
+          {
+            model: Message,
+            as: "quotedMsg",
+            include: ["contact"],
+          },
+        ],
+      });
+
+      if (!messageCreated) {
+        throw new Error("ERR_CREATING_MESSAGE_SYSTEM");
       }
+
+      await ticket.update({
+        lastMessage: messageCreated.body,
+        lastMessageAt: new Date().getTime(),
+        answered: true,
+      });
+
+      socketEmit({
+        tenantId,
+        type: "chat:create",
+        payload: messageCreated,
+      });
       // {
       //   type: 'WebhookField',
       //   id: '33947090-4669-41c3-8b3d-1a84e9fc24e6',
       //   data: { webhook: { apiId: '19', acao: 'consulta' } }
-      // }162824,72382, 1, false
-      // Choice Webhoook
-      //   const token = "aa5234f21048750108464e50cf9ddf5ab86972861a6d62c7d540525e989c097d"
-      //   const urlTeste = "http://otrsweb.zapto.org/clinuxintegra/consultapacientes"
-      //   const nome = ticket.contact.name
-      //   const {data } = await axios.post(urlTeste, {
-      //     NomePaciente: nome
-      //   }, {
-      //     headers: {
-      //       'Authorization': token,
-      //       'Content-Type': 'application/json'
-      //     }
-      //   })
-      // const codigoPaciente = data[0].CodigoPaciente
-      //   const token2 = 'eyJhbGciOiAiSFMyNTYiLCAidHlwIjogIkpXVCJ9.eyAiZXhwIiA6IDE3MjkwOTQ1NjIsICJucl92ZXJzYW8iIDogMzA3ODQsICJjZF9ncnVwbyIgOiAxLCAiY2RfbWF0cml6IiA6IDEsICJucl9lbXByZXNhIiA6IDEsICJucl9mdW5jaW9uYXJpbyIgOiAwLCAiY2RfZW1wcmVzYSIgOiAxLCAiY2RfdXN1YXJpbyIgOiAxLCAiZHNfdXN1YXJpbyIgOiAiUk9PVCIsICJjZF9mdW5jaW9uYXJpbyIgOiAxLCAiY2RfbWVkaWNvIiA6IDAsICJjZF9zZXNzYW8iIDogMCwgImNkX2F0ZW5kaW1lbnRvIiA6IDAsICJjZF9leGFtZSIgOiAwIH0.-PtWxWRHSrFqCfS7pgY01Bs5RYCDjktlfFwdGGbDtdw'
-      //   const agenda = `https://otrsweb.zapto.org/testeportal/cgi-bin/dwserver.cgi/se1/doListaAgendamento?cd_paciente=${codigoPaciente}`
-      //  const agendamento  = await axios.post(agenda,{}, {
-      //    headers: {
-      //      'Authorization': `Bearer ${token2}`
-      //    }
-      //  })
-      //  const messageSend = agendamento.data[0]
-      //  const template = CreateTemplateMessageConsulta({
-      //   msg: messageSend,
-      // });
-      //  const messageSent = await SendMessageSystemProxy({
-      //   ticket,
-      //   messageData: {
-      //     ...messageData,
-      //     body: template.body
-      //   },
-      //   media: null,
-      //   userId: null
-      // });
-      //   console.log(messageSent)
+      // }
     } else {
       // Alter template message
       msg.data.message = pupa(msg.data.message || "", {
