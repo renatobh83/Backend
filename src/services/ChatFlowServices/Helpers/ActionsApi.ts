@@ -1,7 +1,9 @@
 import {
+  confirmaExame,
   doGetAgendamentos,
   doListaAtendimentos,
 } from "../../../helpers/SEMNOME";
+import { TemplateConfirmaAgendamento } from "../../../templates/confirmacao";
 import { TemplateConsulta } from "../../../templates/consultaDados";
 import {
   TemplateListaAgendamentos,
@@ -11,15 +13,24 @@ import { TemplateListaAtendimentos } from "../../../templates/ListaAtendimentos"
 import { validarCPF } from "../../../utils/ApiWebhook";
 import { ConsultaPaciente } from "../../ApiConfirmacaoServices/Helpers/ConsultaPacientes";
 import { ConsultarLaudos } from "../../ApiConfirmacaoServices/Helpers/ConsultarLaudos";
+import { ListarPlanos } from "../../ApiConfirmacaoServices/Helpers/ListaPlanos";
 interface ResponseListaAtendimento {
   ds_medico: string;
   dt_data: string;
   ds_procedimento: string;
   cd_exame: string;
 }
+
+interface ResponseListaPlanos {
+  cd_plano: number;
+  ds_plano: string;
+  cd_fornecedor: number;
+  ds_fornecedor: string;
+}
 let codPaciente: number;
 let listaAtendimentos: ResponseListaAtendimento[];
 let listaAgendamentos: ResponseListaAgendamentos[];
+let listaPlanos: ResponseListaPlanos[];
 
 export const apiConsulta = async (nome: string, api: any, numero: string) => {
   let mensagem: string;
@@ -43,12 +54,6 @@ export const apiConsulta = async (nome: string, api: any, numero: string) => {
 };
 export const apiConsultaCPF = async (nome: string, api: any, cpf: string) => {
   let mensagem: string;
-  console.log(cpf);
-  if (!validarCPF(cpf)) {
-    mensagem = "Favor inserir um CPF válido.";
-    return mensagem;
-  }
-
   const dataResponseConsulta = await ConsultaPaciente({
     api,
     params: { NomePaciente: nome, CPF: cpf },
@@ -93,11 +98,13 @@ export const getLaudoPDF = async (api: any, chosenIndex: number) => {
 };
 
 export const getAgendamentos = async (api: any) => {
+  // biome-ignore lint/style/useConst: <explanation>
   let mensagem: string;
   listaAgendamentos = await doGetAgendamentos({
     api,
     codPaciente: codPaciente,
   });
+
   mensagem =
     listaAgendamentos.length > 0
       ? TemplateListaAgendamentos({
@@ -106,7 +113,22 @@ export const getAgendamentos = async (api: any) => {
       : TemplateListaAgendamentos({
           listaAgendamentos,
         }).semAgendamento;
+
   return mensagem;
+};
+export const ConfirmaExame = async (api: any, chosenIndex: number) => {
+  // biome-ignore lint/style/useConst: <explanation>
+  let message: string;
+  const selectedAgendamemto = listaAgendamentos[chosenIndex - 1].cd_atendimento;
+  const data = await confirmaExame(api, selectedAgendamemto);
+  message =
+    data.length > 0
+      ? TemplateConfirmaAgendamento().confirmacao
+      : TemplateConfirmaAgendamento().erroConfirmacao;
+  return message;
+};
+export const getListaPlanos = async (api, plano) => {
+  listaPlanos = await ListarPlanos({ api });
 };
 // if (acaoWebhook === "consulta") {
 //     const dataResponseConsulta = await ConsultaPaciente({

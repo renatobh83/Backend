@@ -1,13 +1,20 @@
 /* eslint-disable no-return-assign */
-import { Message as WbotMessage } from "whatsapp-web.js";
+import type { Message as WbotMessage } from "whatsapp-web.js";
 import socketEmit from "../../helpers/socketEmit";
-import Ticket from "../../models/Ticket";
+import type Ticket from "../../models/Ticket";
 import CreateMessageSystemService from "../MessageServices/CreateMessageSystemService";
 import CreateLogTicketService from "../TicketServices/CreateLogTicketService";
 import BuildSendMessageService from "./BuildSendMessageService";
 import DefinedUserBotService from "./DefinedUserBotService";
 import IsContactTest from "./IsContactTest";
+import { validarCPF } from "../../utils/ApiWebhook";
 
+const validateStep = async (ticket: Ticket, step: any): Promise<boolean> => {
+  if (step.data.label === "validacpf") {
+    return validarCPF(ticket.lastMessage.toString().trim());
+  }
+  return true;
+};
 const isNextSteps = async (
   ticket: Ticket,
   chatFlow: any,
@@ -16,6 +23,11 @@ const isNextSteps = async (
 ): Promise<void> => {
   // action = 0: enviar para proximo step: nextStepId
   if (stepCondition.action === 0) {
+    const validationPassed = validateStep(ticket, step);
+    if (!validationPassed) {
+      return;
+    }
+
     await ticket.update({
       stepChatFlow: stepCondition.nextStepId,
       botRetries: 0,
@@ -307,10 +319,11 @@ const VerifyStepsChatFlowTicket = async (
       // verificar condição com a ação do step
       const stepCondition = step.data.conditions.find((conditions: any) => {
         if (conditions.type === "US") return true;
-        const newConditions = conditions.condition.map((c: any) =>
-          String(c).toLowerCase().trim()
-        );
+        // const newConditions = conditions.condition.map((c: any) =>
+        //   String(c).toLowerCase().trim()
+        // );
         const message = String(msg.body).toLowerCase().trim();
+
         return conditions.condition.some(
           (c: any) => String(c).toLowerCase().trim() === message
         );

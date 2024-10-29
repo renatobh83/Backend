@@ -24,10 +24,12 @@ import {
 import {
   apiConsulta,
   apiConsultaCPF,
+  ConfirmaExame,
   consultaAtendimentos,
   getAgendamentos,
   getLaudoPDF,
 } from "./Helpers/ActionsApi";
+import { validarCPF } from "../../utils/ApiWebhook";
 interface MessageData {
   id?: string;
   ticketId: number;
@@ -214,6 +216,10 @@ const BuildSendMessageService = async ({
       const numero = formatarNumero(ticket.contact.number);
       if (acaoWebhook === "consulta") {
         mensagem = await apiConsulta(nome, api, numero);
+      } else if (acaoWebhook === "validacpf") {
+        if (!validarCPF(ticket.lastMessage.toString().trim())) {
+          mensagem = "Por favor inserir um CPF valido.";
+        }
       } else if (acaoWebhook === "consultacpf") {
         mensagem = await apiConsultaCPF(
           nome,
@@ -222,6 +228,10 @@ const BuildSendMessageService = async ({
         );
       } else if (acaoWebhook === "laudo") {
         mensagem = await consultaAtendimentos(api);
+      } else if (acaoWebhook === "agendamento") {
+        mensagem = await getAgendamentos(api);
+      } else if (acaoWebhook === "confirmacao") {
+        mensagem = await ConfirmaExame(api, +ticket.lastMessage);
       } else if (acaoWebhook === "pdf") {
         const mediaName = await getLaudoPDF(api, +ticket.lastMessage);
         const customPath = join(__dirname, "..", "..", "..", "public");
@@ -280,10 +290,7 @@ const BuildSendMessageService = async ({
           });
           return;
         }
-      } else if (acaoWebhook === "agendamento") {
-        mensagem = await getAgendamentos(api);
       }
-
       messageSent = await SendMessageSystemProxy({
         ticket,
         messageData: {

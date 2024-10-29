@@ -187,6 +187,33 @@ export async function doGetAgendamentos({ api, codPaciente }) {
         })
         .slice(0, 5); // Seleciona os 5 registros mais recentes
     }
+    return [];
+  } catch (error) {
+    console.error("Erro ao confirmar exame:", error);
+    throw error;
+  }
+}
+
+export async function doListaPlano(api: any) {
+  const apiInstance = createApiInstanceJTW(api);
+  const url = "/doListaPlano/";
+  const URL_FINAL = `${api.baseURl}${url}`;
+  try {
+    const { data } = await apiInstance.post(URL_FINAL, {});
+    return data;
+  } catch (error) {
+    console.error("Error :", error);
+    throw error;
+  }
+}
+export async function confirmaExame(api: any, atendimento: number) {
+  const apiInstance = createApiInstanceJTW(api);
+  const url = `/doAgendaConfirmar?cd_atendimento=${atendimento}`;
+  const URL_FINAL = `${api.baseURl}${url}`;
+  try {
+    const { data } = await apiInstance.post(URL_FINAL, {});
+
+    return data;
   } catch (error) {
     console.error("Erro ao confirmar exame:", error);
     throw error;

@@ -19,6 +19,7 @@ import {
 import { TemplateConsulta } from "../templates/consultaDados";
 import { ConsultaPaciente } from "../services/ApiConfirmacaoServices/Helpers/ConsultaPacientes";
 import { validarCPF } from "../utils/ApiWebhook";
+import { ListarPlanos } from "../services/ApiConfirmacaoServices/Helpers/ListaPlanos";
 
 export default interface Notificacao {
   paciente_nome: string;
@@ -200,11 +201,14 @@ export const TESTEAPIWEBHOOKS = async (
   const acaoWebhook = data.webhook.acao.toLowerCase();
 
   const api = await ShowApiListService({ id: idApi, tenantId: 1 });
-  const response = await ConsultaPaciente({
-    api,
-    params: { NomePaciente: "Renato mendonca" },
-  });
-  console.log(validarCPF("01330415656"));
+
+  const response = await ListarPlanos({ api });
+  const searchTerm = "brasilia";
+  const filteredData = response.filter((item) =>
+    item.ds_fornecedor.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  return res.json(filteredData);
   // const actionIsInclude = api.action.includes(acaoWebhook);
 
   // if (!actionIsInclude) {
