@@ -39,10 +39,9 @@ export const TemplateListaAgendamentos = ({
   message += "Para encerar o atendimento, digite 8.\n";
   const agendamentos = message;
   const semAgendamento = `Olá! Gostaríamos de informá-lo que, no momento, você não tem nenhum agendamento marcado conosco.
-  Se precisar de ajuda para marcar um horário ou tiver outras dúvidas, estamos à disposição.
-  Para realizar um agendamento, digite 5.\n
-  Para retornar o menu de opções, digite 6.\n
-  Para encerar o atendimento, digite 7.\n `;
+Se precisar de ajuda para marcar um horário ou tiver outras dúvidas, estamos à disposição.
+Para retornar o menu de opções, digite 7.\n
+Para encerar o atendimento, digite 8.\n `;
   return {
     agendamentos,
     semAgendamento,

@@ -38,6 +38,7 @@ export const apiConsulta = async (nome: string, api: any, numero: string) => {
     api,
     params: { NomePaciente: nome },
   });
+  console.log(dataResponseConsulta);
   if (dataResponseConsulta.length > 1) {
     mensagem = TemplateConsulta({ nome }).nenhumRegistroLocalizado;
     return mensagem;
@@ -58,13 +59,13 @@ export const apiConsultaCPF = async (nome: string, api: any, cpf: string) => {
     api,
     params: { NomePaciente: nome, CPF: cpf },
   });
-
   if (dataResponseConsulta.length) {
+    const nomeEncontrado = dataResponseConsulta[0].NomePaciente;
     codPaciente = dataResponseConsulta[0].CodigoPaciente;
-    mensagem = TemplateConsulta({ nome }).registroEncontrado;
+    mensagem = TemplateConsulta({ nome: nomeEncontrado }).registroEncontrado;
     return mensagem;
   }
-  return TemplateConsulta({ nome }).nenhumRegistroLocalizado;
+  return TemplateConsulta({ nome }).buscaCpf;
 };
 export const consultaAtendimentos = async (api) => {
   // biome-ignore lint/style/useConst: <explanation>

@@ -46,7 +46,7 @@ export default {
     }
     return queue.bull.add(data, { ...queue.options, ...data.options });
   },
-  process(concurrency = 10) {
+  process(concurrency = 100) {
     // biome-ignore lint/complexity/noForEach: <explanation>
     return this.queues.forEach((queue) => {
       queue.bull.process(concurrency, queue.handle);

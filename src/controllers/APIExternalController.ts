@@ -199,7 +199,7 @@ export const TESTEAPIWEBHOOKS = async (
   const { data } = req.body;
   const idApi = data.webhook.apiId;
   const acaoWebhook = data.webhook.acao.toLowerCase();
-
+  console.log(validarCPF("01330415655"));
   const api = await ShowApiListService({ id: idApi, tenantId: 1 });
 
   const response = await ListarPlanos({ api });

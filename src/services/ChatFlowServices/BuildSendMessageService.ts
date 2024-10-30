@@ -216,10 +216,6 @@ const BuildSendMessageService = async ({
       const numero = formatarNumero(ticket.contact.number);
       if (acaoWebhook === "consulta") {
         mensagem = await apiConsulta(nome, api, numero);
-      } else if (acaoWebhook === "validacpf") {
-        if (!validarCPF(ticket.lastMessage.toString().trim())) {
-          mensagem = "Por favor inserir um CPF valido.";
-        }
       } else if (acaoWebhook === "consultacpf") {
         mensagem = await apiConsultaCPF(
           nome,

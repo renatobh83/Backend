@@ -10,7 +10,7 @@ import IsContactTest from "./IsContactTest";
 import { validarCPF } from "../../utils/ApiWebhook";
 
 const validateStep = async (ticket: Ticket, step: any): Promise<boolean> => {
-  if (step.data.label === "validacpf") {
+  if (step.data.label === "pesquisaCPF") {
     return validarCPF(ticket.lastMessage.toString().trim());
   }
   return true;
@@ -23,9 +23,30 @@ const isNextSteps = async (
 ): Promise<void> => {
   // action = 0: enviar para proximo step: nextStepId
   if (stepCondition.action === 0) {
-    const validationPassed = validateStep(ticket, step);
+    const previousStepId = ticket.stepChatFlow; // Guardar o passo anterior
+    const validationPassed = await validateStep(ticket, step);
     if (!validationPassed) {
-      return;
+      await ticket.update({
+        stepChatFlow: previousStepId, // Restaurar para o passo anterior
+        botRetries: ticket.botRetries + 1, // Incrementar tentativas do bot
+        lastInteractionBot: new Date(),
+      });
+
+      // Enviar mensagem de erro para o usuário
+      await CreateMessageSystemService({
+        msg: {
+          body: "CPF inválido. Por favor, revise as informações e tente novamente.",
+          fromMe: true,
+          read: true,
+          sendType: "bot",
+        },
+        tenantId: ticket.tenantId,
+        ticket,
+        sendType: "bot",
+        status: "pending",
+      });
+
+      return; // Sair sem avançar para o próximo passo
     }
 
     await ticket.update({
