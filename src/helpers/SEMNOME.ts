@@ -40,17 +40,6 @@ import { createApiInstance, createApiInstanceJTW } from "../utils/ApiWebhook";
 //   }
 // }
 
-// export async function getPreparos(
-//   procedimentos: number[],
-//   instanceApi: ApiConfirma
-// ) {
-
-//   const promessas = procedimentos.map(async (procedimento) => {
-//     const response = await instanceApi.doGetPreparo(procedimento);
-//     return response;
-//   });
-//   const responses = await Promise.all(promessas);
-// }
 interface InstanceAxios {
   baseURl: string;
   token2: string;
@@ -214,6 +203,19 @@ export async function confirmaExame(api: any, atendimento: number) {
     const { data } = await apiInstance.post(URL_FINAL, {});
 
     return data;
+  } catch (error) {
+    console.error("Erro ao confirmar exame:", error);
+    throw error;
+  }
+}
+export async function getPreparos({ procedimento, api }) {
+  const apiInstance = createApiInstanceJTW(api);
+  const url = `/doProcedimentoPreparo?cd_procedimento=${procedimento}`;
+  const URL_FINAL = `${api.baseURl}${url}`;
+  try {
+    const { data } = await apiInstance.post(URL_FINAL, {});
+    const blob = data[0].bb_preparo;
+    return blob;
   } catch (error) {
     console.error("Erro ao confirmar exame:", error);
     throw error;

@@ -2,9 +2,11 @@ import {
   confirmaExame,
   doGetAgendamentos,
   doListaAtendimentos,
+  getPreparos,
 } from "../../../helpers/SEMNOME";
 import { TemplateConfirmaAgendamento } from "../../../templates/confirmacao";
 import { TemplateConsulta } from "../../../templates/consultaDados";
+import { TemplateExamesPreparo } from "../../../templates/ExamesPreparo";
 import {
   TemplateListaAgendamentos,
   type ResponseListaAgendamentos,
@@ -128,9 +130,36 @@ export const ConfirmaExame = async (api: any, chosenIndex: number) => {
       : TemplateConfirmaAgendamento().erroConfirmacao;
   return message;
 };
-export const getListaPlanos = async (api, plano) => {
+export const getListaPlanos = async (api) => {
   listaPlanos = await ListarPlanos({ api });
+  return listaPlanos;
 };
+export const ListaExamesPreparo = async () => {
+  return TemplateExamesPreparo({ listaAgendamentos }).agendamentos;
+};
+
+export const getPreparo = async (chosenIndex: number, api: any) => {
+  const selectedExamePreparo =
+    listaAgendamentos[chosenIndex - 1].cd_procedimento;
+
+  const cdProcedimento = selectedExamePreparo.split(";").map(Number);
+  //   const promessas = procedimentos.map(async (procedimento) => {
+  //     const response = await instanceApi.doGetPreparo(procedimento);
+  //     return response;
+  //   });
+  //   const responses = await Promise.all(promessas);
+  const preparos = cdProcedimento.map(async (procedimento) => {
+    const response = await getPreparos({ api, procedimento });
+    return response;
+  });
+  return await Promise.all(preparos);
+  // const response = await getPreparos({
+  //   procedimento: selectedExamePreparo,
+  //   api,
+  // });
+  // return response;
+};
+
 // if (acaoWebhook === "consulta") {
 //     const dataResponseConsulta = await ConsultaPaciente({
 //       api,

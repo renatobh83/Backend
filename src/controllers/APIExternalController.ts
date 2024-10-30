@@ -15,11 +15,13 @@ import {
   doGetAgendamentos,
   doGetLaudo,
   doListaAtendimentos,
+  getPreparos,
 } from "../helpers/SEMNOME";
 import { TemplateConsulta } from "../templates/consultaDados";
 import { ConsultaPaciente } from "../services/ApiConfirmacaoServices/Helpers/ConsultaPacientes";
 import { validarCPF } from "../utils/ApiWebhook";
 import { ListarPlanos } from "../services/ApiConfirmacaoServices/Helpers/ListaPlanos";
+import SendMessageBlob from "../services/WbotServices/SendMessageBlob";
 
 export default interface Notificacao {
   paciente_nome: string;
@@ -199,16 +201,17 @@ export const TESTEAPIWEBHOOKS = async (
   const { data } = req.body;
   const idApi = data.webhook.apiId;
   const acaoWebhook = data.webhook.acao.toLowerCase();
-  console.log(validarCPF("01330415655"));
+
   const api = await ShowApiListService({ id: idApi, tenantId: 1 });
+  const responseTeste = await doGetAgendamentos({ api, codPaciente: 72382 });
+  console.log(responseTeste);
+  // const response = await ListarPlanos({ api });
+  // const searchTerm = "brasilia";
+  // const filteredData = response.filter((item) =>
+  //   item.ds_fornecedor.toLowerCase().includes(searchTerm.toLowerCase())
+  // );
 
-  const response = await ListarPlanos({ api });
-  const searchTerm = "brasilia";
-  const filteredData = response.filter((item) =>
-    item.ds_fornecedor.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
-  return res.json(filteredData);
+  // return res.json(filteredData);
   // const actionIsInclude = api.action.includes(acaoWebhook);
 
   // if (!actionIsInclude) {
@@ -275,5 +278,5 @@ export const TESTEAPIWEBHOOKS = async (
   // } catch (error) {
   //   return res.status(500).send(error.response);
   // }
-  return res.status(200).json("data");
+  return res.status(200).json(responseTeste);
 };

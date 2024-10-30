@@ -28,8 +28,11 @@ import {
   consultaAtendimentos,
   getAgendamentos,
   getLaudoPDF,
+  getPreparo,
+  ListaExamesPreparo,
 } from "./Helpers/ActionsApi";
 import { validarCPF } from "../../utils/ApiWebhook";
+import SendMessageBlobHtml from "../../helpers/SendWhatsAppBlob";
 interface MessageData {
   id?: string;
   ticketId: number;
@@ -226,6 +229,17 @@ const BuildSendMessageService = async ({
         mensagem = await consultaAtendimentos(api);
       } else if (acaoWebhook === "agendamento") {
         mensagem = await getAgendamentos(api);
+      } else if (acaoWebhook === "preparo") {
+        mensagem = await ListaExamesPreparo();
+      } else if (acaoWebhook === "sendpreparo") {
+        const preparo = await getPreparo(+ticket.lastMessage, api);
+        preparo.map((p) => {
+          SendMessageBlobHtml({
+            ticket,
+            blob: p,
+            userId: null,
+          });
+        });
       } else if (acaoWebhook === "confirmacao") {
         mensagem = await ConfirmaExame(api, +ticket.lastMessage);
       } else if (acaoWebhook === "pdf") {
