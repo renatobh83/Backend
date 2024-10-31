@@ -1,25 +1,24 @@
-import { Client, Message as WbotMessage } from "whatsapp-web.js";
+import type { Client, Message as WbotMessage } from "whatsapp-web.js";
 import VerifyContact from "./helpers/VerifyContact";
-
 import Confirmacao from "../../models/Confirmacao";
 import { logger } from "../../utils/logger";
-import FindorCreateConfirmacaoTicket from "../ConfirmacaoServices/FindorCreateConfirmacaoTicket";
 import ProcessBodyData from "../../helpers/ProcessBodyData";
 import CreateTemplateMessageService from "../MessageServices/CreateTemplateMessageService";
+import FindOrCreateConfirmacaoTicket from "../ConfirmacaoServices/FindorCreateConfirmacaoTicket";
 
 interface Session extends Client {
   id: number;
 }
 
 const SendMessageSystemConfirmacao = async (wbot: Session, data: any) => {
-  let message: any = {} as WbotMessage;
+  let message: WbotMessage = {} as WbotMessage;
   const bodyProcessed = ProcessBodyData(data.body);
 
   const idNumber = await wbot.getNumberId(bodyProcessed.contato);
   const msgContact = await wbot.getContactById(idNumber._serialized);
   const contact = await VerifyContact(msgContact, data.tenantId);
 
-  const ticket = await FindorCreateConfirmacaoTicket({
+  const ticket = await FindOrCreateConfirmacaoTicket({
     contact: contact.id,
     tenantId: data.tenantId,
     channel: "Whatsapp",

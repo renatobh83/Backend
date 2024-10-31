@@ -1,6 +1,6 @@
 const ProcessBodyData = (body: any): any => {
   const modifiedbody = body;
-  const jsonParse = JSON.parse(body.contatos[0].notificacao);
+  const jsonParse = JSON.parse(body.notificacao);
 
   const array = jsonParse;
 
@@ -27,7 +27,7 @@ const ProcessBodyData = (body: any): any => {
 
   array.dados_agendamentos = dadosAgendamentosArray;
 
-  modifiedbody.contatos[0].notificacao = array;
+  modifiedbody.notificacao = array;
 
   return modifiedbody;
 };

@@ -199,12 +199,18 @@ export const TESTEAPIWEBHOOKS = async (
   req: Request,
   res: Response
 ): Promise<Response> => {
-  const data = req.body;
+  const { contatos } = req.body;
   // const idApi = data.webhook.apiId;
   // const acaoWebhook = data.webhook.acao.toLowerCase();
-
-  const a = ProcessBodyData(data);
-
+  const a = ProcessBodyData(contatos[0]);
+  console.log(a);
+  const horarioMaisCedo = a.notificacao.dados_agendamentos.reduce(
+    (min, agendamento) => {
+      return agendamento.Hora < min.Hora ? agendamento : min;
+    },
+    a.notificacao.dados_agendamentos[0]
+  );
+  console.log(horarioMaisCedo);
   // const api = await ShowApiListService({ id: idApi, tenantId: 1 });
   // const responseTeste = await doGetAgendamentos({ api, codPaciente: 72382 });
   // console.log(responseTeste);

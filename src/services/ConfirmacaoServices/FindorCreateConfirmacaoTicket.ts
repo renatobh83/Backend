@@ -9,14 +9,13 @@ interface Data {
   contatoSend: string;
 }
 
-const FindorCreateConfirmacaoTicket = async ({
+const FindOrCreateConfirmacaoTicket = async ({
   contact,
   tenantId,
   data,
   channel,
   contatoSend,
 }: Data): Promise<Confirmacao | any> => {
-
   const horarioMaisCedo = data.body.notificacao.dados_agendamentos.reduce(
     (min, agendamento) => {
       return agendamento.Hora < min.Hora ? agendamento : min;
@@ -26,7 +25,7 @@ const FindorCreateConfirmacaoTicket = async ({
 
   let confirmacaoReturn: any = {};
 
-  let confirmacao = await Confirmacao.findOne({
+  const confirmacao = await Confirmacao.findOne({
     where: {
       contactId: 1,
       atendimentoData: data.body.notificacao.atendimento_data,
@@ -83,42 +82,37 @@ const FindorCreateConfirmacaoTicket = async ({
       );
     }
     return { confirmacaoJaEnviada: true };
-    confirmacaoReturn = await Confirmacao.findOne({
-      where: { id: confirmacao.id },
-    });
-  } else {
-
-    const novosProcedimentos = [];
-    const novosIdExternos = [];
-
-    for (const agendamento of data.body.notificacao.dados_agendamentos) {
-        const { idExterno, Procedimento } = agendamento;
-
-        // Verifique se idExterno já existe em novosIdExternos antes de adicionar
-        if (!novosIdExternos.includes(idExterno)) {
-            novosIdExternos.push(idExterno);
-        }
-
-        // Verifique se Procedimento já existe em novosProcedimentos antes de adicionar
-        if (!novosProcedimentos.includes(Procedimento)) {
-            novosProcedimentos.push(Procedimento);
-        }
-    }
-    const confirmacaoObj: any = {
-      contactId: contact,
-      contatoSend,
-      procedimentos: novosProcedimentos,
-      idexterno: novosIdExternos,
-      atendimentoData: data.body.notificacao.atendimento_data,
-      atendimentoHora: horarioMaisCedo.Hora,
-      tenantId: tenantId,
-      channel,
-    };
-
-    confirmacaoReturn = await Confirmacao.create(confirmacaoObj);
   }
+  const novosProcedimentos = [];
+  const novosIdExternos = [];
+
+  for (const agendamento of data.body.notificacao.dados_agendamentos) {
+    const { idExterno, Procedimento } = agendamento;
+
+    // Verifique se idExterno já existe em novosIdExternos antes de adicionar
+    if (!novosIdExternos.includes(idExterno)) {
+      novosIdExternos.push(idExterno);
+    }
+
+    // Verifique se Procedimento já existe em novosProcedimentos antes de adicionar
+    if (!novosProcedimentos.includes(Procedimento)) {
+      novosProcedimentos.push(Procedimento);
+    }
+  }
+  const confirmacaoObj: any = {
+    contactId: contact,
+    contatoSend,
+    procedimentos: novosProcedimentos,
+    idexterno: novosIdExternos,
+    atendimentoData: data.body.notificacao.atendimento_data,
+    atendimentoHora: horarioMaisCedo.Hora,
+    tenantId: tenantId,
+    channel,
+  };
+
+  confirmacaoReturn = await Confirmacao.create(confirmacaoObj);
 
   return confirmacaoReturn.dataValues;
 };
 
-export default FindorCreateConfirmacaoTicket;
+export default FindOrCreateConfirmacaoTicket;
