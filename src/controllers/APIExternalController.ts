@@ -23,6 +23,8 @@ import { validarCPF } from "../utils/ApiWebhook";
 import { ListarPlanos } from "../services/ApiConfirmacaoServices/Helpers/ListaPlanos";
 import SendMessageBlob from "../services/WbotServices/SendMessageBlob";
 import ProcessBodyData from "../helpers/ProcessBodyData";
+import GetApiConfirmacaoService from "../services/ApiConfirmacaoServices/GetApiConfirmacaoService";
+import ShowApiListServiceName from "../services/ApiConfirmacaoServices/ShowApiListServiceName";
 
 export default interface Notificacao {
   paciente_nome: string;
@@ -203,14 +205,33 @@ export const TESTEAPIWEBHOOKS = async (
   // const idApi = data.webhook.apiId;
   // const acaoWebhook = data.webhook.acao.toLowerCase();
   const a = ProcessBodyData(contatos[0]);
-  console.log(a);
+
   const horarioMaisCedo = a.notificacao.dados_agendamentos.reduce(
     (min, agendamento) => {
       return agendamento.Hora < min.Hora ? agendamento : min;
     },
     a.notificacao.dados_agendamentos[0]
   );
-  console.log(horarioMaisCedo);
+  const api = await ShowApiListServiceName({
+    nomeApi: "API GENESIS",
+    tenantId: 1,
+  });
+
+  // const preparos = cdProcedimento.map(async (procedimento) => {
+  //   const response = await getPreparos({ api, procedimento });
+  //   return response;
+  // });
+  // return await Promise.allSettled(preparos);
+  const response = a.notificacao.dados_agendamentos.map((i) =>
+    getPreparos({ api, procedimento: i.Procedimento })
+  );
+
+  const retur = await Promise.allSettled(response);
+  const fulfilledResults = retur
+    .filter((result) => result.status === "fulfilled")
+    .map((result) => result.value);
+
+  fulfilledResults.map((a) => console.log(a));
   // const api = await ShowApiListService({ id: idApi, tenantId: 1 });
   // const responseTeste = await doGetAgendamentos({ api, codPaciente: 72382 });
   // console.log(responseTeste);

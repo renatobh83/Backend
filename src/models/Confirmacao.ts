@@ -9,13 +9,13 @@ import {
   AutoIncrement,
   Default,
   DataType,
-
-
+  BelongsTo,
 } from "sequelize-typescript";
 import Contact from "./Contact";
 import Tenant from "./Tenant";
+import Whatsapp from "./Whatsapp";
 
-@Table({ tableName: 'Confirmacao' })
+@Table({ tableName: "Confirmacao" })
 class Confirmacao extends Model<Confirmacao> {
   @PrimaryKey
   @AutoIncrement
@@ -32,16 +32,16 @@ class Confirmacao extends Model<Confirmacao> {
   lastMessage: string;
 
   @Column(DataType.JSONB)
-  procedimentos: number[]
+  procedimentos: number[];
 
   @Column(DataType.JSONB)
-  idexterno: number[]
+  idexterno: number[];
 
   @Column
-  atendimentoData: string
+  atendimentoData: string;
 
   @Column
-  atendimentoHora: string
+  atendimentoHora: string;
 
   @Default(false)
   @Column
@@ -50,28 +50,33 @@ class Confirmacao extends Model<Confirmacao> {
   @Column(DataType.BIGINT)
   lastMessageAt: number;
 
-
   @Column(DataType.STRING)
   messageResponse: string;
 
   @Default(false)
   @Column
-  preparoEnviado: boolean
+  preparoEnviado: boolean;
 
   @ForeignKey(() => Contact)
   @Column
   contactId: number;
 
   @Column
-  preparo!: Buffer
+  preparo!: Buffer;
 
   @Column(DataType.BIGINT)
-  closedAt: Date;
+  closedAt: number;
 
   @ForeignKey(() => Tenant)
   @Column
   tenantId: number;
 
+  @ForeignKey(() => Whatsapp)
+  @Column
+  whatsappId: number;
+
+  @BelongsTo(() => Whatsapp)
+  whatsapp: Whatsapp;
   @Column
   channel: string;
 
@@ -83,7 +88,6 @@ class Confirmacao extends Model<Confirmacao> {
 
   @UpdatedAt
   updatedAt: Date;
-
 }
 
 export default Confirmacao;

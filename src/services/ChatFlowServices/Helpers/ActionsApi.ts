@@ -152,7 +152,7 @@ export const getPreparo = async (chosenIndex: number, api: any) => {
     const response = await getPreparos({ api, procedimento });
     return response;
   });
-  return await Promise.all(preparos);
+  return await Promise.allSettled(preparos);
   // const response = await getPreparos({
   //   procedimento: selectedExamePreparo,
   //   api,

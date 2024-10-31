@@ -1,13 +1,17 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { logger } from "../utils/logger";
 
-import GetApiConfirmacaoService from "../services/ApiConfirmacaoServices/GetApiConfirmacaoService";
-// import { confirmarAtendimentos } from "../helpers/SEMNOME";
+import ShowApiListServiceName from "../services/ApiConfirmacaoServices/ShowApiListServiceName";
+import { confirmaExame, getPreparos } from "../helpers/SEMNOME";
+import Confirmacao from "../models/Confirmacao";
+import SendMessageBlobHtml from "../helpers/SendWhatsAppBlob";
+import SendMessagePreparoApiExternal from "../services/WbotServices/SendMessagePreparoApiExternal";
 
 interface Data {
   idexterno: number[];
   procedimentos: number[];
   tenantId: string;
+  contatoSend: string;
 }
 
 interface HandlerPayload {
@@ -27,15 +31,56 @@ export default {
   // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
   async handle({ data }: HandlerPayload) {
     try {
+      const api = await ShowApiListServiceName({
+        nomeApi: "API GENESIS",
+        tenantId: Number(data.tenantId),
+      });
+      const msgConfirmacao = await Confirmacao.findOne({
+        where: {
+          tenantId: Number(data.tenantId),
+          contatoSend: data.contatoSend,
+        },
+      });
+      function isBase64Meaningful(base64) {
+        // Decodifica e mede o tamanho do conteúdo base64
+        const decodedContent = Buffer.from(base64, "base64");
+        const minSize = 200; // Define 200 bytes como tamanho mínimo para conteúdo relevante
+
+        return decodedContent.length >= minSize;
+      }
+      let responseSendMessage: any;
       //   const { link, usuario, senha } = await GetApiConfirmacaoService({ tenantId: Number(data.tenantId)})
       //   const instanceApi = new ApiConfirma(usuario, senha, link);
+      // ConfirmaExame(api)
+      const confirmacao = data.idexterno.map((i) => confirmaExame(api, i));
+      const preparos = data.procedimentos.map((i) =>
+        getPreparos({ api, procedimento: i })
+      );
+      const retornoPreparo = await Promise.allSettled(preparos);
+      const retornoConfirmacao = await Promise.allSettled(confirmacao);
+      // Verifique se todas as promessas foram resolvidas com sucesso
+      const allFulfilled = retornoConfirmacao.every(
+        (result) => result.status === "fulfilled"
+      );
+      if (allFulfilled) {
+        // Extraia os valores dos preparos
 
-      // //   const response = await instanceApi.confirmaExame()
-      //     if(confirmarAtendimentos(data.idexterno, instanceApi)){
-      //         console.log('CONFIRMADo')
-      //     }
+        msgConfirmacao.status = "CONFIRMADO";
+        msgConfirmacao.save();
+        responseSendMessage = retornoPreparo
+          .filter((result) => isBase64Meaningful(result.value)) // Filtra apenas resultados onde base64 não está vazio
+          .map(async (result) => {
+            return await SendMessagePreparoApiExternal({
+              msgConfirmacao,
+              base64Html: result.value,
+              sendTo: data.contatoSend,
+            });
+          });
+      } else {
+        console.log("Nem todas as promessas foram resolvidas com sucesso.");
+      }
 
-      logger.info(`Queue WebHooksAPI success: Data: ${data}`);
+      logger.info(`Queue WebHooksAPI success: Data: ${responseSendMessage}`);
       return true;
     } catch (error) {
       logger.error(`Error send message confirmacao response: ${error}`);

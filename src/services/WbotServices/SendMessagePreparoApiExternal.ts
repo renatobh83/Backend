@@ -4,45 +4,36 @@ import GetTicketWbot from "../../helpers/GetTicketWbot";
 import type Ticket from "../../models/Ticket";
 import UserMessagesLog from "../../models/UserMessagesLog";
 import { logger } from "../../utils/logger";
+import type Confirmacao from "../../models/Confirmacao";
 
 interface Request {
   base64Html: string;
-  ticket: Ticket;
-  userId: number;
+  msgConfirmacao: Confirmacao;
+  sendTo: string;
 }
 
-const SendMessageBlob = async ({
+const SendMessagePreparoApiExternal = async ({
   base64Html,
-  ticket,
-  userId,
+  msgConfirmacao,
+  sendTo,
 }: Request): Promise<WbotMessage> => {
   try {
-    const wbot = await GetTicketWbot(ticket);
+    const wbot = await GetTicketWbot(msgConfirmacao);
 
     const media = new MessageMedia("text/html", base64Html, "Preparo");
-
-    const sendMessage = await wbot.sendMessage(
-      `${ticket.contact.number}@${ticket.isGroup ? "g" : "c"}.us`,
-      media,
-      { sendAudioAsVoice: true }
-    );
-
-    await ticket.update({
-      lastMessage: "arquivo.html",
-      lastMessageAt: new Date().getTime(),
+    await wbot.sendMessage(sendTo, "Agendamento Confirmado com sucesso!");
+    const sendMessage = await wbot.sendMessage(sendTo, media, {
+      sendAudioAsVoice: true,
+      caption: "Segue o preparo do seu exame!",
     });
-    try {
-      if (userId) {
-        await UserMessagesLog.create({
-          messageId: sendMessage.id.id,
-          userId,
-          ticketId: ticket.id,
-        });
-      }
-    } catch (error) {
-      logger.error(`Error criar log mensagem ${error}`);
-    }
 
+    await msgConfirmacao.update({
+      lastMessage: "Segue o preparo do seu exame!",
+      lastMessageAt: new Date().getTime(),
+      closedAt: new Date().getTime(),
+      status: "PREPARO ENVIADO",
+      preparoEnviado: true,
+    });
     return sendMessage;
   } catch (err) {
     console.log(err);
@@ -51,5 +42,4 @@ const SendMessageBlob = async ({
     throw new AppError("ERR_SENDING_WAPP_MSG");
   }
 };
-
-export default SendMessageBlob;
+export default SendMessagePreparoApiExternal;

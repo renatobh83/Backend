@@ -22,20 +22,22 @@ const CheckConfirmationResponse = async ({
       contatoSend: data.from,
     },
   });
-
+  msgConfirmacao.status = "RESPONDIDO";
+  msgConfirmacao.lastMessage = data.body;
+  // msgConfirmacao.answered = true;
+  msgConfirmacao.lastMessageAt = new Date().getTime();
+  msgConfirmacao.save();
   switch (data.body) {
     case "sim":
     case "Sim":
     case "👍":
     case "1":
-      console.log("Resposta confirmar:", data.body);
-
       Queue.add("WebHookConfirma", {
         idexterno: msgConfirmacao.idexterno,
         procedimentos: msgConfirmacao.procedimentos,
         tenantId,
+        contatoSend: data.from,
       });
-      // sendApiConfirmacao({tenantId, idExterno: msgConfirmacao.idExterno})
       break;
     case "nao":
     case "Nao":
