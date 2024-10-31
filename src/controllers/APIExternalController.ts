@@ -22,6 +22,7 @@ import { ConsultaPaciente } from "../services/ApiConfirmacaoServices/Helpers/Con
 import { validarCPF } from "../utils/ApiWebhook";
 import { ListarPlanos } from "../services/ApiConfirmacaoServices/Helpers/ListaPlanos";
 import SendMessageBlob from "../services/WbotServices/SendMessageBlob";
+import ProcessBodyData from "../helpers/ProcessBodyData";
 
 export default interface Notificacao {
   paciente_nome: string;
@@ -198,13 +199,15 @@ export const TESTEAPIWEBHOOKS = async (
   req: Request,
   res: Response
 ): Promise<Response> => {
-  const { data } = req.body;
-  const idApi = data.webhook.apiId;
-  const acaoWebhook = data.webhook.acao.toLowerCase();
+  const data = req.body;
+  // const idApi = data.webhook.apiId;
+  // const acaoWebhook = data.webhook.acao.toLowerCase();
 
-  const api = await ShowApiListService({ id: idApi, tenantId: 1 });
-  const responseTeste = await doGetAgendamentos({ api, codPaciente: 72382 });
-  console.log(responseTeste);
+  const a = ProcessBodyData(data);
+
+  // const api = await ShowApiListService({ id: idApi, tenantId: 1 });
+  // const responseTeste = await doGetAgendamentos({ api, codPaciente: 72382 });
+  // console.log(responseTeste);
   // const response = await ListarPlanos({ api });
   // const searchTerm = "brasilia";
   // const filteredData = response.filter((item) =>
@@ -278,5 +281,5 @@ export const TESTEAPIWEBHOOKS = async (
   // } catch (error) {
   //   return res.status(500).send(error.response);
   // }
-  return res.status(200).json(responseTeste);
+  return res.status(200).json("ok");
 };
