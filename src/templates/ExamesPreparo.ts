@@ -24,10 +24,10 @@ export const TemplateExamesPreparo = ({
   listaAgendamentos,
 }: TemplateProps): TemplateConsultaReturn => {
   let message =
-    "Para consultar o prepro, escolha uma das opções abaixo, informando o número correspondente:\n\n";
+    "Para consultar o preparo, escolha uma das opções abaixo, informando o número correspondente:\n\n";
   listaAgendamentos.forEach((item, index) => {
     message += `${index + 1}. Data do Exame: ${item.dt_data}\n`;
-    message += `   Exame de : ${item.ds_modalidade}\n\n`;
+    message += `Exame de : ${item.ds_modalidade}\n\n`;
   });
 
   // // Adicionando as opções com os índices dos atendimentos
