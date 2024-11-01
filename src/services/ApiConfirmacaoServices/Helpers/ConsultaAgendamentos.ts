@@ -5,17 +5,15 @@ interface AxiosInstance {
   token: string;
 }
 interface ConsultarAgendamentosProps {
-  api: AxiosInstance;
-
+  tenantId: number;
   codPaciente: number;
 }
 export const ConsultarAgendamentos = async ({
-  api,
-
+  tenantId,
   codPaciente,
 }: ConsultarAgendamentosProps) => {
   const data = await doGetAgendamentos({
-    api,
+    tenantId,
     codPaciente,
   });
   return data;

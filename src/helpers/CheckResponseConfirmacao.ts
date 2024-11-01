@@ -24,7 +24,7 @@ const CheckConfirmationResponse = async ({
   });
   msgConfirmacao.status = "RESPONDIDO";
   msgConfirmacao.lastMessage = data.body;
-  // msgConfirmacao.answered = true;
+  msgConfirmacao.answered = true;
   msgConfirmacao.lastMessageAt = new Date().getTime();
   msgConfirmacao.save();
   switch (data.body) {

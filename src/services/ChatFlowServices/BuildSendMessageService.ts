@@ -45,6 +45,12 @@ interface WebhookProps {
   apiId: string;
   acao: string;
 }
+export enum MessageType {
+  MessageField = "MessageField",
+  MessageOptionsField = "MessageOptionsField",
+  MediaField = "MediaField",
+  WebhookField = "WebhookField",
+}
 interface MessageRequest {
   data: {
     message?: string;

@@ -4,7 +4,9 @@ import socketEmit from "../../helpers/socketEmit";
 import type Ticket from "../../models/Ticket";
 import CreateMessageSystemService from "../MessageServices/CreateMessageSystemService";
 import CreateLogTicketService from "../TicketServices/CreateLogTicketService";
-import BuildSendMessageService from "./BuildSendMessageService";
+import BuildSendMessageService, {
+  MessageType,
+} from "./BuildSendMessageService";
 import DefinedUserBotService from "./DefinedUserBotService";
 import IsContactTest from "./IsContactTest";
 import { validarCPF } from "../../utils/ApiWebhook";
@@ -154,7 +156,7 @@ const isCloseDefine = async (ticket, actionDetails) => {
     const messageField = {
       data: closeTicketMessage,
       id: actionDetails.id,
-      type: "MessageField",
+      type: MessageType.MediaField,
     };
     const messageArray = [messageField];
     const firstMessage = messageArray[0];

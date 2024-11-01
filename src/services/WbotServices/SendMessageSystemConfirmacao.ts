@@ -4,7 +4,7 @@ import Confirmacao from "../../models/Confirmacao";
 import { logger } from "../../utils/logger";
 import ProcessBodyData from "../../helpers/ProcessBodyData";
 import CreateTemplateMessageService from "../MessageServices/CreateTemplateMessageService";
-import FindOrCreateConfirmacaoTicket from "../ConfirmacaoServices/FindorCreateConfirmacaoTicket";
+import FindOrCreateConfirmacaoTicket from "../ConfirmacaoServices/FindOrCreateConfirmacaoTicket";
 
 interface Session extends Client {
   id: number;
