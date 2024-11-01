@@ -34,13 +34,17 @@ let listaAtendimentos: ResponseListaAtendimento[];
 let listaAgendamentos: ResponseListaAgendamentos[];
 let listaPlanos: ResponseListaPlanos[];
 
-export const apiConsulta = async (nome: string, api: any, numero: string) => {
+export const apiConsulta = async (
+  nome: string,
+  tenantId: number,
+  numero: string
+) => {
   let mensagem: string;
   const dataResponseConsulta = await ConsultaPaciente({
-    api,
+    tenantId,
     params: { NomePaciente: nome },
   });
-  console.log(dataResponseConsulta);
+
   if (dataResponseConsulta.length > 1) {
     mensagem = TemplateConsulta({ nome }).nenhumRegistroLocalizado;
     return mensagem;
@@ -55,10 +59,15 @@ export const apiConsulta = async (nome: string, api: any, numero: string) => {
   }
   return TemplateConsulta({ nome }).nenhumRegistroLocalizado;
 };
-export const apiConsultaCPF = async (nome: string, api: any, cpf: string) => {
+
+export const apiConsultaCPF = async (
+  nome: string,
+  tenantId: number,
+  cpf: string
+) => {
   let mensagem: string;
   const dataResponseConsulta = await ConsultaPaciente({
-    api,
+    tenantId,
     params: { NomePaciente: nome, CPF: cpf },
   });
   if (dataResponseConsulta.length) {
@@ -69,11 +78,11 @@ export const apiConsultaCPF = async (nome: string, api: any, cpf: string) => {
   }
   return TemplateConsulta({ nome }).buscaCpf;
 };
-export const consultaAtendimentos = async (api) => {
+export const consultaAtendimentos = async (tenantId: number) => {
   // biome-ignore lint/style/useConst: <explanation>
   let mensagem: string;
   listaAtendimentos = await doListaAtendimentos({
-    api,
+    tenantId,
     codigoPaciente: codPaciente,
   });
 
@@ -87,10 +96,10 @@ export const consultaAtendimentos = async (api) => {
         }).semAtendimentoComLaudo;
   return mensagem;
 };
-export const getLaudoPDF = async (api: any, chosenIndex: number) => {
+export const getLaudoPDF = async (tenantId: number, chosenIndex: number) => {
   const selectedLaudo = listaAtendimentos[chosenIndex - 1];
   await ConsultarLaudos({
-    api,
+    tenantId,
     cdExame: +selectedLaudo.cd_exame,
     cdPaciente: codPaciente,
     cdFuncionario: 1,
@@ -100,11 +109,11 @@ export const getLaudoPDF = async (api: any, chosenIndex: number) => {
   return mediaName;
 };
 
-export const getAgendamentos = async (api: any) => {
+export const getAgendamentos = async (tenantId: number) => {
   // biome-ignore lint/style/useConst: <explanation>
   let mensagem: string;
   listaAgendamentos = await doGetAgendamentos({
-    api,
+    tenantId,
     codPaciente: codPaciente,
   });
 
@@ -119,45 +128,36 @@ export const getAgendamentos = async (api: any) => {
 
   return mensagem;
 };
-export const ConfirmaExame = async (api: any, chosenIndex: number) => {
+export const ConfirmaExame = async (tenantId: number, chosenIndex: number) => {
   // biome-ignore lint/style/useConst: <explanation>
   let message: string;
   const selectedAgendamemto = listaAgendamentos[chosenIndex - 1].cd_atendimento;
-  const data = await confirmaExame(api, selectedAgendamemto);
+  const data = await confirmaExame(tenantId, selectedAgendamemto);
   message =
     data.length > 0
       ? TemplateConfirmaAgendamento().confirmacao
       : TemplateConfirmaAgendamento().erroConfirmacao;
   return message;
 };
-export const getListaPlanos = async (api) => {
-  listaPlanos = await ListarPlanos({ api });
+export const getListaPlanos = async (tenantId: number) => {
+  listaPlanos = await ListarPlanos({ tenantId });
   return listaPlanos;
 };
 export const ListaExamesPreparo = async () => {
   return TemplateExamesPreparo({ listaAgendamentos }).agendamentos;
 };
 
-export const getPreparo = async (chosenIndex: number, api: any) => {
+export const getPreparo = async (chosenIndex: number, tenantId: number) => {
   const selectedExamePreparo =
     listaAgendamentos[chosenIndex - 1].cd_procedimento;
 
   const cdProcedimento = selectedExamePreparo.split(";").map(Number);
-  //   const promessas = procedimentos.map(async (procedimento) => {
-  //     const response = await instanceApi.doGetPreparo(procedimento);
-  //     return response;
-  //   });
-  //   const responses = await Promise.all(promessas);
+
   const preparos = cdProcedimento.map(async (procedimento) => {
-    const response = await getPreparos({ api, procedimento });
+    const response = await getPreparos({ tenantId, procedimento });
     return response;
   });
   return await Promise.allSettled(preparos);
-  // const response = await getPreparos({
-  //   procedimento: selectedExamePreparo,
-  //   api,
-  // });
-  // return response;
 };
 
 // if (acaoWebhook === "consulta") {

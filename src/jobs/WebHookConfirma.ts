@@ -31,10 +31,6 @@ export default {
   // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
   async handle({ data }: HandlerPayload) {
     try {
-      const api = await ShowApiListServiceName({
-        nomeApi: "API GENESIS",
-        tenantId: Number(data.tenantId),
-      });
       const msgConfirmacao = await Confirmacao.findOne({
         where: {
           tenantId: Number(data.tenantId),
@@ -52,9 +48,11 @@ export default {
       //   const { link, usuario, senha } = await GetApiConfirmacaoService({ tenantId: Number(data.tenantId)})
       //   const instanceApi = new ApiConfirma(usuario, senha, link);
       // ConfirmaExame(api)
-      const confirmacao = data.idexterno.map((i) => confirmaExame(api, i));
+      const confirmacao = data.idexterno.map((i) =>
+        confirmaExame(+data.tenantId, i)
+      );
       const preparos = data.procedimentos.map((i) =>
-        getPreparos({ api, procedimento: i })
+        getPreparos({ tenantId: +data.tenantId, procedimento: i })
       );
       const retornoPreparo = await Promise.allSettled(preparos);
       const retornoConfirmacao = await Promise.allSettled(confirmacao);
@@ -68,6 +66,7 @@ export default {
         msgConfirmacao.status = "CONFIRMADO";
         msgConfirmacao.save();
         responseSendMessage = retornoPreparo
+          .filter((result) => result.status === "fulfilled")
           .filter((result) => isBase64Meaningful(result.value)) // Filtra apenas resultados onde base64 não está vazio
           .map(async (result) => {
             return await SendMessagePreparoApiExternal({

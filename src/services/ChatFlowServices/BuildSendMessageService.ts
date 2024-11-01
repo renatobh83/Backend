@@ -1,4 +1,5 @@
-import path, { join } from "path";
+import { join } from "path";
+import fs from "fs";
 import { pupa } from "../../utils/pupa";
 import { logger } from "../../utils/logger";
 import Ticket from "../../models/Ticket";
@@ -6,21 +7,9 @@ import Message from "../../models/Message";
 import socketEmit from "../../helpers/socketEmit";
 import SendMessageSystemProxy from "../../helpers/SendMessageSystemProxy";
 import ShowApiListService from "../ApiConfirmacaoServices/ShowApiListService";
-import { ConsultaPaciente } from "../ApiConfirmacaoServices/Helpers/ConsultaPacientes";
-import { TemplateConsulta } from "../../templates/consultaDados";
-import {
-  doGetAgendamentos,
-  doGetLaudo,
-  doListaAtendimentos,
-} from "../../helpers/SEMNOME";
-import { ConsultarLaudos } from "../ApiConfirmacaoServices/Helpers/ConsultarLaudos";
-import { TemplateListaAtendimentos } from "../../templates/ListaAtendimentos";
 import { existsSync } from "fs";
 import { promisify } from "util";
-import {
-  ResponseListaAgendamentos,
-  TemplateListaAgendamentos,
-} from "../../templates/ListaAgendamentos";
+import type { ResponseListaAgendamentos } from "../../templates/ListaAgendamentos";
 import {
   apiConsulta,
   apiConsultaCPF,
@@ -31,7 +20,6 @@ import {
   getPreparo,
   ListaExamesPreparo,
 } from "./Helpers/ActionsApi";
-import { validarCPF } from "../../utils/ApiWebhook";
 import SendMessageBlobHtml from "../../helpers/SendWhatsAppBlob";
 interface MessageData {
   id?: string;
@@ -204,6 +192,7 @@ const BuildSendMessageService = async ({
       });
     } else if (msg.type === "WebhookField") {
       let mensagem: string;
+      // biome-ignore lint/suspicious/noExplicitAny: <explanation>
       let messageSent: any;
       const idApi = msg.data.webhook.apiId;
       const acaoWebhook = msg.data.webhook.acao.toLowerCase();
@@ -218,32 +207,34 @@ const BuildSendMessageService = async ({
       const nome = ticket.contact.name;
       const numero = formatarNumero(ticket.contact.number);
       if (acaoWebhook === "consulta") {
-        mensagem = await apiConsulta(nome, api, numero);
+        mensagem = await apiConsulta(nome, api.tenantId, numero);
       } else if (acaoWebhook === "consultacpf") {
         mensagem = await apiConsultaCPF(
           nome,
-          api,
+          api.tenantId,
           ticket.lastMessage.toString().trim()
         );
       } else if (acaoWebhook === "laudo") {
-        mensagem = await consultaAtendimentos(api);
+        mensagem = await consultaAtendimentos(api.tenantId);
       } else if (acaoWebhook === "agendamento") {
-        mensagem = await getAgendamentos(api);
+        mensagem = await getAgendamentos(api.tenantId);
       } else if (acaoWebhook === "preparo") {
         mensagem = await ListaExamesPreparo();
       } else if (acaoWebhook === "sendpreparo") {
-        const preparo = await getPreparo(+ticket.lastMessage, api);
-        preparo.map((p) => {
-          SendMessageBlobHtml({
-            ticket,
-            blob: p,
-            userId: null,
+        const preparo = await getPreparo(+ticket.lastMessage, api.tenantId);
+        preparo
+          .filter((result) => result.status === "fulfilled")
+          .map((result) => {
+            SendMessageBlobHtml({
+              ticket,
+              blob: result.value,
+              userId: null,
+            });
           });
-        });
       } else if (acaoWebhook === "confirmacao") {
-        mensagem = await ConfirmaExame(api, +ticket.lastMessage);
+        mensagem = await ConfirmaExame(api.tenantId, +ticket.lastMessage);
       } else if (acaoWebhook === "pdf") {
-        const mediaName = await getLaudoPDF(api, +ticket.lastMessage);
+        const mediaName = await getLaudoPDF(api.tenantId, +ticket.lastMessage);
         const customPath = join(__dirname, "..", "..", "..", "public");
         const mediaPath = join(customPath, mediaName);
         const arquivoExiste = await verificarArquivo(mediaPath);
@@ -298,6 +289,7 @@ const BuildSendMessageService = async ({
             type: "chat:create",
             payload: messageCreated,
           });
+          fs.unlinkSync(mediaPath);
           return;
         }
       }

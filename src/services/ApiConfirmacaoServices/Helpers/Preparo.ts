@@ -1,18 +1,13 @@
-import { doGetLaudo, doListaPlano } from "../../../helpers/SEMNOME";
 import { getPreparo } from "../../ChatFlowServices/Helpers/ActionsApi";
 
-interface AxiosInstance {
-  baseURl: string;
-  token: string;
-}
 interface ConsultarLaudosProps {
-  api: AxiosInstance;
-  procedimentos: number[];
+  tenantId: number;
+  procedimento: number;
 }
 export const ListarPlanos = async ({
-  procedimentos,
-  api,
+  procedimento,
+  tenantId,
 }: ConsultarLaudosProps) => {
-  const data = await getPreparo(procedimentos, api);
+  const data = await getPreparo(procedimento, tenantId);
   return data;
 };

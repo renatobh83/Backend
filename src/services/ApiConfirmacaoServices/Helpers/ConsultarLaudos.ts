@@ -1,25 +1,21 @@
 import { doGetLaudo } from "../../../helpers/SEMNOME";
 
-interface AxiosInstance {
-  baseURl: string;
-  token: string;
-}
 interface ConsultarLaudosProps {
-  api: AxiosInstance;
+  tenantId: number;
   cdExame: number;
   cdPaciente: number;
   cdFuncionario: number;
   entrega: boolean;
 }
 export const ConsultarLaudos = async ({
-  api,
+  tenantId,
   cdExame,
   cdPaciente,
   cdFuncionario,
   entrega,
 }: ConsultarLaudosProps) => {
   const data = await doGetLaudo({
-    api,
+    tenantId,
     cdExame,
     cdPaciente,
     cdFuncionario,

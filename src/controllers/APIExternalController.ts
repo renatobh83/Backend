@@ -18,7 +18,7 @@ import {
   getPreparos,
 } from "../helpers/SEMNOME";
 import { TemplateConsulta } from "../templates/consultaDados";
-import { ConsultaPaciente } from "../services/ApiConfirmacaoServices/Helpers/ConsultaPacientes";
+
 import { validarCPF } from "../utils/ApiWebhook";
 import { ListarPlanos } from "../services/ApiConfirmacaoServices/Helpers/ListaPlanos";
 import SendMessageBlob from "../services/WbotServices/SendMessageBlob";
@@ -212,9 +212,12 @@ export const TESTEAPIWEBHOOKS = async (
     },
     a.notificacao.dados_agendamentos[0]
   );
-  const api = await ShowApiListServiceName({
-    nomeApi: "API GENESIS",
-    tenantId: 1,
+  // const api = await ShowApiListServiceName({
+  //   nomeApi: "API GENESIS",
+  //   tenantId: 1,
+  // });
+  const daa = await consultaPaciente({
+    params: { NomePaciente: "Renato lucio mendonca" },
   });
 
   // const preparos = cdProcedimento.map(async (procedimento) => {
@@ -222,16 +225,16 @@ export const TESTEAPIWEBHOOKS = async (
   //   return response;
   // });
   // return await Promise.allSettled(preparos);
-  const response = a.notificacao.dados_agendamentos.map((i) =>
-    getPreparos({ api, procedimento: i.Procedimento })
-  );
+  // const response = a.notificacao.dados_agendamentos.map((i) =>
+  //   getPreparos({ api, procedimento: i.Procedimento })
+  // );
 
-  const retur = await Promise.allSettled(response);
-  const fulfilledResults = retur
-    .filter((result) => result.status === "fulfilled")
-    .map((result) => result.value);
+  // const retur = await Promise.allSettled(response);
+  // const fulfilledResults = retur
+  //   .filter((result) => result.status === "fulfilled")
+  //   .map((result) => result.value);
 
-  fulfilledResults.map((a) => console.log(a));
+  // fulfilledResults.map((a) => console.log(a));
   // const api = await ShowApiListService({ id: idApi, tenantId: 1 });
   // const responseTeste = await doGetAgendamentos({ api, codPaciente: 72382 });
   // console.log(responseTeste);

@@ -1,13 +1,9 @@
-import { doGetLaudo, doListaPlano } from "../../../helpers/SEMNOME";
+import { doListaPlano } from "../../../helpers/SEMNOME";
 
-interface AxiosInstance {
-  baseURl: string;
-  token: string;
-}
 interface ConsultarLaudosProps {
-  api: AxiosInstance;
+  tenantId: number;
 }
-export const ListarPlanos = async ({ api }: ConsultarLaudosProps) => {
-  const data = await doListaPlano(api);
+export const ListarPlanos = async ({ tenantId }: ConsultarLaudosProps) => {
+  const data = await doListaPlano(tenantId);
   return data;
 };

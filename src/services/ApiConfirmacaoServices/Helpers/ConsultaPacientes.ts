@@ -8,16 +8,16 @@ interface ConsultaPacienteParams {
   CPF?: string; // Campo opcional para incluir na consulta quando necessário
 }
 interface ConsultaPacienteProps {
-  api: InstanceAxios;
+  tenantId: number;
   params: ConsultaPacienteParams;
 }
 
 export const ConsultaPaciente = async ({
-  api,
+  tenantId,
   params,
 }: ConsultaPacienteProps) => {
   try {
-    const data = await consultaPaciente({ api, params });
+    const data = await consultaPaciente({ tenantId, params });
     if (data) {
       return data;
     }

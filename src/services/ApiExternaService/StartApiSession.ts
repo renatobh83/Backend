@@ -3,6 +3,7 @@ import AppError from "../../errors/AppError";
 import ApiConfirmacao from "../../models/ApiConfirmacao";
 import { logger } from "../../utils/logger";
 
+let cachedToken: string | null = null;
 export const StartApiSession = async (api: ApiConfirmacao) => {
   const findApi = await ApiConfirmacao.findOne({
     where: { id: api.id, tenantId: api.tenantId },
@@ -13,7 +14,7 @@ export const StartApiSession = async (api: ApiConfirmacao) => {
 
   const usuario = findApi.usuario;
   const senha = findApi.senha;
-  const link = "https://otrsweb.zapto.org/testeportal/cgi-bin/dwserver.cgi/se1";
+  const link = findApi.baseURl;
   if (findApi.token) {
     const currentDate = new Date();
     const diffInMilliseconds =
@@ -25,6 +26,7 @@ export const StartApiSession = async (api: ApiConfirmacao) => {
           `${link}/doFuncionarioLogin?id=${usuario}&pw=${senha}`
         );
         const token = response.data[0].ds_token;
+        cachedToken = token;
         findApi.token = token;
         findApi.status = "CONECTADA";
         await findApi.save();
@@ -36,20 +38,20 @@ export const StartApiSession = async (api: ApiConfirmacao) => {
     }
 
     // Cálculo para obter os componentes de tempo restantes
-    const diffInSeconds = Math.floor(diffInMilliseconds / 1000);
-    const seconds = diffInSeconds % 60;
+    // const diffInSeconds = Math.floor(diffInMilliseconds / 1000);
+    // const seconds = diffInSeconds % 60;
 
-    const diffInMinutes = Math.floor(diffInSeconds / 60);
-    const minutes = diffInMinutes % 60;
+    // const diffInMinutes = Math.floor(diffInSeconds / 60);
+    // const minutes = diffInMinutes % 60;
 
-    const diffInHours = Math.floor(diffInMinutes / 60);
-    const hours = diffInHours % 24;
+    // const diffInHours = Math.floor(diffInMinutes / 60);
+    // const hours = diffInHours % 24;
 
-    const days = Math.floor(diffInHours / 24);
+    // const days = Math.floor(diffInHours / 24);
 
-    console.log(
-      `${days} dias, ${hours} horas, ${minutes} minutos e ${seconds} segundos`
-    );
+    // console.log(
+    //   `${days} dias, ${hours} horas, ${minutes} minutos e ${seconds} segundos`
+    // );
 
     return;
   }
@@ -58,6 +60,7 @@ export const StartApiSession = async (api: ApiConfirmacao) => {
       `${link}/doFuncionarioLogin?id=${usuario}&pw=${senha}`
     );
     const token = response.data[0].ds_token;
+    cachedToken = token;
     findApi.token = token;
     findApi.status = "CONECTADA";
     await findApi.save();

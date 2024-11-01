@@ -1,6 +1,9 @@
 const fs = require("fs");
 const path = require("path");
-import { createApiInstance, createApiInstanceJTW } from "../utils/ApiWebhook";
+import {
+  createApiSessionInstance,
+  sessionApiDados,
+} from "../services/ApiExternaService/StartApiSessionByName";
 
 // export async function confirmarAtendimentos(
 //   atendimentos,
@@ -39,38 +42,49 @@ import { createApiInstance, createApiInstanceJTW } from "../utils/ApiWebhook";
 //     );
 //   }
 // }
-
-interface InstanceAxios {
-  baseURl: string;
-  token2: string;
+export interface StartSessionProps {
+  nomeApi: string;
+  tenantId: number;
 }
+
 interface ConsultaPacienteParams {
   NomePaciente: string;
   CPF?: string; // Campo opcional para incluir na consulta quando necessário
 }
 interface ConsultaPacienteProps {
-  api: InstanceAxios;
+  tenantId?: number;
   params: ConsultaPacienteParams;
 }
-export async function consultaPaciente({ api, params }: ConsultaPacienteProps) {
+export async function consultaPaciente({
+  tenantId,
+  params,
+}: ConsultaPacienteProps) {
   try {
-    if (!api.baseURl) {
+    const apiInstance = await createApiSessionInstance({
+      nomeApi: "API GENESIS",
+      tenantId: tenantId,
+      jwt: false,
+    });
+
+    if (!sessionApiDados.baseURl) {
       throw new Error("Url não cadatrada para a api");
     }
     if (!params.NomePaciente) {
       return "Nao tem parametro para pesquisa";
     }
-    const apiInstance = createApiInstance(api);
+
     const url = "/clinuxintegra/consultapacientes";
-    const URL_FINAL = `${api.baseURl}${url}`;
+    const URL_FINAL = `${sessionApiDados.baseURl}${url}`;
 
     const consultaDados = {
       NomePaciente: params.NomePaciente,
       ...(params.CPF && { CPF: params.CPF }), // Inclui o CPF somente se ele estiver presente em `params`
     };
     const { data } = await apiInstance.post(URL_FINAL, consultaDados);
-
-    return data;
+    if (data !== null) {
+      return data;
+    }
+    return [];
   } catch (error) {
     throw new Error("Url não cadatrada para a api");
   }
@@ -82,22 +96,27 @@ interface InstanceAxiosJTW {
 }
 
 interface ConsultaLaudoProps {
-  api: InstanceAxiosJTW;
+  tenantId: number;
   cdExame: number;
   cdPaciente: number;
   cdFuncionario: number;
   entrega: boolean;
 }
 export async function doGetLaudo({
-  api,
+  tenantId,
   cdExame,
   cdPaciente,
   cdFuncionario,
   entrega,
 }: ConsultaLaudoProps) {
-  const apiInstance = createApiInstanceJTW(api);
+  const apiInstance = await createApiSessionInstance({
+    nomeApi: "API GENESIS",
+    tenantId,
+    jwt: true,
+  });
+
   const url = `/doLaudoDownload?cd_exame=${cdExame}&cd_paciente=${cdPaciente}&cd_funcuionario=${cdFuncionario}&sn_entrega=${entrega}`;
-  const URL_FINAL = `${api.baseURl}${url}`;
+  const URL_FINAL = `${sessionApiDados.baseURl}${url}`;
   try {
     const response = await apiInstance.post(
       URL_FINAL,
@@ -129,18 +148,22 @@ export async function doGetLaudo({
 }
 
 interface doListaAtendimentoProps {
-  api: InstanceAxiosJTW;
+  tenantId: number;
   codigoPaciente: number;
 }
 
 export async function doListaAtendimentos({
-  api,
+  tenantId,
   codigoPaciente,
 }: doListaAtendimentoProps) {
-  const apiInstance = createApiInstanceJTW(api);
+  const apiInstance = await createApiSessionInstance({
+    nomeApi: "API GENESIS",
+    tenantId,
+    jwt: true,
+  });
 
   const url = `/doListaAtendimento?cd_paciente=${codigoPaciente}`;
-  const URL_FINAL = `${api.baseURl}${url}`;
+  const URL_FINAL = `${sessionApiDados.baseURl}${url}`;
   try {
     const { data } = await apiInstance.post(URL_FINAL, {});
     if (data.length) {
@@ -159,10 +182,15 @@ export async function doListaAtendimentos({
     throw error;
   }
 }
-export async function doGetAgendamentos({ api, codPaciente }) {
-  const apiInstance = createApiInstanceJTW(api);
+export async function doGetAgendamentos({ tenantId, codPaciente }) {
+  const apiInstance = await createApiSessionInstance({
+    nomeApi: "API GENESIS",
+    tenantId,
+    jwt: true,
+  });
+
   const url = `/doListaAgendamento?cd_paciente=${codPaciente}`;
-  const URL_FINAL = `${api.baseURl}${url}`;
+  const URL_FINAL = `${sessionApiDados.baseURl}${url}`;
   try {
     const { data } = await apiInstance.post(URL_FINAL, {});
     //   console.log("Exame confirmado com sucesso", response.data);
@@ -183,10 +211,14 @@ export async function doGetAgendamentos({ api, codPaciente }) {
   }
 }
 
-export async function doListaPlano(api: any) {
-  const apiInstance = createApiInstanceJTW(api);
+export async function doListaPlano(tenantId: number) {
+  const apiInstance = await createApiSessionInstance({
+    nomeApi: "API GENESIS",
+    tenantId,
+    jwt: true,
+  });
   const url = "/doListaPlano/";
-  const URL_FINAL = `${api.baseURl}${url}`;
+  const URL_FINAL = `${sessionApiDados.baseURl}${url}`;
   try {
     const { data } = await apiInstance.post(URL_FINAL, {});
     return data;
@@ -195,10 +227,14 @@ export async function doListaPlano(api: any) {
     throw error;
   }
 }
-export async function confirmaExame(api: any, atendimento: number) {
-  const apiInstance = createApiInstanceJTW(api);
+export async function confirmaExame(tenantId: number, atendimento: number) {
+  const apiInstance = await createApiSessionInstance({
+    nomeApi: "API GENESIS",
+    tenantId,
+    jwt: true,
+  });
   const url = `/doAgendaConfirmar?cd_atendimento=${atendimento}`;
-  const URL_FINAL = `${api.baseURl}${url}`;
+  const URL_FINAL = `${sessionApiDados.baseURl}${url}`;
   try {
     const { data } = await apiInstance.post(URL_FINAL, {});
 
@@ -208,13 +244,18 @@ export async function confirmaExame(api: any, atendimento: number) {
     throw error;
   }
 }
-export async function getPreparos({ procedimento, api }) {
-  const apiInstance = createApiInstanceJTW(api);
+export async function getPreparos({ procedimento, tenantId }) {
+  const apiInstance = await createApiSessionInstance({
+    nomeApi: "API GENESIS",
+    tenantId,
+    jwt: true,
+  });
   const url = `/doProcedimentoPreparo?cd_procedimento=${procedimento}`;
-  const URL_FINAL = `${api.baseURl}${url}`;
+  const URL_FINAL = `${sessionApiDados.baseURl}${url}`;
   try {
     const { data } = await apiInstance.post(URL_FINAL, {});
     const blob = data[0].bb_preparo;
+
     return blob;
   } catch (error) {
     console.error("Erro ao confirmar exame:", error);
