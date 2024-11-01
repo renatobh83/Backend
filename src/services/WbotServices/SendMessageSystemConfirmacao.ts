@@ -4,7 +4,8 @@ import Confirmacao from "../../models/Confirmacao";
 import { logger } from "../../utils/logger";
 import ProcessBodyData from "../../helpers/ProcessBodyData";
 import CreateTemplateMessageService from "../MessageServices/CreateTemplateMessageService";
-import FindOrCreateConfirmacaoTicket from "../ConfirmacaoServices/FindOrCreateConfirmacaoTicket";
+
+import FindOrCreateConfirmacao from "../ConfirmacaoServices/FindOrCreateConfirmacaoTicket";
 
 interface Session extends Client {
   id: number;
@@ -18,7 +19,7 @@ const SendMessageSystemConfirmacao = async (wbot: Session, data: any) => {
   const msgContact = await wbot.getContactById(idNumber._serialized);
   const contact = await VerifyContact(msgContact, data.tenantId);
 
-  const ticket = await FindOrCreateConfirmacaoTicket({
+  const ticket = await FindOrCreateConfirmacao({
     contact: contact.id,
     tenantId: data.tenantId,
     channel: "Whatsapp",

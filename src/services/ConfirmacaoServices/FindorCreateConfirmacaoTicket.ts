@@ -9,7 +9,7 @@ interface Data {
   contatoSend: string;
 }
 
-const FindOrCreateConfirmacaoTicket = async ({
+const FindOrCreateConfirmacao = async ({
   contact,
   tenantId,
   data,
@@ -115,4 +115,4 @@ const FindOrCreateConfirmacaoTicket = async ({
   return confirmacaoReturn.dataValues;
 };
 
-export default FindOrCreateConfirmacaoTicket;
+export default FindOrCreateConfirmacao;
