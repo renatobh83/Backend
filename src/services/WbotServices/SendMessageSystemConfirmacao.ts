@@ -4,13 +4,13 @@ import Confirmacao from "../../models/Confirmacao";
 import { logger } from "../../utils/logger";
 import ProcessBodyData from "../../helpers/ProcessBodyData";
 import CreateTemplateMessageService from "../MessageServices/CreateTemplateMessageService";
-
 import FindOrCreateConfirmacao from "../ConfirmacaoServices/FindOrCreateConfirmacaoTicket";
 
 interface Session extends Client {
   id: number;
 }
 
+// biome-ignore lint/suspicious/noExplicitAny: <explanation>
 const SendMessageSystemConfirmacao = async (wbot: Session, data: any) => {
   let message: WbotMessage = {} as WbotMessage;
   const bodyProcessed = ProcessBodyData(data.body);

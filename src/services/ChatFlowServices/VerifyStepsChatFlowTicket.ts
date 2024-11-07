@@ -179,7 +179,7 @@ const isCloseDefine = async (ticket, actionDetails) => {
       id: ticket.id,
       tenantId: ticket.tenantId,
     };
-    console.log(showTicketParams);
+
     // const updatedTicket = yield ShowTicketServiceZPRO_1.default(
     //     showTicketParams
     //   ),

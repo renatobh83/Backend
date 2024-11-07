@@ -15,28 +15,28 @@ export const StartAllWhatsAppsSessions = async (): Promise<void> => {
         {
           [Op.and]: {
             type: {
-              [Op.in]: ["instagram", "telegram", "waba", "messenger"]
+              [Op.in]: ["instagram", "telegram", "waba", "messenger"],
             },
             status: {
-              [Op.notIn]: ["DISCONNECTED"]
-            }
-          }
+              [Op.notIn]: ["DISCONNECTED"],
+            },
+          },
         },
         {
           [Op.and]: {
-            type: "whatsapp"
+            type: "whatsapp",
           },
           status: {
-            [Op.notIn]: ["DISCONNECTED", "qrcode"]
+            [Op.notIn]: ["DISCONNECTED", "qrcode"],
             // "DISCONNECTED"
-          }
-        }
+          },
+        },
       ],
-      isActive: true
-    }
+      isActive: true,
+    },
   });
 
-  const whatsappSessions = whatsapps.filter(w => w.type === "whatsapp");
+  const whatsappSessions = whatsapps.filter((w) => w.type === "whatsapp");
   // const telegramSessions = whatsapps.filter(
   //   w => w.type === "telegram" && !!w.tokenTelegram
   // );
@@ -46,38 +46,38 @@ export const StartAllWhatsAppsSessions = async (): Promise<void> => {
 
   if (whatsappSessions.length > 0) {
     // biome-ignore lint/complexity/noForEach: <explanation>
-    whatsappSessions.forEach(whatsapp => {
+    whatsappSessions.forEach((whatsapp) => {
       StartWhatsAppSession(whatsapp);
     });
   }
 
-//   if (telegramSessions.length > 0) {
-//     telegramSessions.forEach(whatsapp => {
-//       StartTbotSession(whatsapp);
-//     });
-//   }
+  //   if (telegramSessions.length > 0) {
+  //     telegramSessions.forEach(whatsapp => {
+  //       StartTbotSession(whatsapp);
+  //     });
+  //   }
 
-//   if (waba360Sessions.length > 0) {
-//     waba360Sessions.forEach(channel => {
-//       if (channel.tokenAPI && channel.wabaBSP === "360") {
-//         StartWaba360(channel);
-//       }
-//     });
-//   }
+  //   if (waba360Sessions.length > 0) {
+  //     waba360Sessions.forEach(channel => {
+  //       if (channel.tokenAPI && channel.wabaBSP === "360") {
+  //         StartWaba360(channel);
+  //       }
+  //     });
+  //   }
 
-//   if (instagramSessions.length > 0) {
-//     instagramSessions.forEach(channel => {
-//       if (channel.instagramKey) {
-//         StartInstaBotSession(channel);
-//       }
-//     });
-//   }
+  //   if (instagramSessions.length > 0) {
+  //     instagramSessions.forEach(channel => {
+  //       if (channel.instagramKey) {
+  //         StartInstaBotSession(channel);
+  //       }
+  //     });
+  //   }
 
-//   if (messengerSessions.length > 0) {
-//     messengerSessions.forEach(channel => {
-//       if (channel.tokenAPI) {
-//         StartMessengerBot(channel);
-//       }
-//     });
-//   }
+  //   if (messengerSessions.length > 0) {
+  //     messengerSessions.forEach(channel => {
+  //       if (channel.tokenAPI) {
+  //         StartMessengerBot(channel);
+  //       }
+  //     });
+  //   }
 };

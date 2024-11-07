@@ -18,33 +18,34 @@ export const StartWhatsAppSession = async (
   const io = getIO();
   io.emit(`${whatsapp.tenantId}:whatsappSession`, {
     action: "update",
-    session: whatsapp
+    session: whatsapp,
   });
 
   try {
     if (whatsapp.type === "whatsapp") {
       const wbot = await initWbot(whatsapp);
+
       wbotMessageListener(wbot);
       wbotMonitor(wbot, whatsapp);
     }
 
-//     if (whatsapp.type === "telegram") {
-//       StartTbotSession(whatsapp);
-//     }
+    //     if (whatsapp.type === "telegram") {
+    //       StartTbotSession(whatsapp);
+    //     }
 
-//     if (whatsapp.type === "instagram") {
-//       StartInstaBotSession(whatsapp);
-//     }
+    //     if (whatsapp.type === "instagram") {
+    //       StartInstaBotSession(whatsapp);
+    //     }
 
-//     if (whatsapp.type === "messenger") {
-//       StartMessengerBot(whatsapp);
-//     }
+    //     if (whatsapp.type === "messenger") {
+    //       StartMessengerBot(whatsapp);
+    //     }
 
-//     if (whatsapp.type === "waba") {
-//       if (whatsapp.wabaBSP === "360") {
-//         StartWaba360(whatsapp);
-//       }
-//     }
+    //     if (whatsapp.type === "waba") {
+    //       if (whatsapp.wabaBSP === "360") {
+    //         StartWaba360(whatsapp);
+    //       }
+    //     }
   } catch (err) {
     logger.error(`StartWhatsAppSession | Error: ${err}`);
     throw new AppError("ERR_START_SESSION", 404);

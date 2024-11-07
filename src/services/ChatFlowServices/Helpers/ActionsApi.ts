@@ -40,6 +40,7 @@ export const apiConsulta = async (
   numero: string
 ) => {
   let mensagem: string;
+  console.log(nome, tenantId);
   const dataResponseConsulta = await ConsultaPaciente({
     tenantId,
     params: { NomePaciente: nome },

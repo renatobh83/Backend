@@ -157,7 +157,7 @@ const StartCampaignService = async ({
     });
   });
   Queue.add("SendMessageWhatsappCampaign", data);
-  console.log(data);
+
   await campaign.update({
     status: "scheduled",
   });
