@@ -43,7 +43,7 @@ export const createApiSessionInstance = async ({
       throw new AppError("ERR_USER_NOT_FOUND", 404);
     }
   }
-
+  console.log(dadosApi);
   // Create Axios instance based on the token type
   const authorizationHeader = jwt ? `Bearer ${currentToken}` : token2;
 

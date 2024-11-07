@@ -1,3 +1,4 @@
+import AppError from "../../../errors/AppError";
 import { consultaPaciente } from "../../../helpers/SEMNOME";
 interface InstanceAxios {
   baseURl: string;
@@ -23,6 +24,7 @@ export const ConsultaPaciente = async ({
     }
     return [];
   } catch (error) {
+    throw new AppError(error);
     // // Responder com o status de erro e a mensagem apropriada
     // if (error instanceof AppError) {
     //   return res.status(error.statusCode).json({ message: error.message });

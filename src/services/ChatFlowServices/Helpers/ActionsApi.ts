@@ -40,13 +40,13 @@ export const apiConsulta = async (
   numero: string
 ) => {
   let mensagem: string;
-  console.log(nome, tenantId);
+
   const dataResponseConsulta = await ConsultaPaciente({
     tenantId,
     params: { NomePaciente: nome },
   });
 
-  if (dataResponseConsulta.length > 1) {
+  if (dataResponseConsulta?.length > 1) {
     mensagem = TemplateConsulta({ nome }).nenhumRegistroLocalizado;
     return mensagem;
   }

@@ -65,7 +65,7 @@ export async function consultaPaciente({
       tenantId: tenantId,
       jwt: false,
     });
-
+    console.log(apiInstance);
     if (!sessionApiDados.baseURl) {
       throw new Error("Url não cadatrada para a api");
     }
@@ -81,18 +81,14 @@ export async function consultaPaciente({
       ...(params.CPF && { CPF: params.CPF }), // Inclui o CPF somente se ele estiver presente em `params`
     };
     const { data } = await apiInstance.post(URL_FINAL, consultaDados);
+
     if (data !== null) {
       return data;
     }
     return [];
   } catch (error) {
-    throw new Error("Url não cadatrada para a api");
+    throw new Error(error.response.statusText);
   }
-}
-
-interface InstanceAxiosJTW {
-  baseURl: string;
-  token: string;
 }
 
 interface ConsultaLaudoProps {
