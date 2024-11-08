@@ -65,7 +65,6 @@ export async function consultaPaciente({
       tenantId: tenantId,
       jwt: false,
     });
-    console.log(apiInstance);
     if (!sessionApiDados.baseURl) {
       throw new Error("Url não cadatrada para a api");
     }
