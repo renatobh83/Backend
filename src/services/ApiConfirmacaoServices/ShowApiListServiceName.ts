@@ -12,7 +12,7 @@ const ShowApiListServiceName = async ({
   tenantId,
 }: Data): Promise<ApiConfirmacao> => {
   const attr = ["action", "token", "token2", "baseURl"];
-  console.log(nomeApi, tenantId);
+
   const api = await ApiConfirmacao.findOne({
     where: { nomeApi, tenantId },
     attributes: attr,

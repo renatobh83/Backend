@@ -21,6 +21,7 @@ import {
   ListaExamesPreparo,
 } from "./Helpers/ActionsApi";
 import SendMessageBlobHtml from "../../helpers/SendWhatsAppBlob";
+import type ApiConfirmacao from "../../models/ApiConfirmacao";
 interface MessageData {
   id?: string;
   ticketId: number;
@@ -95,7 +96,7 @@ interface ResponseListaAtendimento {
 let codPaciente: number;
 let listaAtendimentos: ResponseListaAtendimento[];
 let listaAgendamentos: ResponseListaAgendamentos[];
-
+let servicesApi: ApiConfirmacao;
 const delay = promisify(setTimeout);
 
 async function verificarArquivo(mediaPath, intervalo = 500, tentativas = 20) {
@@ -199,35 +200,41 @@ const BuildSendMessageService = async ({
     } else if (msg.type === "WebhookField") {
       let mensagem: string;
       // biome-ignore lint/suspicious/noExplicitAny: <explanation>
+      // biome-ignore lint/style/useConst: <explanation>
       let messageSent: any;
       const idApi = msg.data.webhook.apiId;
       const acaoWebhook = msg.data.webhook.acao.toLowerCase();
       console.log(acaoWebhook);
-      const api = await ShowApiListService({ id: idApi, tenantId });
+      if (!servicesApi) {
+        servicesApi = await ShowApiListService({ id: idApi, tenantId });
+      }
 
-      const actionIsInclude = api.action.includes(acaoWebhook);
+      const actionIsInclude = servicesApi.action.includes(acaoWebhook);
 
       if (!actionIsInclude) {
-        throw new Error("Actions is not defined to api");
+        throw new Error("Actions is not defined to servicesApi");
       }
       const nome = ticket.contact.name;
       const numero = formatarNumero(ticket.contact.number);
       if (acaoWebhook === "consulta") {
-        mensagem = await apiConsulta(nome, api.tenantId, numero);
+        mensagem = await apiConsulta(nome, servicesApi.tenantId, numero);
       } else if (acaoWebhook === "consultacpf") {
         mensagem = await apiConsultaCPF(
           nome,
-          api.tenantId,
+          servicesApi.tenantId,
           ticket.lastMessage.toString().trim()
         );
       } else if (acaoWebhook === "laudo") {
-        mensagem = await consultaAtendimentos(api.tenantId);
+        mensagem = await consultaAtendimentos(servicesApi.tenantId);
       } else if (acaoWebhook === "agendamento") {
-        mensagem = await getAgendamentos(api.tenantId);
+        mensagem = await getAgendamentos(servicesApi.tenantId);
       } else if (acaoWebhook === "preparo") {
         mensagem = await ListaExamesPreparo();
       } else if (acaoWebhook === "sendpreparo") {
-        const preparo = await getPreparo(+ticket.lastMessage, api.tenantId);
+        const preparo = await getPreparo(
+          +ticket.lastMessage,
+          servicesApi.tenantId
+        );
         preparo
           .filter((result) => result.status === "fulfilled")
           .map((result) => {
@@ -238,9 +245,15 @@ const BuildSendMessageService = async ({
             });
           });
       } else if (acaoWebhook === "confirmacao") {
-        mensagem = await ConfirmaExame(api.tenantId, +ticket.lastMessage);
+        mensagem = await ConfirmaExame(
+          servicesApi.tenantId,
+          +ticket.lastMessage
+        );
       } else if (acaoWebhook === "pdf") {
-        const mediaName = await getLaudoPDF(api.tenantId, +ticket.lastMessage);
+        const mediaName = await getLaudoPDF(
+          servicesApi.tenantId,
+          +ticket.lastMessage
+        );
         const customPath = join(__dirname, "..", "..", "..", "public");
         const mediaPath = join(customPath, mediaName);
         const arquivoExiste = await verificarArquivo(mediaPath);
