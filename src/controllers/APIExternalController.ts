@@ -11,6 +11,7 @@ import { getWbot } from "../libs/wbot";
 import { find, result } from "lodash";
 import ShowApiListService from "../services/ApiConfirmacaoServices/ShowApiListService";
 import {
+  consultaLaudo,
   consultaPaciente,
   doGetAgendamentos,
   doGetLaudo,
@@ -201,25 +202,12 @@ export const TESTEAPIWEBHOOKS = async (
   req: Request,
   res: Response
 ): Promise<Response> => {
-  const { contatos } = req.body;
-  // const idApi = data.webhook.apiId;
-  // const acaoWebhook = data.webhook.acao.toLowerCase();
-  const a = ProcessBodyData(contatos[0]);
-
-  const horarioMaisCedo = a.notificacao.dados_agendamentos.reduce(
-    (min, agendamento) => {
-      return agendamento.Hora < min.Hora ? agendamento : min;
-    },
-    a.notificacao.dados_agendamentos[0]
-  );
   // const api = await ShowApiListServiceName({
   //   nomeApi: "API GENESIS",
   //   tenantId: 1,
   // });
-  const daa = await consultaPaciente({
-    params: { NomePaciente: "Renato lucio mendonca" },
-  });
 
+  const a = await consultaLaudo(1, 30168857);
   // const preparos = cdProcedimento.map(async (procedimento) => {
   //   const response = await getPreparos({ api, procedimento });
   //   return response;

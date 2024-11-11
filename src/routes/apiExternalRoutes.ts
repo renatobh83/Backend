@@ -40,5 +40,5 @@ apiExternalRoute.post(
   APIExternalController.sendMessageConfirmacao
 );
 
-apiExternalRoute.get("/teste", isAuth, APIExternalController.TESTEAPIWEBHOOKS);
+apiExternalRoute.get("/teste", APIExternalController.TESTEAPIWEBHOOKS);
 export default apiExternalRoute;

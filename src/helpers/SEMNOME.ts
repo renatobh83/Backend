@@ -97,6 +97,50 @@ interface ConsultaLaudoProps {
   cdFuncionario: number;
   entrega: boolean;
 }
+export async function consultaLaudo(tenantId, cdExame) {
+  try {
+    const apiInstance = await createApiSessionInstance({
+      nomeApi: "API GENESIS",
+      tenantId: tenantId,
+      jwt: false,
+    });
+    if (!sessionApiDados.baseURl) {
+      throw new Error("Url não cadatrada para a api");
+    }
+    const CodigoItemPedido = {
+      CodigoItemPedido: cdExame,
+    };
+    const url = "/clinuxintegra/consultalaudo";
+    const URL_FINAL = `${sessionApiDados.baseURl}${url}`;
+    const response = await apiInstance.post(URL_FINAL, CodigoItemPedido);
+    const filePath = path.resolve(
+      __dirname,
+      "..",
+      "..",
+      "public",
+      `${cdExame}.pdf`
+    );
+
+    const writer = fs.createWriteStream(filePath, { encoding: "utf8" });
+    const decodedContent = Buffer.from(
+      response.data.BBLaudo,
+      "base64"
+    ).toString("utf8");
+    console.log(decodedContent);
+    writer.write(decodedContent);
+    writer.end();
+
+    writer.on("finish", () => {
+      console.log("Arquivo gravado com sucesso!");
+    });
+
+    writer.on("error", (err) => {
+      console.error("Erro ao gravar o arquivo:", err);
+    });
+  } catch (error) {
+    console.log(error);
+  }
+}
 export async function doGetLaudo({
   tenantId,
   cdExame,
