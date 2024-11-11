@@ -22,6 +22,7 @@ import {
 } from "./Helpers/ActionsApi";
 import SendMessageBlobHtml from "../../helpers/SendWhatsAppBlob";
 import type ApiConfirmacao from "../../models/ApiConfirmacao";
+import { CheckChatFlowWebhook } from "../../helpers/CheckChatFlowWebhook";
 interface MessageData {
   id?: string;
   ticketId: number;
@@ -74,18 +75,6 @@ interface Request {
   userId?: number | string;
 }
 
-const formatarNumero = (numero) => {
-  let numeroFormatado = numero.replace(/^55/, "");
-
-  // Adiciona o dígito '9' após o DDD se ele estiver ausente
-  if (numeroFormatado.length === 10) {
-    numeroFormatado = `${numeroFormatado.slice(0, 2)}9${numeroFormatado.slice(
-      2
-    )}`;
-  }
-
-  return numeroFormatado;
-};
 interface ResponseListaAtendimento {
   ds_medico: string;
   dt_data: string;
@@ -198,120 +187,16 @@ const BuildSendMessageService = async ({
         payload: messageCreated,
       });
     } else if (msg.type === "WebhookField") {
-      let mensagem: string;
       // biome-ignore lint/suspicious/noExplicitAny: <explanation>
       // biome-ignore lint/style/useConst: <explanation>
       let messageSent: any;
-      const idApi = msg.data.webhook.apiId;
-      const acaoWebhook = msg.data.webhook.acao.toLowerCase();
-      console.log(acaoWebhook);
-      if (!servicesApi) {
-        servicesApi = await ShowApiListService({ id: idApi, tenantId });
-      }
+      const mensagem = await CheckChatFlowWebhook(
+        msg.data.webhook,
+        tenantId,
+        ticket,
+        messageData
+      );
 
-      const actionIsInclude = servicesApi.action.includes(acaoWebhook);
-
-      if (!actionIsInclude) {
-        throw new Error("Actions is not defined to servicesApi");
-      }
-      const nome = ticket.contact.name;
-      const numero = formatarNumero(ticket.contact.number);
-      if (acaoWebhook === "consulta") {
-        mensagem = await apiConsulta(nome, servicesApi.tenantId, numero);
-      } else if (acaoWebhook === "consultacpf") {
-        mensagem = await apiConsultaCPF(
-          nome,
-          servicesApi.tenantId,
-          ticket.lastMessage.toString().trim()
-        );
-      } else if (acaoWebhook === "laudo") {
-        mensagem = await consultaAtendimentos(servicesApi.tenantId);
-      } else if (acaoWebhook === "agendamento") {
-        mensagem = await getAgendamentos(servicesApi.tenantId);
-      } else if (acaoWebhook === "preparo") {
-        mensagem = await ListaExamesPreparo();
-      } else if (acaoWebhook === "sendpreparo") {
-        const preparo = await getPreparo(
-          +ticket.lastMessage,
-          servicesApi.tenantId
-        );
-        preparo
-          .filter((result) => result.status === "fulfilled")
-          .map((result) => {
-            SendMessageBlobHtml({
-              ticket,
-              blob: result.value,
-              userId: null,
-            });
-          });
-      } else if (acaoWebhook === "confirmacao") {
-        mensagem = await ConfirmaExame(
-          servicesApi.tenantId,
-          +ticket.lastMessage
-        );
-      } else if (acaoWebhook === "pdf") {
-        const mediaName = await getLaudoPDF(
-          servicesApi.tenantId,
-          +ticket.lastMessage
-        );
-        const customPath = join(__dirname, "..", "..", "..", "public");
-        const mediaPath = join(customPath, mediaName);
-        const arquivoExiste = await verificarArquivo(mediaPath);
-        if (arquivoExiste) {
-          const messageSent = await SendMessageSystemProxy({
-            ticket,
-            messageData: {
-              ...messageData,
-              mediaName: mediaName,
-            },
-            media: {
-              path: mediaPath,
-            },
-            userId: null,
-          });
-          const msgCreated = await Message.create({
-            ...messageData,
-            ...messageSent,
-            id: messageData.id,
-            messageId: messageSent.id?.id || messageSent.messageId || null,
-            mediaType: "bot",
-          });
-
-          const messageCreated = await Message.findByPk(msgCreated.id, {
-            include: [
-              {
-                model: Ticket,
-                as: "ticket",
-                where: { tenantId },
-                include: ["contact"],
-              },
-              {
-                model: Message,
-                as: "quotedMsg",
-                include: ["contact"],
-              },
-            ],
-          });
-
-          if (!messageCreated) {
-            throw new Error("ERR_CREATING_MESSAGE_SYSTEM");
-          }
-
-          await ticket.update({
-            lastMessage: messageCreated.body,
-            lastMessageAt: new Date().getTime(),
-            answered: true,
-          });
-
-          socketEmit({
-            tenantId,
-            type: "chat:create",
-            payload: messageCreated,
-          });
-          fs.unlinkSync(mediaPath);
-          return;
-        }
-      }
       messageSent = await SendMessageSystemProxy({
         ticket,
         messageData: {

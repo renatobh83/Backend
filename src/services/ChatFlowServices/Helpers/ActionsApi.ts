@@ -16,6 +16,7 @@ import { validarCPF } from "../../../utils/ApiWebhook";
 import { ConsultaPaciente } from "../../ApiConfirmacaoServices/Helpers/ConsultaPacientes";
 import { ConsultarLaudos } from "../../ApiConfirmacaoServices/Helpers/ConsultarLaudos";
 import { ListarPlanos } from "../../ApiConfirmacaoServices/Helpers/ListaPlanos";
+import VerifyStepsChatFlowTicket from "../VerifyStepsChatFlowTicket";
 interface ResponseListaAtendimento {
   ds_medico: string;
   dt_data: string;
@@ -38,27 +39,24 @@ export const apiConsulta = async (
   nome: string,
   tenantId: number,
   numero: string
-) => {
-  let mensagem: string;
-
+  // biome-ignore lint/suspicious/noExplicitAny: <explanation>
+): Promise<any[]> => {
   const dataResponseConsulta = await ConsultaPaciente({
     tenantId,
     params: { NomePaciente: nome },
   });
 
-  if (dataResponseConsulta?.length > 1) {
-    mensagem = TemplateConsulta({ nome }).nenhumRegistroLocalizado;
-    return mensagem;
+  if (dataResponseConsulta?.length > 1 || dataResponseConsulta?.length === 0) {
+    // mensagem = TemplateConsulta({ nome }).nenhumRegistroLocalizado;
+    return dataResponseConsulta;
   }
   const dados = dataResponseConsulta.find(
     (i) => i.Celular || i.Whatsapp === numero
   );
   if (dados) {
     codPaciente = dados.CodigoPaciente;
-    mensagem = TemplateConsulta({ nome }).registroEncontrado;
-    return mensagem;
+    return dataResponseConsulta;
   }
-  return TemplateConsulta({ nome }).nenhumRegistroLocalizado;
 };
 
 export const apiConsultaCPF = async (

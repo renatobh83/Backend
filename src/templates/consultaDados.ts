@@ -21,8 +21,8 @@ Sinta-se à vontade para explorar e nos avisar como podemos ajudar!
   const nenhumRegistroLocalizado = `Olá, ${nome}!
 Encontramos mais de um registro associado ao seu nome em nossa base.
 
-Para uma pesquisa mais precisa, por favor, digite consulta.
-Para encerar o atendimento, digite Sair.
+Para uma pesquisa mais precisa, por favor, digite seu cpf.
+Para encerar o atendimento, digite 3.
 Agradecemos pela sua compreensão!`;
   const buscaCpf = `Não encontramos nenhum registro correspondente às informações fornecidas em nossa base de dados.
 Por favor, verifique os dados e tente novamente.

@@ -312,16 +312,15 @@ const isAnswerCloseTicket = async (
   return false;
 };
 
-const VerifyStepsChatFlowTicket = async (
-  msg: WbotMessage | any,
-  ticket: Ticket | any
+const VerifyStepsChatFlowTicketWebhook = async (
+  ticket: Ticket | any,
+  type: string
 ): Promise<void> => {
   let celularTeste: string; // ticket.chatFlow?.celularTeste;
 
   if (
     ticket.chatFlowId &&
     ticket.status === "pending" &&
-    !msg.fromMe &&
     !ticket.isGroup &&
     !ticket.answered
   ) {
@@ -341,26 +340,11 @@ const VerifyStepsChatFlowTicket = async (
       );
 
       // verificar condição com a ação do step
-      const stepCondition = step.data.conditions.find((conditions: any) => {
-        if (conditions.type === "US") return true;
-
-        // const newConditions = conditions.condition.map((c: any) =>
-        //   String(c).toLowerCase().trim()
-        // );
-        const message = String(msg.body).toLowerCase().trim();
-
-        return conditions.condition.some(
-          (c: any) => String(c).toLowerCase().trim() === message
-        );
+      const stepCondition = step.data.conditions.filter((conditions: any) => {
+        if (conditions.type === type) return true;
       });
 
-      if (
-        !ticket.isCreated &&
-        (await isAnswerCloseTicket(flowConfig, ticket, msg.body))
-      )
-        return;
-
-      if (stepCondition && !ticket.isCreated) {
+      if (stepCondition) {
         // await CreateAutoReplyLogsService(stepAutoReplyAtual, ticket, msg.body);
         // Verificar se rotina em teste
         if (
@@ -373,16 +357,16 @@ const VerifyStepsChatFlowTicket = async (
           return;
 
         // action = 0: enviar para proximo step: nextStepId
-        await isNextSteps(ticket, chatFlow, step, stepCondition);
+        await isNextSteps(ticket, chatFlow, step, stepCondition[0]);
 
-        // action = 1: enviar para fila: queue
-        await isQueueDefine(ticket, flowConfig, step, stepCondition);
+        // // action = 1: enviar para fila: queue
+        // await isQueueDefine(ticket, flowConfig, step, stepCondition);
 
-        // action = 2: enviar para determinado usuário
-        await isUserDefine(ticket, step, stepCondition);
+        // // action = 2: enviar para determinado usuário
+        // await isUserDefine(ticket, step, stepCondition);
 
-        // action = 3: encerar atendimento
-        await isCloseDefine(ticket, stepCondition);
+        // // action = 3: encerar atendimento
+        // await isCloseDefine(ticket, stepCondition);
 
         socketEmit({
           tenantId: ticket.tenantId,
@@ -390,9 +374,9 @@ const VerifyStepsChatFlowTicket = async (
           payload: ticket,
         });
 
-        if (stepCondition.action === 1 || stepCondition.action === 2) {
-          await sendWelcomeMessage(ticket, flowConfig);
-        }
+        // if (stepCondition.action === 1 || stepCondition.action === 2) {
+        //   await sendWelcomeMessage(ticket, flowConfig);
+        // }
       } else {
         // Verificar se rotina em teste
         if (
@@ -444,4 +428,4 @@ const VerifyStepsChatFlowTicket = async (
   }
 };
 
-export default VerifyStepsChatFlowTicket;
+export default VerifyStepsChatFlowTicketWebhook;
