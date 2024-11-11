@@ -59,7 +59,7 @@ const isNextSteps = async (
 
     const nodesList = [...chatFlow.flow.nodeList];
 
-    /// pegar os dados do proxumo step
+    /// pegar os dados do proximo step
     const nextStep = nodesList.find(
       (n: any) => n.id === stepCondition.nextStepId
     );
