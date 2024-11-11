@@ -17,7 +17,7 @@ export const TemplateListaAtendimentos = ({
   listaAtendimentos,
 }: TemplateProps): TemplateConsultaReturn => {
   let message =
-    "Prezado, segue a relação de atendimentos recentes que o laudo já está liberado. Por favor, escolha uma das opções abaixo, informando o número correspondente:\n\n";
+    "Prezado, segue a relação de atendimentos recentes que o laudo já está liberado.\n\n Por favor, escolha uma das opções abaixo, informando o número correspondente:\n\n";
   listaAtendimentos.forEach((item, index) => {
     message += `${index + 1}. Data do Exame: ${item.dt_data}\n`;
     message += `   Descrição do Exame: ${item.ds_procedimento}\n\n`;

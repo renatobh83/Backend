@@ -93,6 +93,7 @@ export const consultaAtendimentos = async (tenantId: number) => {
       : TemplateListaAtendimentos({
           listaAtendimentos,
         }).semAtendimentoComLaudo;
+
   return mensagem;
 };
 export const getLaudoPDF = async (tenantId: number, chosenIndex: number) => {

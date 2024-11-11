@@ -161,6 +161,7 @@ export async function doListaAtendimentos({
   const URL_FINAL = `${sessionApiDados.baseURl}${url}`;
   try {
     const { data } = await apiInstance.post(URL_FINAL, {});
+
     if (data.length) {
       return data
         .filter((i) => i.nr_laudo !== null)

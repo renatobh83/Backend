@@ -50,7 +50,7 @@ export const isNextSteps = async (
 
       return; // Sair sem avançar para o próximo passo
     }
-
+    console.log(stepCondition.nextStepId);
     await ticket.update({
       stepChatFlow: stepCondition.nextStepId,
       botRetries: 0,

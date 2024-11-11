@@ -62,7 +62,7 @@ export const CheckChatFlowWebhook = async (
   }
   const nome = ticket.contact.name;
   const numero = formatarNumero(ticket.contact.number);
-
+  console.log(acaoWebhook);
   if (acaoWebhook === "consulta") {
     const dadosConsulta = await apiConsulta(nome, servicesApi.tenantId, numero);
 
@@ -71,9 +71,9 @@ export const CheckChatFlowWebhook = async (
       mensagem = TemplateConsulta({ nome }).nenhumRegistroLocalizado;
       return mensagem;
     }
-    mensagem = TemplateConsulta({ nome }).registroEncontrado;
 
     VerifyStepsChatFlowTicketWebhook(ticket, "I");
+    mensagem = TemplateConsulta({ nome }).registroEncontrado;
     return mensagem;
   }
   if (acaoWebhook === "consultacpf") {
@@ -166,7 +166,7 @@ export const CheckChatFlowWebhook = async (
 
     return mensagem;
   }
-
+  return mensagem;
   // const idApi = msg.data.webhook.apiId;
   // const acaoWebhook = msg.data.webhook.acao.toLowerCase();
   // console.log(acaoWebhook);

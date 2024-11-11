@@ -12,7 +12,7 @@ export const TemplateConsulta = ({
 }: TemplateProps): TemplateConsultaReturn => {
   const registroEncontrado = `Olá ${nome}!
 Estamos felizes em tê-lo conosco e prontos para atender suas necessidades.
-Temos diversos serviços disponíveis:
+Favor escolher um dos nossos serviços:
 Consultar agendamentos, digite 1.
 Laudo, digite 2.
 Para finalizar digite, Sair.

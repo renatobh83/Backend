@@ -196,7 +196,6 @@ const BuildSendMessageService = async ({
         ticket,
         messageData
       );
-
       messageSent = await SendMessageSystemProxy({
         ticket,
         messageData: {
