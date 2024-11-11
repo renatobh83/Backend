@@ -119,7 +119,7 @@ const BuildSendMessageService = async ({
     status: "pending",
     tenantId,
   };
-
+  console.log(msg);
   try {
     if (msg.type === "MediaField" && msg.data.mediaUrl) {
       const urlSplit = msg.data.mediaUrl.split("/");
@@ -196,6 +196,7 @@ const BuildSendMessageService = async ({
         ticket,
         messageData
       );
+      if (mensagem === true || mensagem === undefined) return;
       messageSent = await SendMessageSystemProxy({
         ticket,
         messageData: {
@@ -205,7 +206,6 @@ const BuildSendMessageService = async ({
         media: null,
         userId: null,
       });
-
       const msgCreated = await Message.create({
         ...messageData,
         ...messageSent,

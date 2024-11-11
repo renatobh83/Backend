@@ -48,8 +48,8 @@ export const CheckChatFlowWebhook = async (
   tenantId: string | number,
   ticket: Ticket | any,
   messageData
-): Promise<string> => {
-  let mensagem: string;
+): Promise<string | boolean> => {
+  let mensagem: string | boolean;
   const idApi = webhook.apiId;
   const acaoWebhook = webhook.acao.toLowerCase();
 
@@ -73,8 +73,9 @@ export const CheckChatFlowWebhook = async (
     }
 
     VerifyStepsChatFlowTicketWebhook(ticket, "I");
-    mensagem = TemplateConsulta({ nome }).registroEncontrado;
-    return mensagem;
+    // mensagem = TemplateConsulta({ nome }).registroEncontrado;
+    // return mensagem;
+    return true;
   }
   if (acaoWebhook === "consultacpf") {
     mensagem = await apiConsultaCPF(

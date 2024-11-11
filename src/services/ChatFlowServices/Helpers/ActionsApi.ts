@@ -72,8 +72,8 @@ export const apiConsultaCPF = async (
   if (dataResponseConsulta.length) {
     const nomeEncontrado = dataResponseConsulta[0].NomePaciente;
     codPaciente = dataResponseConsulta[0].CodigoPaciente;
-    mensagem = TemplateConsulta({ nome: nomeEncontrado }).registroEncontrado;
-    return mensagem;
+    // mensagem = TemplateConsulta({ nome: nomeEncontrado }).registroEncontrado;
+    return true;
   }
   return TemplateConsulta({ nome }).buscaCpf;
 };

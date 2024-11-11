@@ -359,7 +359,7 @@ const VerifyStepsChatFlowTicket = async (
         (await isAnswerCloseTicket(flowConfig, ticket, msg.body))
       )
         return;
-      console.log(step);
+
       if (stepCondition && !ticket.isCreated) {
         // await CreateAutoReplyLogsService(stepAutoReplyAtual, ticket, msg.body);
         // Verificar se rotina em teste
