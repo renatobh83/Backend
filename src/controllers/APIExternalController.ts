@@ -207,7 +207,7 @@ export const TESTEAPIWEBHOOKS = async (
   //   tenantId: 1,
   // });
 
-  const a = await consultaLaudo(1, 30168857);
+  const a = await consultaLaudo(1, 158934);
   // const preparos = cdProcedimento.map(async (procedimento) => {
   //   const response = await getPreparos({ api, procedimento });
   //   return response;

@@ -103,12 +103,14 @@ export const CheckChatFlowWebhook = async (
   } else if (acaoWebhook === "confirmacao") {
     mensagem = await ConfirmaExame(servicesApi.tenantId, +ticket.lastMessage);
   } else if (acaoWebhook === "pdf") {
-    const mediaName = await getLaudoPDF(
+    const { mediaName, data } = await getLaudoPDF(
       servicesApi.tenantId,
       +ticket.lastMessage
     );
+
     const customPath = join(__dirname, "..", "..", "public");
     const mediaPath = join(customPath, mediaName);
+
     const arquivoExiste = await verificarArquivo(mediaPath);
     if (arquivoExiste) {
       const messageSent = await SendMessageSystemProxy({
@@ -119,9 +121,11 @@ export const CheckChatFlowWebhook = async (
         },
         media: {
           path: mediaPath,
+          data,
         },
         userId: null,
       });
+
       const msgCreated = await Message.create({
         ...messageData,
         ...messageSent,
@@ -162,7 +166,7 @@ export const CheckChatFlowWebhook = async (
         payload: messageCreated,
       });
       fs.unlinkSync(mediaPath);
-      return;
+      return true;
     }
 
     return mensagem;

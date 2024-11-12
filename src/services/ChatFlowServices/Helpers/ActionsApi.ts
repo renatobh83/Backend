@@ -14,7 +14,10 @@ import {
 import { TemplateListaAtendimentos } from "../../../templates/ListaAtendimentos";
 import { validarCPF } from "../../../utils/ApiWebhook";
 import { ConsultaPaciente } from "../../ApiConfirmacaoServices/Helpers/ConsultaPacientes";
-import { ConsultarLaudos } from "../../ApiConfirmacaoServices/Helpers/ConsultarLaudos";
+import {
+  ConsultarLaudos,
+  ConsultarLaudosNovo,
+} from "../../ApiConfirmacaoServices/Helpers/ConsultarLaudos";
 import { ListarPlanos } from "../../ApiConfirmacaoServices/Helpers/ListaPlanos";
 import VerifyStepsChatFlowTicket from "../VerifyStepsChatFlowTicket";
 interface ResponseListaAtendimento {
@@ -98,15 +101,23 @@ export const consultaAtendimentos = async (tenantId: number) => {
 };
 export const getLaudoPDF = async (tenantId: number, chosenIndex: number) => {
   const selectedLaudo = listaAtendimentos[chosenIndex - 1];
-  await ConsultarLaudos({
+  const data = await ConsultarLaudosNovo({
     tenantId,
     cdExame: +selectedLaudo.cd_exame,
-    cdPaciente: codPaciente,
-    cdFuncionario: 1,
-    entrega: false,
   });
+  // await ConsultarLaudos({
+  //   tenantId,
+  //   cdExame: +selectedLaudo.cd_exame,
+  //   cdPaciente: codPaciente,
+  //   cdFuncionario: 1,
+  //   entrega: false,
+  // });
   const mediaName = `${+selectedLaudo.cd_exame}.pdf`;
-  return mediaName;
+
+  return {
+    data,
+    mediaName,
+  };
 };
 
 export const getAgendamentos = async (tenantId: number) => {

@@ -113,6 +113,12 @@ export async function consultaLaudo(tenantId, cdExame) {
     const url = "/clinuxintegra/consultalaudo";
     const URL_FINAL = `${sessionApiDados.baseURl}${url}`;
     const response = await apiInstance.post(URL_FINAL, CodigoItemPedido);
+
+    const base64WithoutPrefix = response.data.BBPDF.replace(
+      /^data:application\/pdf;base64,/,
+      ""
+    );
+
     const filePath = path.resolve(
       __dirname,
       "..",
@@ -121,22 +127,17 @@ export async function consultaLaudo(tenantId, cdExame) {
       `${cdExame}.pdf`
     );
 
-    const writer = fs.createWriteStream(filePath, { encoding: "utf8" });
-    const decodedContent = Buffer.from(
-      response.data.BBLaudo,
-      "base64"
-    ).toString("utf8");
-    console.log(decodedContent);
-    writer.write(decodedContent);
-    writer.end();
-
-    writer.on("finish", () => {
-      console.log("Arquivo gravado com sucesso!");
-    });
-
-    writer.on("error", (err) => {
-      console.error("Erro ao gravar o arquivo:", err);
-    });
+    fs.writeFile(
+      filePath,
+      Buffer.from(base64WithoutPrefix, "base64"),
+      (err) => {
+        if (err) {
+          console.error("Erro ao salvar o PDF:", err);
+        }
+        console.log("PDF salvo com sucesso!", filePath);
+      }
+    );
+    return response.data.BBPDF;
   } catch (error) {
     console.log(error);
   }

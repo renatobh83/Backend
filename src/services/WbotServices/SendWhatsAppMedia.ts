@@ -7,7 +7,7 @@ import UserMessagesLog from "../../models/UserMessagesLog";
 import { logger } from "../../utils/logger";
 
 interface Request {
-  media: Express.Multer.File;
+  media: any;
   ticket: Ticket;
   userId: number;
 }
@@ -15,30 +15,31 @@ interface Request {
 const SendWhatsAppMedia = async ({
   media,
   ticket,
-  userId
+  userId,
 }: Request): Promise<WbotMessage> => {
   try {
     const wbot = await GetTicketWbot(ticket);
 
     const newMedia = MessageMedia.fromFilePath(media.path);
-
+    if (media.data) {
+      newMedia.data = media.data;
+    }
 
     const sendMessage = await wbot.sendMessage(
       `${ticket.contact.number}@${ticket.isGroup ? "g" : "c"}.us`,
-      newMedia,
-      { sendAudioAsVoice: true }
+      newMedia
     );
 
     await ticket.update({
       lastMessage: media.filename,
-      lastMessageAt: new Date().getTime()
+      lastMessageAt: new Date().getTime(),
     });
     try {
       if (userId) {
         await UserMessagesLog.create({
           messageId: sendMessage.id.id,
           userId,
-          ticketId: ticket.id
+          ticketId: ticket.id,
         });
       }
     } catch (error) {
@@ -48,7 +49,7 @@ const SendWhatsAppMedia = async ({
 
     return sendMessage;
   } catch (err) {
-    console.log(err)
+    console.log(err);
     logger.error(`SendWhatsAppMedia | Error: ${err}`);
     // StartWhatsAppSessionVerify(ticket.whatsappId, err);
     throw new AppError("ERR_SENDING_WAPP_MSG");

@@ -1,5 +1,8 @@
-import { doGetLaudo } from "../../../helpers/SEMNOME";
-
+import { consultaLaudo, doGetLaudo } from "../../../helpers/SEMNOME";
+interface ConsultarLaudosNovo {
+  tenantId: number;
+  cdExame: number;
+}
 interface ConsultarLaudosProps {
   tenantId: number;
   cdExame: number;
@@ -21,5 +24,13 @@ export const ConsultarLaudos = async ({
     cdFuncionario,
     entrega,
   });
+  return data;
+};
+export const ConsultarLaudosNovo = async ({
+  tenantId,
+  cdExame,
+}: ConsultarLaudosNovo) => {
+  const data = await consultaLaudo(tenantId, cdExame);
+
   return data;
 };
