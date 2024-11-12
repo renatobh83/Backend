@@ -25,7 +25,7 @@ export const TemplateListaAtendimentos = ({
 
   // Adicionando as opções com os índices dos atendimentos
   message +=
-    "Caso deseja um laudo de outro periodo favor entrar em contato com nossa central para fazer a sua solicitação.\n";
+    "Caso deseja um laudo de outro periodo favor entrar em contato com nossa central para fazer a sua solicitação.\n\n";
   message += "Para retornar o menu de opções, digite 6.\n";
   message += "Para encerar o atendimento, digite 7.\n";
   const atendimentosRecentes = message;

@@ -159,9 +159,9 @@ export const ListaExamesPreparo = async () => {
 };
 
 export const getPreparo = async (chosenIndex: number, tenantId: number) => {
+  console.log(chosenIndex, listaAgendamentos);
   const selectedExamePreparo =
     listaAgendamentos[chosenIndex - 1].cd_procedimento;
-
   const cdProcedimento = selectedExamePreparo.split(";").map(Number);
 
   const preparos = cdProcedimento.map(async (procedimento) => {

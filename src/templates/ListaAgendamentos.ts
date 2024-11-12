@@ -25,7 +25,7 @@ export const TemplateListaAgendamentos = ({
   listaAgendamentos,
 }: TemplateProps): TemplateConsultaReturn => {
   let message =
-    "Prezado, segue a relação dos proximos agendamentos. Para confirmar um agendamento por favor, escolha uma das opções abaixo, informando o número correspondente:\n\n";
+    "Prezado, segue a relação dos proximos agendamentos.\n\nPara confirmar um agendamento por favor, escolha uma das opções abaixo, informando o número correspondente:\n\n";
   listaAgendamentos.forEach((item, index) => {
     message += `${index + 1}. Data do Exame: ${item.dt_data}\n`;
     message += `   Horáro : ${item.dt_hora}\n`;

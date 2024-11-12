@@ -119,7 +119,7 @@ const BuildSendMessageService = async ({
     status: "pending",
     tenantId,
   };
-  console.log(msg);
+
   try {
     if (msg.type === "MediaField" && msg.data.mediaUrl) {
       const urlSplit = msg.data.mediaUrl.split("/");

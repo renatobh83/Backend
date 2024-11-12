@@ -71,10 +71,7 @@ export const CheckChatFlowWebhook = async (
       mensagem = TemplateConsulta({ nome }).nenhumRegistroLocalizado;
       return mensagem;
     }
-
     VerifyStepsChatFlowTicketWebhook(ticket, "I");
-    // mensagem = TemplateConsulta({ nome }).registroEncontrado;
-    // return mensagem;
     return true;
   }
   if (acaoWebhook === "consultacpf") {
