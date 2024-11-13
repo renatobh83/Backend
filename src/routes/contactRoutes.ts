@@ -34,7 +34,12 @@ contactRoutes.get("/contacts", isAuth, ContactController.index);
 contactRoutes.get("/contacts/:contactId", isAuth, ContactController.show);
 
 contactRoutes.post("/contacts", isAuth, ContactController.store);
-
+contactRoutes.post("/contactVcard", isAuth, ContactController.storeVcard);
+contactRoutes.get(
+  "/contactsNumber/:numberId",
+  isAuth,
+  ContactController.showNumber
+);
 contactRoutes.post("/contacts/sync", isAuth, ContactController.syncContacts);
 
 contactRoutes.put("/contacts/:contactId", isAuth, ContactController.update);

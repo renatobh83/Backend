@@ -60,6 +60,8 @@ export const apiConsulta = async (
     codPaciente = dados.CodigoPaciente;
     return dataResponseConsulta;
   }
+  codPaciente = dataResponseConsulta[0].CodigoPaciente;
+  return dataResponseConsulta;
 };
 
 export const apiConsultaCPF = async (
@@ -81,6 +83,7 @@ export const apiConsultaCPF = async (
   return TemplateConsulta({ nome }).buscaCpf;
 };
 export const consultaAtendimentos = async (tenantId: number) => {
+  console.log(codPaciente);
   // biome-ignore lint/style/useConst: <explanation>
   let mensagem: string;
   listaAtendimentos = await doListaAtendimentos({
@@ -159,7 +162,6 @@ export const ListaExamesPreparo = async () => {
 };
 
 export const getPreparo = async (chosenIndex: number, tenantId: number) => {
-  console.log(chosenIndex, listaAgendamentos);
   const selectedExamePreparo =
     listaAgendamentos[chosenIndex - 1].cd_procedimento;
   const cdProcedimento = selectedExamePreparo.split(";").map(Number);

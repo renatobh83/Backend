@@ -20,6 +20,7 @@ import SyncContactsWhatsappInstanceService from "../services/WbotServices/SyncCo
 import Whatsapp from "../models/Whatsapp";
 import { ImportFileContactsService } from "../services/WbotServices/ImportFileContactsService";
 import Contact from "../models/Contact";
+import ShowContactByNumber from "../services/ContactServices/ShowContactByNumber";
 
 type IndexQuery = {
   searchParam: string;
@@ -47,7 +48,7 @@ export const index = async (req: Request, res: Response): Promise<Response> => {
     pageNumber,
     tenantId,
     profile,
-    userId
+    userId,
   });
 
   return res.json({ contacts, count, hasMore });
@@ -62,7 +63,7 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
     name: Yup.string().required(),
     number: Yup.string()
       .required()
-      .matches(/^\d+$/, "Invalid number format. Only numbers is allowed.")
+      .matches(/^\d+$/, "Invalid number format. Only numbers is allowed."),
   });
 
   try {
@@ -79,12 +80,45 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
     ...newContact,
     number: waNumber.user,
     profilePicUrl,
-    tenantId
+    tenantId,
   });
 
   return res.status(200).json(contact);
 };
+export const storeVcard = async (
+  req: Request,
+  res: Response
+): Promise<Response> => {
+  const { tenantId } = req.user;
+  const newContact: ContactData = req.body;
+  newContact.number = newContact.number.replace("-", "").replace(" ", "");
 
+  const schema = Yup.object().shape({
+    name: Yup.string().required(),
+    number: Yup.string()
+      .required()
+      .matches(/^\d+$/, "Invalid number format. Only numbers is allowed."),
+  });
+
+  try {
+    await schema.validate(newContact);
+  } catch (err) {
+    throw new AppError(err.message);
+  }
+
+  const waNumber = await CheckIsValidContact(newContact.number, tenantId);
+
+  const profilePicUrl = await GetProfilePicUrl(newContact.number, tenantId);
+
+  const contact = await CreateContactService({
+    ...newContact,
+    number: waNumber.user,
+    profilePicUrl,
+    tenantId,
+  });
+
+  return res.status(200).json(contact);
+};
 export const show = async (req: Request, res: Response): Promise<Response> => {
   const { contactId } = req.params;
   const { tenantId } = req.user;
@@ -93,7 +127,17 @@ export const show = async (req: Request, res: Response): Promise<Response> => {
 
   return res.status(200).json(contact);
 };
+export const showNumber = async (
+  req: Request,
+  res: Response
+): Promise<Response> => {
+  const { numberId } = req.params;
+  const { tenantId } = req.user;
 
+  const contact = await ShowContactByNumber({ number: numberId, tenantId });
+
+  return res.status(200).json(contact);
+};
 export const update = async (
   req: Request,
   res: Response
@@ -106,7 +150,7 @@ export const update = async (
     number: Yup.string().matches(
       /^\d+$/,
       "Invalid number format. Only numbers is allowed."
-    )
+    ),
   });
 
   try {
@@ -120,12 +164,12 @@ export const update = async (
   contactData.number = waNumber.user;
 
   const { contactId: contato } = req.params;
-  const contactId = Number(contato)
+  const contactId = Number(contato);
 
   const contact = await UpdateContactService({
     contactData,
     contactId,
-    tenantId
+    tenantId,
   });
 
   return res.status(200).json(contact);
@@ -148,13 +192,13 @@ export const updateContactTags = async (
   res: Response
 ): Promise<Response> => {
   const { tags } = req.body;
-  const { contactId : contato} = req.params;
+  const { contactId: contato } = req.params;
   const { tenantId } = req.user;
-  const contactId = Number(contato)
+  const contactId = Number(contato);
   const contact = await UpdateContactTagsService({
     tags,
     contactId,
-    tenantId
+    tenantId,
   });
 
   return res.status(200).json(contact);
@@ -165,13 +209,13 @@ export const updateContactWallet = async (
   res: Response
 ): Promise<Response> => {
   const { wallets } = req.body;
-  const { contactId : contato} = req.params;
+  const { contactId: contato } = req.params;
   const { tenantId } = req.user;
-  const contactId = Number(contato)
+  const contactId = Number(contato);
   const contact = await UpdateContactWalletsService({
     wallets,
     contactId,
-    tenantId
+    tenantId,
   });
 
   return res.status(200).json(contact);
@@ -186,8 +230,8 @@ export const syncContacts = async (
     where: {
       tenantId,
       status: "CONNECTED",
-      type: "whatsapp"
-    }
+      type: "whatsapp",
+    },
   });
 
   if (!sessoes.length) {
@@ -197,7 +241,7 @@ export const syncContacts = async (
   }
 
   await Promise.all(
-    sessoes.map(async s => {
+    sessoes.map(async (s) => {
       if (s.id) {
         if (s.id) {
           await SyncContactsWhatsappInstanceService(s.id, +tenantId);
@@ -249,7 +293,7 @@ export const exportContacts = async (req: Request, res: Response) => {
     where: { tenantId },
     attributes: ["id", "name", "number", "email"],
     order: [["name", "ASC"]],
-    raw: true
+    raw: true,
   });
 
   // Cria um novo workbook e worksheet
@@ -262,7 +306,7 @@ export const exportContacts = async (req: Request, res: Response) => {
   // Gera o arquivo Excel no formato .xlsx
   const excelBuffer = XLSX.write(workbook, {
     bookType: "xlsx",
-    type: "buffer"
+    type: "buffer",
   });
 
   // Define o nome do arquivo
@@ -276,7 +320,7 @@ export const exportContacts = async (req: Request, res: Response) => {
   }
 
   // Salva o arquivo no diretório de downloads
-  fs.writeFile(file, excelBuffer, err => {
+  fs.writeFile(file, excelBuffer, (err) => {
     if (err) {
       console.error("Erro ao salvar arquivo:", err);
       return res.status(500).send("Erro ao exportar contatos");

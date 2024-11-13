@@ -65,7 +65,7 @@ export const CheckChatFlowWebhook = async (
   console.log(acaoWebhook);
   if (acaoWebhook === "consulta") {
     const dadosConsulta = await apiConsulta(nome, servicesApi.tenantId, numero);
-
+    if (!dadosConsulta) return;
     if (dadosConsulta.length > 1 || dadosConsulta.length === 0) {
       VerifyStepsChatFlowTicketWebhook(ticket, "A");
       mensagem = TemplateConsulta({ nome }).nenhumRegistroLocalizado;
@@ -162,7 +162,14 @@ export const CheckChatFlowWebhook = async (
         type: "chat:create",
         payload: messageCreated,
       });
-      fs.unlinkSync(mediaPath);
+      if (fs.existsSync(mediaPath)) {
+        try {
+          fs.unlinkSync(mediaPath);
+        } catch (err) {
+          console.error("Erro ao tentar apagar o arquivo:", err.message);
+        }
+      }
+
       return true;
     }
 
