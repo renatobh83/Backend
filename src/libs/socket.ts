@@ -1,7 +1,7 @@
 import { Server as SocketIO } from "socket.io";
 import socketRedis from "socket.io-redis";
 
-import { Server } from "http";
+import type { Server } from "node:http";
 import AppError from "../errors/AppError";
 import decodeTokenSocket from "./decodeTokenSocket";
 import { logger } from "../utils/logger";
@@ -13,16 +13,16 @@ let io: SocketIO;
 export const initIO = (httpServer: Server): SocketIO => {
   io = new SocketIO(httpServer, {
     cors: {
-      origin: "*"
+      origin: "*",
     },
     pingTimeout: 180000,
-    pingInterval: 60000
+    pingInterval: 60000,
   });
 
   const connRedis = {
     host: process.env.IO_REDIS_SERVER,
     port: Number(process.env.IO_REDIS_PORT),
-    password: undefined
+    password: undefined,
   };
 
   // apresentando problema na assinatura
@@ -40,7 +40,7 @@ export const initIO = (httpServer: Server): SocketIO => {
           ...auth,
           ...verify.data,
           id: String(verify.data.id),
-          tenantId: String(verify.data.tenantId)
+          tenantId: String(verify.data.tenantId),
         };
 
         const user = await User.findByPk(verify.data.id, {
@@ -52,8 +52,8 @@ export const initIO = (httpServer: Server): SocketIO => {
             "profile",
             "status",
             "lastLogin",
-            "lastOnline"
-          ]
+            "lastOnline",
+          ],
         });
 
         socket.handshake.auth.user = user;
@@ -62,27 +62,25 @@ export const initIO = (httpServer: Server): SocketIO => {
       } else {
         next(new Error("authentication error"));
       }
-
     } catch (error) {
-
       logger.warn(`tokenInvalid: ${socket}`);
       socket.emit(`tokenInvalid:${socket.id}`);
       next(new Error("authentication error"));
     }
   });
 
-  io.on("connection", socket => {
+  io.on("connection", (socket) => {
     const { tenantId } = socket.handshake.auth;
     if (tenantId) {
       logger.info({
         message: "Client connected in tenant",
-        data: socket.handshake.auth
+        data: socket.handshake.auth,
       });
 
       // create room to tenant
       socket.join(tenantId.toString());
 
-      socket.on(`${tenantId}:joinChatBox`, ticketId => {
+      socket.on(`${tenantId}:joinChatBox`, (ticketId) => {
         logger.info(`Client joined a ticket channel ${tenantId}:${ticketId}`);
         socket.join(`${tenantId}:${ticketId}`);
       });
@@ -94,7 +92,7 @@ export const initIO = (httpServer: Server): SocketIO => {
         socket.join(`${tenantId}:notification`);
       });
 
-      socket.on(`${tenantId}:joinTickets`, status => {
+      socket.on(`${tenantId}:joinTickets`, (status) => {
         logger.info(
           `A client joined to ${tenantId}:${status} tickets channel.`
         );
@@ -104,9 +102,8 @@ export const initIO = (httpServer: Server): SocketIO => {
     }
 
     socket.on("disconnect", (reason: any) => {
-
       logger.info({
-        message: `SOCKET Client disconnected , ${tenantId}, ${reason}`
+        message: `SOCKET Client disconnected , ${tenantId}, ${reason}`,
       });
     });
   });
