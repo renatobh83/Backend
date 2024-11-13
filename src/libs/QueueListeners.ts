@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Job } from "bull";
+import type { Job } from "bull";
 import axios from "axios";
 
 export enum ExecutionType {
@@ -27,6 +27,7 @@ export type RetryOptions = {
 };
 
 export type RabbitMQJob = {
+  // biome-ignore lint/suspicious/noExplicitAny: <explanation>
   data: any;
   queue: string;
 };

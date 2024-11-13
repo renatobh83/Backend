@@ -3,7 +3,7 @@
 import Queue from "bull";
 import QueueListeners from "./QueueListeners";
 import * as jobs from "../jobs/Index";
-
+// biome-ignore lint/suspicious/noExplicitAny: <explanation>
 const queues = Object.values(jobs).map((job: any) => ({
   bull: new Queue(job.key, {
     redis: {
@@ -27,12 +27,15 @@ const queues = Object.values(jobs).map((job: any) => ({
 
 export default {
   queues,
+  // biome-ignore lint/suspicious/noExplicitAny: <explanation>
   async add(name: string, data: any | any[]) {
+    // biome-ignore lint/suspicious/noExplicitAny: <explanation>
     const queue = this.queues.find((q: any) => q.name === name);
     if (!queue) {
       throw new Error(`Queue ${name} not exists`);
     }
     if (Array.isArray(data)) {
+      // biome-ignore lint/suspicious/noExplicitAny: <explanation>
       const parsedJobs = data.map((jobData: any) => {
         return {
           data: jobData,

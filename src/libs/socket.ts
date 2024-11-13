@@ -26,6 +26,7 @@ export const initIO = (httpServer: Server): SocketIO => {
   };
 
   // apresentando problema na assinatura
+  // biome-ignore lint/suspicious/noExplicitAny: <explanation>
   const redis = socketRedis as any;
   io.adapter(redis(connRedis));
 
@@ -101,6 +102,7 @@ export const initIO = (httpServer: Server): SocketIO => {
       Chat.register(socket);
     }
 
+    // biome-ignore lint/suspicious/noExplicitAny: <explanation>
     socket.on("disconnect", (reason: any) => {
       logger.info({
         message: `SOCKET Client disconnected , ${tenantId}, ${reason}`,

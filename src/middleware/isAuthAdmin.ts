@@ -1,5 +1,5 @@
 import { verify } from "jsonwebtoken";
-import { Request, Response, NextFunction } from "express";
+import type { Request, Response, NextFunction } from "express";
 
 import AppError from "../errors/AppError";
 import authConfig from "../config/auth";
@@ -38,9 +38,8 @@ const isAuthAdmin = async (req: Request, res: Response, next: NextFunction) => {
     req.user = {
       id,
       profile,
-      tenantId
+      tenantId,
     };
-
   } catch (err) {
     throw new AppError("Invalid token or not Admin", 403);
   }

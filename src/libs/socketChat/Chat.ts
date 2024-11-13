@@ -1,7 +1,4 @@
-
-/* eslint-disable @typescript-eslint/ban-types */
-/* eslint-disable no-prototype-builtins */
-import { Socket } from "socket.io";
+import type { Socket } from "socket.io";
 import {
   find,
   findKey,
@@ -11,18 +8,18 @@ import {
   size,
   sortBy,
   toPairs,
-  without
+  without,
 } from "lodash";
 import {
   sendToAllConnectedClients,
   sendToSelf,
   sendToUser,
-  sortByKeys
+  sortByKeys,
 } from "./Utils";
 import { shared } from "./Index";
 import User from "../../models/User";
 import { logger } from "../../utils/logger";
-
+// biome-ignore lint/suspicious/noExplicitAny: <explanation>
 const events: any = {};
 
 const JoinChatServer = (socket: Socket) => {
@@ -31,6 +28,7 @@ const JoinChatServer = (socket: Socket) => {
   logger.info(`joinChatServer USER ${user.name}`);
   const { tenantId } = user;
   const socketDataTenant = `socketData_${tenantId}`;
+  // biome-ignore lint/suspicious/noExplicitAny: <explanation>
   let dataTenant: any;
 
   // dataTenant = await getValue(socketDataTenant);
@@ -38,7 +36,7 @@ const JoinChatServer = (socket: Socket) => {
   if (dataTenant) {
     dataTenant.usersOnline[user.id] = {
       sockets: [socket.id],
-      user
+      user,
     };
     dataTenant.sockets.push(socket);
     sendToSelf(socket, "joinSuccessfully");
@@ -48,12 +46,12 @@ const JoinChatServer = (socket: Socket) => {
     shared[socketDataTenant] = {
       sockets: [],
       usersOnline: {},
-      idleUsers: {}
+      idleUsers: {},
     };
     dataTenant = shared[socketDataTenant];
     dataTenant.usersOnline[user.id] = {
       sockets: [socket.id],
-      user
+      user,
     };
     dataTenant.sockets.push(socket);
     sendToSelf(socket, `${user.tenantId}:joinSuccessfully`);
@@ -67,12 +65,12 @@ const UpdateUsers = (socket: Socket) => {
   const dataTenant = shared[socketDataTenant];
 
   const sortedUserList = sortByKeys(dataTenant.usersOnline);
-  forEach(sortedUserList, v => {
+  forEach(sortedUserList, (v) => {
     const userValue = v.user;
     const { sockets } = v;
     if (userValue && sockets.length > 0) {
-      forEach(sockets, sock => {
-        const socketFind = find(dataTenant.sockets, s => {
+      forEach(sockets, (sock) => {
+        const socketFind = find(dataTenant.sockets, (s) => {
           return s.id === sock;
         });
 
@@ -148,12 +146,12 @@ const UpdateOnlineBubbles = (socket: Socket) => {
   const socketDataTenant = `socketData_${user.tenantId}`;
   const dataTenant = shared[socketDataTenant];
   const sortedUserList = fromPairs(
-    sortBy(toPairs(dataTenant.usersOnline), o => {
+    sortBy(toPairs(dataTenant.usersOnline), (o) => {
       return o[0];
     })
   );
   const sortedIdleList = fromPairs(
-    sortBy(toPairs(dataTenant.idleUsers), o => {
+    sortBy(toPairs(dataTenant.idleUsers), (o) => {
       return o[0];
     })
   );
@@ -163,7 +161,7 @@ const UpdateOnlineBubbles = (socket: Socket) => {
     `${user.tenantId}:chat:updateOnlineBubbles`,
     {
       sortedUserList,
-      sortedIdleList
+      sortedIdleList,
     }
   );
 };
@@ -181,7 +179,7 @@ const spawnChatWindow = (socket: Socket) => {
   socket.on("spawnChatWindow", async (userId: number) => {
     // Get user
     const user = await User.findByPk(userId, {
-      attributes: ["id", "name", "email", "profile"]
+      attributes: ["id", "name", "email", "profile"],
     });
     sendToSelf(socket, "spawnChatWindow", user);
   });
@@ -192,19 +190,20 @@ const onSetUserIdle = (socket: Socket) => {
 
   const socketDataTenant = `socketData_${user.tenantId}`;
   socket.on(`${user.tenantId}:setUserIdle`, () => {
+    // biome-ignore lint/suspicious/noExplicitAny: <explanation>
     let dataTenant: any;
     dataTenant = shared[socketDataTenant];
     if (dataTenant) {
       dataTenant.idleUsers[user.id] = {
         sockets: [socket.id],
-        user
+        user,
       };
     }
     if (!dataTenant) {
       shared[socketDataTenant] = {
         sockets: [],
         usersOnline: {},
-        idleUsers: {}
+        idleUsers: {},
       };
       dataTenant = shared[socketDataTenant];
       dataTenant.idleUsers.push(socket.id);
@@ -232,7 +231,7 @@ const onSetUserActive = (socket: Socket) => {
       shared[socketDataTenant] = {
         sockets: [],
         usersOnline: {},
-        idleUsers: {}
+        idleUsers: {},
       };
       dataTenant = shared[socketDataTenant];
       dataTenant.usersOnline.push(socket.id);
@@ -241,7 +240,7 @@ const onSetUserActive = (socket: Socket) => {
     if (dataTenant?.usersOnline) {
       dataTenant.usersOnline[user.id] = {
         sockets: [socket.id],
-        user
+        user,
       };
     }
 
@@ -258,7 +257,7 @@ const onChatMessage = (socket: Socket) => {
 
   const { tenantId } = user;
   const socketDataTenant = `socketData_${tenantId}`;
-  socket.on("chatMessage", function (data) {
+  socket.on("chatMessage", (data) => {
     const dataTenant = shared[socketDataTenant];
     if (dataTenant) {
       const { to } = data;
@@ -301,15 +300,16 @@ const onChatTyping = (socket: Socket) => {
   const { tenantId } = user;
   const socketDataTenant = `socketData_${tenantId}`;
 
-  socket.on("chatTyping", data => {
+  socket.on("chatTyping", (data) => {
     const dataTenant = shared[socketDataTenant];
     if (dataTenant) {
       const { to } = data;
       const { from } = data;
-
+      // biome-ignore lint/suspicious/noExplicitAny: <explanation>
       let toUser: any = null;
+      // biome-ignore lint/suspicious/noExplicitAny: <explanation>
       let fromUser: any = null;
-      find(dataTenant.usersOnline, function (v) {
+      find(dataTenant.usersOnline, (v) => {
         if (String(v.user.id) === String(to)) {
           toUser = v.user;
         }
@@ -341,12 +341,13 @@ const onChatStopTyping = (socket: Socket) => {
   const { user } = socket.handshake.auth;
   const { tenantId } = user;
   const socketDataTenant = `socketData_${tenantId}`;
-  socket.on("chatStopTyping", data => {
+  socket.on("chatStopTyping", (data) => {
     const dataTenant = shared[socketDataTenant];
     if (dataTenant) {
       const { to } = data;
+      // biome-ignore lint/suspicious/noExplicitAny: <explanation>
       let toUser: any = null;
-      find(dataTenant.usersOnline, v => {
+      find(dataTenant.usersOnline, (v) => {
         if (String(v.user.id) === String(to)) {
           toUser = v.user;
         }
@@ -367,7 +368,7 @@ const onChatStopTyping = (socket: Socket) => {
 };
 
 const saveChatWindow = (socket: Socket) => {
-  socket.on("saveChatWindow", async data => {
+  socket.on("saveChatWindow", async (data) => {
     const { userId } = data;
     // const { convoId } = data;
     const { remove } = data;
@@ -385,7 +386,7 @@ const saveChatWindow = (socket: Socket) => {
 };
 
 const onDisconnect = (socket: Socket) => {
-  socket.on("disconnect", async reason => {
+  socket.on("disconnect", async (reason) => {
     const { user } = socket.handshake.auth;
 
     const { tenantId } = user;
@@ -430,7 +431,7 @@ const onDisconnect = (socket: Socket) => {
 
     if (reason === "transport error") {
       // reason = 'disconnect';
-      return
+      return;
     }
     logger.debug(`User disconnected (${reason}): ${user.name} - ${socket.id}`);
   });
@@ -490,7 +491,7 @@ const eventLoop = (socket: Socket) => {
 const chat = {
   events,
   eventLoop,
-  register
+  register,
 };
 
 export default chat;

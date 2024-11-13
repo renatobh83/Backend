@@ -1,10 +1,9 @@
 /* eslint-disable camelcase */
 import { Client, LocalAuth, DefaultOptions } from "whatsapp-web.js";
-import qrGen from "qrcode-terminal";
-import path from "path";
-import { rm } from "fs/promises";
+import path from "node:path";
+import { rm } from "node:fs/promises";
 import { getIO } from "./socket";
-import Whatsapp from "../models/Whatsapp";
+import type Whatsapp from "../models/Whatsapp";
 import { logger } from "../utils/logger";
 import SyncUnreadMessagesWbot from "../services/WbotServices/SyncUnreadMessagesWbot";
 import AppError from "../errors/AppError";
@@ -186,6 +185,7 @@ export const initWbot = async (whatsapp: Whatsapp): Promise<Session> => {
       wbot.on("ready", async () => {
         logger.info(`Session: ${sessionName}-READY`);
 
+        // biome-ignore lint/suspicious/noExplicitAny: <explanation>
         const info: any = wbot?.info;
         const wbotVersion = await wbot.getWWebVersion();
         const wbotBrowser = await wbot.pupBrowser?.version();
