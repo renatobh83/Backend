@@ -44,9 +44,8 @@
     "sequelize-typescript": "^2.1.6",
     "socket.io": "^4.7.5",
     "socket.io-redis": "^6.1.1",
-    "whatsapp-web.js": "^1.26.0",
+    "whatsapp-web.js": "github:pedroslopez/whatsapp-web.js#v1.26.1-alpha.2",
     "winston": "^3.14.2",
-    "xlsx": "^0.18.5",
     "yup": "^1.4.0"
   },
   "devDependencies": {

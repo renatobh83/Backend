@@ -1,7 +1,6 @@
 import * as Yup from "yup";
 import { Request, Response } from "express";
 import { head } from "lodash";
-import XLSX from "xlsx";
 import path from "path";
 import { v4 as uuidV4 } from "uuid";
 import fs from "fs";
@@ -287,47 +286,39 @@ export const upload = async (req: Request, res: Response) => {
 };
 
 export const exportContacts = async (req: Request, res: Response) => {
-  const { tenantId } = req.user;
-
-  const contacts = await Contact.findAll({
-    where: { tenantId },
-    attributes: ["id", "name", "number", "email"],
-    order: [["name", "ASC"]],
-    raw: true,
-  });
-
-  // Cria um novo workbook e worksheet
-  const workbook = XLSX.utils.book_new();
-  const worksheet = XLSX.utils.json_to_sheet(contacts);
-
-  // Adiciona o worksheet ao workbook
-  XLSX.utils.book_append_sheet(workbook, worksheet, "Contatos");
-
-  // Gera o arquivo Excel no formato .xlsx
-  const excelBuffer = XLSX.write(workbook, {
-    bookType: "xlsx",
-    type: "buffer",
-  });
-
-  // Define o nome do arquivo
-  const fileName = `${uuidV4()}_contatos.xlsx`;
-  const filePath = path.join(__dirname, "..", "..", "public", "downloads");
-  const file = path.join(filePath, fileName);
-
-  // Cria os diretórios de downloads se eles não existirem
-  if (!fs.existsSync(filePath)) {
-    fs.mkdirSync(filePath, { recursive: true });
-  }
-
-  // Salva o arquivo no diretório de downloads
-  fs.writeFile(file, excelBuffer, (err) => {
-    if (err) {
-      console.error("Erro ao salvar arquivo:", err);
-      return res.status(500).send("Erro ao exportar contatos");
-    }
-    const { BACKEND_URL } = process.env;
-    const downloadLink = `${BACKEND_URL}:${process.env.PROXY_PORT}/public/downloads/${fileName}`;
-
-    res.send({ downloadLink });
-  });
+  // const { tenantId } = req.user;
+  // const contacts = await Contact.findAll({
+  //   where: { tenantId },
+  //   attributes: ["id", "name", "number", "email"],
+  //   order: [["name", "ASC"]],
+  //   raw: true,
+  // });
+  // // Cria um novo workbook e worksheet
+  // const workbook = XLSX.utils.book_new();
+  // const worksheet = XLSX.utils.json_to_sheet(contacts);
+  // // Adiciona o worksheet ao workbook
+  // XLSX.utils.book_append_sheet(workbook, worksheet, "Contatos");
+  // // Gera o arquivo Excel no formato .xlsx
+  // const excelBuffer = XLSX.write(workbook, {
+  //   bookType: "xlsx",
+  //   type: "buffer",
+  // });
+  // // Define o nome do arquivo
+  // const fileName = `${uuidV4()}_contatos.xlsx`;
+  // const filePath = path.join(__dirname, "..", "..", "public", "downloads");
+  // const file = path.join(filePath, fileName);
+  // // Cria os diretórios de downloads se eles não existirem
+  // if (!fs.existsSync(filePath)) {
+  //   fs.mkdirSync(filePath, { recursive: true });
+  // }
+  // // Salva o arquivo no diretório de downloads
+  // fs.writeFile(file, excelBuffer, (err) => {
+  //   if (err) {
+  //     console.error("Erro ao salvar arquivo:", err);
+  //     return res.status(500).send("Erro ao exportar contatos");
+  //   }
+  //   const { BACKEND_URL } = process.env;
+  //   const downloadLink = `${BACKEND_URL}:${process.env.PROXY_PORT}/public/downloads/${fileName}`;
+  //   res.send({ downloadLink });
+  // });
 };
