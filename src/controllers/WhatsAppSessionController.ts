@@ -18,7 +18,7 @@ const store = async (req: Request, res: Response): Promise<Response> => {
   const whatsapp = await ShowWhatsAppService({
     id: whatsappId,
     tenantId,
-    isInternal: true
+    isInternal: true,
   });
 
   StartWhatsAppSession(whatsapp);
@@ -38,7 +38,7 @@ const update = async (req: Request, res: Response): Promise<Response> => {
   const { whatsapp } = await UpdateWhatsAppService({
     whatsappId,
     whatsappData: { session: "" },
-    tenantId
+    tenantId,
   });
 
   // await apagarPastaSessao(whatsappId);
@@ -59,8 +59,12 @@ const remove = async (req: Request, res: Response): Promise<Response> => {
       // await setValue(`${channel.id}-retryQrCode`, 0);
       await wbot
         .logout()
-        .catch(error => logger.logger.error("Erro ao fazer logout da conexão", error)); // --> fecha o client e conserva a sessão para reconexão (criar função desconectar)
+        .catch((error) =>
+          logger.logger.error("Erro ao fazer logout da conexão", error)
+        ); // --> fecha o client e conserva a sessão para reconexão (criar função desconectar)
       removeWbot(channel.id);
+
+      await apagarPastaSessao(whatsappId);
       // await wbot
       //   .destroy()
       //   .catch(error => logger.error("Erro ao destuir conexão", error)); // --> encerra a sessão e desconecta o bot do whatsapp, geando um novo QRCODE
@@ -84,7 +88,7 @@ const remove = async (req: Request, res: Response): Promise<Response> => {
       status: "DISCONNECTED",
       session: "",
       qrcode: null,
-      retries: 0
+      retries: 0,
     });
   } catch (error) {
     logger.logger.error(error);
@@ -92,16 +96,16 @@ const remove = async (req: Request, res: Response): Promise<Response> => {
       status: "DISCONNECTED",
       session: "",
       qrcode: null,
-      retries: 0
+      retries: 0,
     });
 
     io.emit(`${channel.tenantId}:whatsappSession`, {
       action: "update",
-      session: channel
+      session: channel,
     });
     throw new AppError("ERR_NO_WAPP_FOUND", 404);
   }
   return res.status(200).json({ message: "Session disconnected." });
 };
 
-export default { store , remove, update};
+export default { store, remove, update };

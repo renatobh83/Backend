@@ -64,7 +64,7 @@ class Message extends Model<Message> {
     if (this.getDataValue("mediaUrl")) {
       const { BACKEND_URL } = process.env;
       const value = this.getDataValue("mediaUrl");
-      return `${BACKEND_URL}:${process.env.PROXY_PORT}/public/${value}`;
+      return `${BACKEND_URL}/public/${value}`;
     }
     return null;
   }

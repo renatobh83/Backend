@@ -57,6 +57,7 @@ const minimal_args = [
 export const apagarPastaSessao = async (id: number | string): Promise<void> => {
   const pathRoot = path.resolve(__dirname, "..", "..", ".wwebjs_auth");
   const pathSession = `${pathRoot}/session-wbot-${id}`;
+
   try {
     await rm(pathSession, { recursive: true, force: true });
   } catch (error) {

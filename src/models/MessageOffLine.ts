@@ -9,7 +9,7 @@ import {
   Default,
   BelongsTo,
   ForeignKey,
-  AutoIncrement
+  AutoIncrement,
 } from "sequelize-typescript";
 import Contact from "./Contact";
 import Message from "./Message";
@@ -48,7 +48,7 @@ class MessagesOffLine extends Model<MessagesOffLine> {
     if (this.getDataValue("mediaUrl")) {
       const { BACKEND_URL } = process.env;
       const value = this.getDataValue("mediaUrl");
-      return `${BACKEND_URL}:${process.env.PROXY_PORT}/public/${value}`;
+      return `${BACKEND_URL}/public/${value}`;
     }
     return null;
   }
