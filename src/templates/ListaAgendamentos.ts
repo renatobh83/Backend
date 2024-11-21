@@ -40,6 +40,7 @@ export const TemplateListaAgendamentos = ({
   const agendamentos = message;
   const semAgendamento = `Olá! Gostaríamos de informá-lo que, no momento, você não tem nenhum agendamento marcado conosco.\n\n
 Se precisar de ajuda para marcar um horário ou tiver outras dúvidas, estamos à disposição.\n\n
+Para agendar um exame, digite 9.\n
 Para menu de opções, digite 7.\n
 Para encerar o atendimento, digite 8.\n `;
   return {

@@ -33,18 +33,16 @@ const wbotMessageListener = (wbot: Session): void => {
             // Converter a imagem para escala de cinza e aumentar o contraste
             return (
               image
+
                 .color([{ apply: "brighten", params: [20] }])
                 .contrast(-0.5)
                 .greyscale()
                 // .threshold({ max: 200 }) // Binarização para destacar texto (opcional)
-                .brightness(0.1) // Ajustar o brilho
+
                 .write("processed_image.jpg")
             );
           })
           .then(() => {
-            console.log("Imagem processada e salva como processed_image.jpg");
-
-            // Após o pré-processamento, usar Tesseract para OCR
             return Tesseract.recognize("processed_image.jpg", "por", {
               // logger: (m) => console.log("Tesseract Log:", m),
             });
