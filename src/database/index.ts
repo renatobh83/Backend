@@ -70,8 +70,12 @@ const models = [
   ChatFlow,
   ApiConfirmacao,
 ];
+try {
 
-sequelize.addModels(models);
+  sequelize.addModels(models);
+} catch (error) {
+  console.log(error)
+}
 
 async function handleSequelizeError(error: any) {
   if (

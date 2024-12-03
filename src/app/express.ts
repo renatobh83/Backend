@@ -10,7 +10,7 @@ import { logger } from "../utils/logger";
 export default async function express(app: Application) {
   app.use(
     cors({
-      origin: "*",
+      origin: "http://localhost:5173",
       credentials: true,
     })
   );

@@ -151,6 +151,7 @@ const CreateMessageSystemService = async ({
     tenantId,
     idFront,
   };
+  console.log(messageData)
   try {
     // Alter template message
     if (msg.body && !Array.isArray(msg.body)) {

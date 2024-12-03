@@ -157,6 +157,7 @@ export const getListaPlanos = async (tenantId: number) => {
   listaPlanos = await ListarPlanos({ tenantId });
   return listaPlanos;
 };
+
 export const ListaExamesPreparo = async () => {
   return TemplateExamesPreparo({ listaAgendamentos }).agendamentos;
 };

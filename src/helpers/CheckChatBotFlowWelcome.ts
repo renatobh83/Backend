@@ -1,5 +1,5 @@
 import Contact from "../models/Contact";
-import Ticket from "../models/Ticket";
+import type Ticket from "../models/Ticket";
 import Setting from "../models/Setting";
 import ChatFlow from "../models/ChatFlow";
 import CreateLogTicketService from "../services/TicketServices/CreateLogTicketService";

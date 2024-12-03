@@ -1,6 +1,5 @@
-
-import { Message as WbotMessage } from "whatsapp-web.js";
-import Ticket from "../models/Ticket";
+import type { Message as WbotMessage } from "whatsapp-web.js";
+import type Ticket from "../models/Ticket";
 import GetTicketWbot from "./GetTicketWbot";
 import AppError from "../errors/AppError";
 import { logger } from "../utils/logger";
@@ -21,7 +20,7 @@ export const GetWbotMessage = async (
   const fetchWbotMessagesGradually = async (): Promise<void | WbotMessage> => {
     const chatMessages = await wbotChat.fetchMessages({ limit });
 
-    const msgFound = chatMessages.find(msg => msg.id.id === messageId);
+    const msgFound = chatMessages.find((msg) => msg.id.id === messageId);
 
     if (!msgFound && limit < totalMessages) {
       limit += 20;
